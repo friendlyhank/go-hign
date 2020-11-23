@@ -75,11 +75,38 @@ type uintptr uintptr
 // integer values.
 type byte = uint8
 
+// iota is a predeclared identifier representing the untyped integer ordinal
+// number of the current const specification in a (usually parenthesized)
+// const declaration. It is zero-indexed.
+const iota = 0 // Untyped int.
+
+// nil is a predeclared identifier representing the zero value for a
+// pointer, channel, func, interface, map, or slice type.
+var nil Type // Type must be a pointer, channel, func, interface, map, or slice type
+
+// The len built-in function returns the length of v, according to its type:
+//	Array: the number of elements in v.
+//	Pointer to array: the number of elements in *v (even if v is nil).
+//	Slice, or map: the number of elements in v; if v is nil, len(v) is zero.
+//	String: the number of bytes in v.
+//	Channel: the number of elements queued (unread) in the channel buffer;
+//	         if v is nil, len(v) is zero.
+// For some arguments, such as a string literal or a simple array expression, the
+// result can be a constant. See the Go language specification's "Length and
+// capacity" section for details.
+func len(v Type) int //计算长度 Array,Slice,String,Channel
+
 // The println built-in function formats its arguments in an
 // implementation-specific way and writes the result to standard error.
 // Spaces are always added between arguments and a newline is appended.
 // Println is useful for bootstrapping and debugging; it is not guaranteed
 // to stay in the language.
 func println(args ...Type)
+
+// The error built-in interface type is the conventional interface for
+// representing an error condition, with the nil value representing no error.
+type error interface {
+	Error() string
+}
 
 
