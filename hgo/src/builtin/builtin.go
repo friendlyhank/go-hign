@@ -75,6 +75,11 @@ type uintptr uintptr
 // integer values.
 type byte = uint8
 
+// rune is an alias for int32 and is equivalent to int32 in all ways. It is
+// used, by convention, to distinguish character values from integer values.
+//用于转换和字符的处理
+type rune = int32
+
 // iota is a predeclared identifier representing the untyped integer ordinal
 // number of the current const specification in a (usually parenthesized)
 // const declaration. It is zero-indexed.
@@ -83,6 +88,29 @@ const iota = 0 // Untyped int.
 // nil is a predeclared identifier representing the zero value for a
 // pointer, channel, func, interface, map, or slice type.
 var nil Type // Type must be a pointer, channel, func, interface, map, or slice type
+
+// The append built-in function appends elements to the end of a slice. If
+// it has sufficient capacity, the destination is resliced to accommodate the
+// new elements. If it does not, a new underlying array will be allocated.
+// Append returns the updated slice. It is therefore necessary to store the
+// result of append, often in the variable holding the slice itself:
+//	slice = append(slice, elem1, elem2)
+//	slice = append(slice, anotherSlice...)
+// As a special case, it is legal to append a string to a byte slice, like this:
+//	slice = append([]byte("hello "), "world"...)
+func append(slice []Type, elems ...Type) []Type
+
+// The copy built-in function copies elements from a source slice into a
+// destination slice. (As a special case, it also will copy bytes from a
+// string to a slice of bytes.) The source and destination may overlap. Copy
+// returns the number of elements copied, which will be the minimum of
+// len(src) and len(dst).
+func copy(dst, src []Type) int
+
+// The delete built-in function deletes the element with the specified key
+// (m[key]) from the map. If m is nil or there is no such element, delete
+// is a no-op.
+func delete(m map[Type]Type1, key Type)
 
 // The len built-in function returns the length of v, according to its type:
 //	Array: the number of elements in v.
@@ -95,6 +123,37 @@ var nil Type // Type must be a pointer, channel, func, interface, map, or slice 
 // result can be a constant. See the Go language specification's "Length and
 // capacity" section for details.
 func len(v Type) int //计算长度 Array,Slice,String,Channel
+
+// The make built-in function allocates and initializes an object of type
+// slice, map, or chan (only). Like new, the first argument is a type, not a
+// value. Unlike new, make's return type is the same as the type of its
+// argument, not a pointer to it. The specification of the result depends on
+// the type:
+//	Slice: The size specifies the length. The capacity of the slice is
+//	equal to its length. A second integer argument may be provided to
+//	specify a different capacity; it must be no smaller than the
+//	length. For example, make([]int, 0, 10) allocates an underlying array
+//	of size 10 and returns a slice of length 0 and capacity 10 that is
+//	backed by this underlying array.
+//	Map: An empty map is allocated with enough space to hold the
+//	specified number of elements. The size may be omitted, in which case
+//	a small starting size is allocated.
+//	Channel: The channel's buffer is initialized with the specified
+//	buffer capacity. If zero, or the size is omitted, the channel is
+//	unbuffered.
+func make(t Type, size ...IntegerType) Type
+
+// The panic built-in function stops normal execution of the current
+// goroutine. When a function F calls panic, normal execution of F stops
+// immediately. Any functions whose execution was deferred by F are run in
+// the usual way, and then F returns to its caller. To the caller G, the
+// invocation of F then behaves like a call to panic, terminating G's
+// execution and running any deferred functions. This continues until all
+// functions in the executing goroutine have stopped, in reverse order. At
+// that point, the program is terminated with a non-zero exit code. This
+// termination sequence is called panicking and can be controlled by the
+// built-in function recover.
+func painc(v interface{})
 
 // The println built-in function formats its arguments in an
 // implementation-specific way and writes the result to standard error.

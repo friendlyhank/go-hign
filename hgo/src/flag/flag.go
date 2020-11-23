@@ -23,6 +23,9 @@ type FlagSet struct {
 	errorHandling ErrorHandling
 }
 
+// Args returns the non-flag command-line arguments.
+func Args() []string { return CommandLine.args }
+
 func (f *FlagSet) Parse(arguments []string) error {
 	f.args = arguments
 	return nil
