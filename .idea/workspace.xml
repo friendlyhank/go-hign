@@ -2,19 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d64c1ac8-31ea-4a0f-89bd-fcee88048c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/internal/sys/zversion.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/plugin.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/symtab.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/go-hign.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/go/main.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hgo/src/cmd/go/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/hgo/src/cmd/go/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hgo/src/cmd/link/main.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hgo/src/sync/atomic/doc.go" beforeDir="false" afterPath="$PROJECT_DIR$/hgo/src/sync/atomic/doc.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/asm_amd64.s" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,8 +41,13 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../go-test" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/pgm/src/runtime" />
     <property name="settings.editor.selected.configurable" value="go.sdk" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\hankwork\go-hign\pgm\src\runtime" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
