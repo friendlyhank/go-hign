@@ -18,6 +18,7 @@ func(e *DLLError)Error()string{return  e.Msg}
 // Implemented in ../runtime/syscall_windows.go.
 func Syscall(trap, nargs, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
 func loadsystemlibrary(filename *uint16, absoluteFilepath *uint16) (handle uintptr, err Errno)
+func getprocaddress(handle uintptr, procname *uint8) (proc uintptr, err Errno)
 
 // A DLL implements access to a single DLL.
 type DLL struct {
@@ -75,9 +76,19 @@ func (d *DLL)FindProc(name string)(proc *Proc,err error){
 	if err != nil{
 		return nil,err
 	}
-	p := &Proc{
+	a,e := getprocaddress(uintptr(d.Handle),namep)
+	if e != 0{
+		return nil,&DLLError{
+			Err:e,
+			ObjName:name,
+			Msg:     "Failed to find " + name + " procedure in " + d.Name + ": " + e.Error(),
+		}
 	}
-	println(namep)
+	p := &Proc{
+		Dll:d,
+		Name:name,
+		addr: a,
+	}
 	return p,nil
 }
 
@@ -162,7 +173,9 @@ func (p *LazyProc)Find() error{
 			if e != nil{
 				return e
 			}
-			println(proc)
+			// Non-racy version of:
+			// p.proc = proc
+			atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&p.proc)), unsafe.Pointer(proc))
 		}
 	}
 	return nil

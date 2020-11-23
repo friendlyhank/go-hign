@@ -8,3 +8,6 @@
 
 TEXT ·LoadPointer(SB),NOSPLIT,$0
 	JMP	runtime∕internal∕atomic·Loadp(SB)
+
+TEXT ·StoreUintptr(SB),NOSPLIT,$0
+	JMP	runtime∕internal∕atomic·Storeuintptr(SB)

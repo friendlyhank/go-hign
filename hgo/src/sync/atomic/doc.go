@@ -44,6 +44,9 @@ import "unsafe"
 // LoadPointer atomically loads *addr. 对应asm.s文件的·LoadPointer(SB)
 func LoadPointer(addr *unsafe.Pointer) (val unsafe.Pointer)
 
+// StoreUintptr atomically stores val into *addr.
+func StoreUintptr(addr *uintptr, val uintptr)
+
 // StorePointer atomically stores val into *addr.
 func StorePointer(addr *unsafe.Pointer, val unsafe.Pointer)
 

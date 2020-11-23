@@ -25,6 +25,16 @@ const (
 	surrSelf = 0x10000
 )
 
+// DecodeRune returns the UTF-16 decoding of a surrogate pair.
+// If the pair is not a valid UTF-16 surrogate pair, DecodeRune returns
+// the Unicode replacement code point U+FFFD.
+func DecodeRune(r1, r2 rune) rune {
+	if surr1 <= r1 && r1 < surr2 && surr2 <= r2 && r2 < surr3 {
+		return (r1-surr1)<<10 | (r2 - surr2) + surrSelf
+	}
+	return replacementChar
+}
+
 // EncodeRune returns the UTF-16 surrogate pair r1, r2 for the given rune.
 // If the rune is not a valid Unicode code point or does not need encoding,
 // EncodeRune returns U+FFFD, U+FFFD.
@@ -63,6 +73,30 @@ func Encode(s []rune) []uint16 {
 			a[n] = uint16(replacementChar)
 			n++
 		}
+	}
+	return a[:n]
+}
+
+// Decode returns the Unicode code point sequence represented
+// by the UTF-16 encoding s.
+func Decode(s []uint16) []rune {
+	a := make([]rune, len(s))
+	n := 0
+	for i := 0; i < len(s); i++ {
+		switch r := s[i]; {
+		case r < surr1, surr3 <= r:
+			// normal rune
+			a[n] = rune(r)
+		case surr1 <= r && r < surr2 && i+1 < len(s) &&
+			surr2 <= s[i+1] && s[i+1] < surr3:
+			// valid surrogate sequence
+			a[n] = DecodeRune(rune(r), rune(s[i+1]))
+			i++
+		default:
+			// invalid surrogate sequence
+			a[n] = replacementChar
+		}
+		n++
 	}
 	return a[:n]
 }
