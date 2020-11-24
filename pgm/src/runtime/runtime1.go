@@ -5,7 +5,8 @@
 package runtime
 
 func args(c int32,v **byte){
-
+	println(c)
+	println(v)
 }
 
 //asm_amd64.s_rt0_go

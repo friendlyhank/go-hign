@@ -178,6 +178,9 @@ TEXT runtime·abort(SB),NOSPLIT,$0-0
 loop:
 	JMP	loop
 
+// morestack but not preserving ctxt.
+TEXT runtime·morestack_noctxt(SB),NOSPLIT,$0
+
 // debugCallV1 is the entry point for debugger-injected function
 // calls on running goroutines. It informs the runtime that a
 // debug call has been injected and creates a call frame for the
