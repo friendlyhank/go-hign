@@ -92,7 +92,16 @@ func main(){
 //
 // The new G calls runtime·main.
 func schedinit(){
-
+	if buildVersion == ""{
+		// Condition should never trigger. This code just serves
+		// to ensure runtime·buildVersion is kept in the resulting binary.
+		buildVersion ="unknown"
+	}
+	if len(modinfo) == 1{
+		// Condition should never trigger. This code just serves
+		// to ensure runtime·modinfo is kept in the resulting binary.
+		modinfo = ""
+	}
 }
 
 // mstart is the entry-point for new Ms.

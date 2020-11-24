@@ -214,3 +214,12 @@ TEXT runtime·morestack_noctxt(SB),NOSPLIT,$0
 // a stack pointer to an escaping argument. debugCallV1 cannot check
 // this invariant.
 TEXT runtime·debugCallV1(SB),NOSPLIT,$152-0
+
+// gcWriteBarrier performs a heap pointer write and informs the GC.
+//
+// gcWriteBarrier does NOT follow the Go ABI. It takes two arguments:
+// - DI is the destination of the write
+// - AX is the value being written at DI
+// It clobbers FLAGS. It does not clobber any general-purpose registers,
+// but may clobber others (e.g., SSE registers).
+TEXT runtime·gcWriteBarrier(SB),NOSPLIT,$120

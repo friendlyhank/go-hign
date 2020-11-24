@@ -28,7 +28,12 @@ func main(){
 			if !cmd.Runnable(){
 				continue
 			}
+			cmd.Flag.Parse(args[1:])
+			args = cmd.Flag.Args()
+
+			cmd.Run(cmd,args)
 		}
+
 	}
 }
 
