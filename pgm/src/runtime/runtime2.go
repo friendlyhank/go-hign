@@ -4,7 +4,10 @@
 
 package runtime
 
-import "unsafe"
+import (
+	"runtime/internal/sys"
+	"unsafe"
+	)
 
 // Stack describes a Go execution stack.
 // The bounds of the stack are exactly [lo, hi),
@@ -32,9 +35,19 @@ type g struct{
 
 type m struct{
 	g0      *g     // goroutine with scheduling stack
+	morebuf gobuf
+
+	gsignal       *g           // signal-handling g
 	tls           [6]uintptr   // thread-local storage (for x86 extern register)
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
+}
+
+type p struct{
+	// wbBuf is this P's GC write barrier buffer.
+	//
+	// TODO: Consider caching this in the running G.
+	wbBuf wbBuf
 }
 
 type gobuf struct {
@@ -54,6 +67,7 @@ type gobuf struct {
 	pc   uintptr
 	g    guintptr
 	ctxt unsafe.Pointer
+	ret  sys.Uintreg
 	lr   uintptr
 	bp   uintptr // for GOEXPERIMENT=framepointer
 }
@@ -112,3 +126,14 @@ type puintptr uintptr
 type sudog struct {}
 
 type itab struct {}
+
+var(
+	// Information about what cpu features are available.
+	// Packages outside the runtime should not use these
+	// as they are not an external api.
+	// Set on startup in asm_{386,amd64}.s
+	//在asm_{386,amd64}.s/rt0.go被设置
+	processorVersionInfo uint32
+	isIntel bool
+	lfenceBeforeRdtsc bool
+)
