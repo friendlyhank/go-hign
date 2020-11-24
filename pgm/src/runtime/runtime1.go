@@ -4,3 +4,11 @@
 
 package runtime
 
+func args(c int32,v **byte){
+
+}
+
+//asm_amd64.s_rt0_go
+func check(){
+
+}

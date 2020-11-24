@@ -126,6 +126,7 @@ ok:
 	MOVQ	CX, g(BX)
 	LEAQ	runtime·m0(SB), AX
 
+    //m0和g0互相绑定
 	// save m->g0 = g0
 	MOVQ	CX, m_g0(AX)
 	// save m0 to g0->m
@@ -138,9 +139,10 @@ ok:
 	MOVL	AX, 0(SP)
 	MOVQ	24(SP), AX		// copy argv
 	MOVQ	AX, 8(SP)
+	//初始化参数信息
 	CALL	runtime·args(SB)
 	CALL	runtime·osinit(SB)
-	CALL	runtime·schedinit(SB)
+	CALL	runtime·schedinit(SB)//初始化调度信息
 
 	// create a new goroutine to start program
 	MOVQ	$runtime·mainPC(SB), AX		// entry
@@ -150,10 +152,10 @@ ok:
 	POPQ	AX
 	POPQ	AX
 
-	// start this M
+	// start this M 启动M
 	CALL	runtime·mstart(SB)
 
-	CALL	runtime·abort(SB)	// mstart should never return
+	CALL	runtime·abort(SB)	// mstart should never return 进入阻塞循环
 	RET
 
 	// Prevent dead-code elimination of debugCallV1, which is
@@ -166,3 +168,8 @@ TEXT setg_gcc<>(SB),NOSPLIT,$0
 	get_tls(AX)
 	MOVQ	DI, g(AX)
 	RET
+
+TEXT runtime·abort(SB),NOSPLIT,$0-0
+	INT	$3
+loop:
+	JMP	loop
