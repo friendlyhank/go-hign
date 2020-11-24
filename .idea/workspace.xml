@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d64c1ac8-31ea-4a0f-89bd-fcee88048c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/.idea/runtime.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/sys_windows_amd64.s" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pgm/src/internal/bytealg/equal_amd64.s.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/asm_amd64.s" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/asm_amd64.s" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

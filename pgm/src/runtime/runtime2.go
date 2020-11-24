@@ -72,6 +72,9 @@ type gobuf struct {
 	bp   uintptr // for GOEXPERIMENT=framepointer
 }
 
+type funcval struct{
+
+}
 
 type iface struct{}
 

@@ -163,6 +163,10 @@ ok:
 	MOVQ	$runtime·debugCallV1(SB), AX
 	RET
 
+//设置全局,然后runtime.mainPC链接runtime.main,也就是说实际上runtime.mainPC实际调用是runtime.main
+DATA	runtime·mainPC+0(SB)/8,$runtime·main(SB)
+GLOBL	runtime·mainPC(SB),RODATA,$8
+
 // void setg_gcc(G*); set g called from gcc.
 TEXT setg_gcc<>(SB),NOSPLIT,$0
 	get_tls(AX)
@@ -173,3 +177,37 @@ TEXT runtime·abort(SB),NOSPLIT,$0-0
 	INT	$3
 loop:
 	JMP	loop
+
+// debugCallV1 is the entry point for debugger-injected function
+// calls on running goroutines. It informs the runtime that a
+// debug call has been injected and creates a call frame for the
+// debugger to fill in.
+//
+// To inject a function call, a debugger should:
+// 1. Check that the goroutine is in state _Grunning and that
+//    there are at least 256 bytes free on the stack.
+// 2. Push the current PC on the stack (updating SP).
+// 3. Write the desired argument frame size at SP-16 (using the SP
+//    after step 2).
+// 4. Save all machine registers (including flags and XMM reigsters)
+//    so they can be restored later by the debugger.
+// 5. Set the PC to debugCallV1 and resume execution.
+//
+// If the goroutine is in state _Grunnable, then it's not generally
+// safe to inject a call because it may return out via other runtime
+// operations. Instead, the debugger should unwind the stack to find
+// the return to non-runtime code, add a temporary breakpoint there,
+// and inject the call once that breakpoint is hit.
+//
+// If the goroutine is in any other state, it's not safe to inject a call.
+//
+// This function communicates back to the debugger by setting RAX and
+// invoking INT3 to raise a breakpoint signal. See the comments in the
+// implementation for the protocol the debugger is expected to
+// follow. InjectDebugCall in the runtime tests demonstrates this protocol.
+//
+// The debugger must ensure that any pointers passed to the function
+// obey escape analysis requirements. Specifically, it must not pass
+// a stack pointer to an escaping argument. debugCallV1 cannot check
+// this invariant.
+TEXT runtime·debugCallV1(SB),NOSPLIT,$152-0

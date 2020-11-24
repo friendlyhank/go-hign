@@ -78,6 +78,11 @@ var(
 	g0  g
 )
 
+// The main goroutine
+func main(){
+
+}
+
 // The bootstrap sequence is:
 //
 //	call osinit
@@ -87,5 +92,38 @@ var(
 //
 // The new G calls runtime·main.
 func schedinit(){
+
+}
+
+// mstart is the entry-point for new Ms.
+//
+// This must not split the stack because we may not even have stack
+// bounds set up yet.
+//
+// May run during STW (because it doesn't have a P yet), so write
+// barriers are not allowed.
+//
+//go:nosplit
+//go:nowritebarrierrec
+func mstart() {
+
+}
+
+// Create a new g running fn with siz bytes of arguments.
+// Put it on the queue of g's waiting to run.
+// The compiler turns a go statement into a call to this.
+//
+// The stack layout of this call is unusual: it assumes that the
+// arguments to pass to fn are on the stack sequentially immediately
+// after &fn. Hence, they are logically part of newproc's argument
+// frame, even though they don't appear in its signature (and can't
+// because their types differ between call sites).
+//
+// This must be nosplit because this stack layout means there are
+// untyped arguments in newproc's argument frame. Stack copies won't
+// be able to adjust them and stack splits won't be able to copy them.
+//
+//go:nosplit
+func newproc(siz int32,fn *funcval){
 
 }
