@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Note: some of these functions are semantically inlined
-// by the compiler (in src/cmd/compile/internal/gc/ssa.go).
+// by the compiler (in src/hcmd/compile/internal/gc/ssa.go).
 
 #include "textflag.h"
 

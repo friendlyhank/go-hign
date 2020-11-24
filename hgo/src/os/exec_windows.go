@@ -17,7 +17,7 @@ func appendBSBytes(b []byte,n int)[]byte{
 	return b
 }
 
-// readNextArg splits command line string cmd into next
+// readNextArg splits command line string hcmd into next
 // argument and command line remainder.
 func readNextArg(cmd string)(arg []byte,rest string){
 	var b []byte

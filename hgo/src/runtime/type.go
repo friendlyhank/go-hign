@@ -11,8 +11,8 @@ import "unsafe"
 // tflag is documented in reflect/type.go.
 //
 // tflag values must be kept in sync with copies in:
-//	cmd/compile/internal/gc/reflect.go
-//	cmd/link/internal/ld/decodesym.go
+//	hcmd/compile/internal/gc/reflect.go
+//	hcmd/link/internal/ld/decodesym.go
 //	reflect/type.go
 //      internal/reflectlite/type.go
 type tflag uint8
@@ -24,8 +24,8 @@ const (
 	tflagRegularMemory tflag = 1 << 3 // equal and hash can treat values of this type as a single region of t.size bytes
 )
 
-// Needs to be in sync with ../cmd/link/internal/ld/decodesym.go:/^func.commonsize,
-// ../cmd/compile/internal/gc/reflect.go:/^func.dcommontype and
+// Needs to be in sync with ../hcmd/link/internal/ld/decodesym.go:/^func.commonsize,
+// ../hcmd/compile/internal/gc/reflect.go:/^func.dcommontype and
 // ../reflect/type.go:/^type.rtype.
 // ../internal/reflectlite/type.go:/^type.rtype.
 type _type struct {
@@ -376,7 +376,7 @@ type maptype struct {
 }
 
 // Note: flag values must match those used in the TMAP case
-// in ../cmd/compile/internal/gc/reflect.go:dtypesym.
+// in ../hcmd/compile/internal/gc/reflect.go:dtypesym.
 func (mt *maptype) indirectkey() bool { // store ptr to key instead of key itself
 	return mt.flags&1 != 0
 }

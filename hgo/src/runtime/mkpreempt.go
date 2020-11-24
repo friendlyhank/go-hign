@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-// Copied from cmd/compile/internal/ssa/gen/*Ops.go
+// Copied from hcmd/compile/internal/ssa/gen/*Ops.go
 
 var regNames386 = []string{
 	"AX",

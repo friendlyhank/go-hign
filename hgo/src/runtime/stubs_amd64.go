@@ -19,7 +19,7 @@ func stackcheck()
 // Called from assembly only; declared for go vet.
 func settls() // argument in DI
 
-// Retpolines, used by -spectre=ret flag in cmd/asm, cmd/compile.
+// Retpolines, used by -spectre=ret flag in hcmd/asm, hcmd/compile.
 func retpolineAX()
 func retpolineCX()
 func retpolineDX()

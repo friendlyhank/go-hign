@@ -266,7 +266,7 @@ func (f *Func) funcInfo() funcInfo {
 
 // PCDATA and FUNCDATA table indexes.
 //
-// See funcdata.h and ../cmd/internal/objabi/funcdata.go.
+// See funcdata.h and ../hcmd/internal/objabi/funcdata.go.
 const (
 	_PCDATA_RegMapIndex   = 0 // if !go115ReduceLiveness
 	_PCDATA_UnsafePoint   = 0 // if go115ReduceLiveness
@@ -305,7 +305,7 @@ const (
 // specially by the runtime.
 // Note that in some situations involving plugins, there may be multiple
 // copies of a particular special runtime function.
-// Note: this list must match the list in cmd/internal/objabi/funcid.go.
+// Note: this list must match the list in hcmd/internal/objabi/funcid.go.
 type funcID uint8
 
 const (
@@ -336,7 +336,7 @@ const (
 
 // moduledata records information about the layout of the executable
 // image. It is written by the linker. Any changes here must be
-// matched changes to the code in cmd/internal/ld/symtab.go:symtab.
+// matched changes to the code in hcmd/internal/ld/symtab.go:symtab.
 // moduledata is stored in statically allocated non-pointer memory;
 // none of the pointers here are visible to the garbage collector.
 type moduledata struct {
@@ -428,7 +428,7 @@ func activeModules() []*moduledata {
 // modulesinit creates the active modules slice out of all loaded modules.
 //
 // When a module is first loaded by the dynamic linker, an .init_array
-// function (written by cmd/link) is invoked to call addmoduledata,
+// function (written by hcmd/link) is invoked to call addmoduledata,
 // appending to the module to the linked list that starts with
 // firstmoduledata.
 //
@@ -694,7 +694,7 @@ func findfunc(pc uintptr) funcInfo {
 		// With multiple text sections, there may be functions inserted by the external
 		// linker that are not known by Go. This means there may be holes in the PC
 		// range covered by the func table. The invalid funcoff value indicates a hole.
-		// See also cmd/link/internal/ld/pcln.go:pclntab
+		// See also hcmd/link/internal/ld/pcln.go:pclntab
 		return funcInfo{}
 	}
 	return funcInfo{(*_func)(unsafe.Pointer(&datap.pclntable[funcoff])), datap}

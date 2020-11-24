@@ -321,7 +321,7 @@ ok:
 
 TEXT runtime·fcntl_trampoline(SB),NOSPLIT,$0
 	SUB	$16, RSP
-	MOVW	4(R0), R1	// arg 2 cmd
+	MOVW	4(R0), R1	// arg 2 hcmd
 	MOVW	8(R0), R2	// arg 3 arg
 	MOVW	R2, (RSP)	// arg 3 is variadic, pass on stack
 	MOVW	0(R0), R0	// arg 1 fd

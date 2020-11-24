@@ -1,5 +1,5 @@
 // Created by cgo -cdefs and converted (by hand) to Go
-// ../cmd/cgo/cgo -cdefs defs_linux.go defs1_linux.go defs2_linux.go
+// ../hcmd/cgo/cgo -cdefs defs_linux.go defs1_linux.go defs2_linux.go
 
 package runtime
 
@@ -141,7 +141,7 @@ type epollevent struct {
 }
 
 // Created by cgo -cdefs and then converted to Go by hand
-// ../cmd/cgo/cgo -cdefs defs_linux.go defs1_linux.go defs2_linux.go
+// ../hcmd/cgo/cgo -cdefs defs_linux.go defs1_linux.go defs2_linux.go
 
 const (
 	_O_RDONLY   = 0x0

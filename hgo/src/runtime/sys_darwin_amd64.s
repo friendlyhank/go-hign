@@ -404,7 +404,7 @@ ok:
 TEXT runtime·fcntl_trampoline(SB),NOSPLIT,$0
 	PUSHQ	BP
 	MOVQ	SP, BP
-	MOVL	4(DI), SI		// arg 2 cmd
+	MOVL	4(DI), SI		// arg 2 hcmd
 	MOVL	8(DI), DX		// arg 3 arg
 	MOVL	0(DI), DI		// arg 1 fd
 	XORL	AX, AX			// vararg: say "no float args"
@@ -430,7 +430,7 @@ TEXT runtime·mstart_stub(SB),NOSPLIT,$0
 	MOVQ	m_g0(DI), DX // g
 
 	// Initialize TLS entry.
-	// See cmd/link/internal/ld/sym.go:computeTLSOffset.
+	// See hcmd/link/internal/ld/sym.go:computeTLSOffset.
 	MOVQ	DX, 0x30(GS)
 
 	// Someday the convention will be D is always cleared.

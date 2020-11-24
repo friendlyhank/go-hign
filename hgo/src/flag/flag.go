@@ -18,6 +18,13 @@ const (
 // Flag names must be unique within a FlagSet. An attempt to define a flag whose
 // name is already in use will cause a panic.
 type FlagSet struct {
+	// Usage is the function called when an error occurs while parsing flags.
+	// The field is a function (not a method) that may be changed to point to
+	// a custom error handler. What happens after Usage is called depends
+	// on the ErrorHandling setting; for the command line, this defaults
+	// to ExitOnError, which exits the program after calling Usage.
+	Usage func() //错误处理自定义方法
+
 	name          string
 	args          []string // arguments after flags
 	errorHandling ErrorHandling

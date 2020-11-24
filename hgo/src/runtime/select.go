@@ -15,7 +15,7 @@ const debugSelect = false
 
 // scase.kind values.
 // Known to compiler.
-// Changes here must also be made in src/cmd/compile/internal/gc/select.go's walkselectcases.
+// Changes here must also be made in src/hcmd/compile/internal/gc/select.go's walkselectcases.
 const (
 	caseNil = iota
 	caseRecv
@@ -25,7 +25,7 @@ const (
 
 // Select case descriptor.
 // Known to compiler.
-// Changes here must also be made in src/cmd/internal/gc/select.go's scasetype.
+// Changes here must also be made in src/hcmd/internal/gc/select.go's scasetype.
 type scase struct {
 	c           *hchan         // chan
 	elem        unsafe.Pointer // data element

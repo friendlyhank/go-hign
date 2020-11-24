@@ -584,7 +584,7 @@ func fuint64to64(x uint64) float64 {
 	if int64(x) >= 0 {
 		return float64(int64(x))
 	}
-	// See ../cmd/compile/internal/gc/ssa.go:uint64Tofloat
+	// See ../hcmd/compile/internal/gc/ssa.go:uint64Tofloat
 	y := x & 1
 	z := x >> 1
 	z = z | y

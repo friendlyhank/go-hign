@@ -83,8 +83,8 @@ func runBuiltTestProg(t *testing.T, exe, name string, env ...string) string {
 	done := make(chan bool)
 	go func() {
 		scale := 1
-		// This GOARCH/GOOS test is copied from cmd/dist/test.go.
-		// TODO(iant): Have cmd/dist update the environment variable.
+		// This GOARCH/GOOS test is copied from hcmd/dist/test.go.
+		// TODO(iant): Have hcmd/dist update the environment variable.
 		if runtime.GOARCH == "arm" || runtime.GOOS == "windows" {
 			scale = 2
 		}

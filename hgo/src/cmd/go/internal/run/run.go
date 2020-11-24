@@ -16,7 +16,7 @@ var CmdRun = &base.Command{
 Run compiles and runs the named main Go package.
 Typically the package is specified as a list of .go source files from a single directory,
 but it may also be an import path, file system path, or pattern
-matching a single known package, as in 'go run .' or 'go run my/cmd'.
+matching a single known package, as in 'go run .' or 'go run my/hcmd'.
 
 By default, 'go run' runs the compiled binary directly: 'a.out arguments...'.
 If the -exec flag is given, 'go run' invokes the binary using xprog:

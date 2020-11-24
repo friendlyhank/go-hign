@@ -465,12 +465,12 @@ TEXT runtime·closeonexec(SB),NOSPLIT,$0
 // func runtime·setNonblock(int32 fd)
 TEXT runtime·setNonblock(SB),NOSPLIT|NOFRAME,$0-4
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVD	$F_GETFL, R1		// arg 2 - cmd
+	MOVD	$F_GETFL, R1		// arg 2 - hcmd
 	MOVD	$0, R2			// arg 3
 	SVC	$SYS_fcntl
 	MOVD	$O_NONBLOCK, R2
 	EOR	R0, R2			// arg 3 - flags
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVD	$F_SETFL, R1		// arg 2 - cmd
+	MOVD	$F_SETFL, R1		// arg 2 - hcmd
 	SVC	$SYS_fcntl
 	RET

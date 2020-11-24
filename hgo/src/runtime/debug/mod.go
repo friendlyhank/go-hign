@@ -68,7 +68,7 @@ func readBuildInfo(data string) (*BuildInfo, bool) {
 		line string
 		ok   bool
 	)
-	// Reverse of cmd/go/internal/modload.PackageBuildInfo
+	// Reverse of hcmd/go/internal/modload.PackageBuildInfo
 	for len(data) > 0 {
 		i := strings.IndexByte(data, '\n')
 		if i < 0 {
