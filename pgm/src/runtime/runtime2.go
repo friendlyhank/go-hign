@@ -41,6 +41,7 @@ type m struct{
 	tls           [6]uintptr   // thread-local storage (for x86 extern register)
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
+	throwing int32 //1有异常 0无异常
 
 	libcallpc uintptr //for cpu profiler
 	libcallsp uintptr
