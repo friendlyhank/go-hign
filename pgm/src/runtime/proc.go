@@ -83,6 +83,17 @@ func main(){
 
 }
 
+//go:nosplit
+//go:nowritebarrierrec
+func badmorestackg0() {
+}
+
+//go:nosplit
+//go:nowritebarrierrec
+func badmorestackgsignal() {
+
+}
+
 // The bootstrap sequence is:
 //
 //	call osinit

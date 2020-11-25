@@ -41,6 +41,10 @@ type m struct{
 	tls           [6]uintptr   // thread-local storage (for x86 extern register)
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
+
+	libcallpc uintptr //for cpu profiler
+	libcallsp uintptr
+	libcallg  guintptr
 }
 
 type p struct{
@@ -131,6 +135,21 @@ type guintptr uintptr
 type puintptr uintptr
 
 type sudog struct {}
+
+type libcall struct{
+	fn uintptr
+	n uintptr
+	args uintptr
+	r1 uintptr
+	r2 uintptr
+	err uintptr
+}
+
+// describes how to handle callback
+type wincallbackcontext struct {
+	gobody unsafe.Pointer // go function to call
+	argsize uintptr // callback arguments size (in bytes)
+}
 
 type itab struct {}
 

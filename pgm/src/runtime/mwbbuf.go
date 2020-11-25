@@ -21,3 +21,23 @@ type wbBuf struct {
 	// be updated without write barriers.
 	end uintptr
 }
+
+// wbBufFlush flushes the current P's write barrier buffer to the GC
+// workbufs. It is passed the slot and value of the write barrier that
+// caused the flush so that it can implement cgocheck.
+//
+// This must not have write barriers because it is part of the write
+// barrier implementation.
+//
+// This and everything it calls must be nosplit because 1) the stack
+// contains untyped slots from gcWriteBarrier and 2) there must not be
+// a GC safe point between the write barrier test in the caller and
+// flushing the buffer.
+//
+// TODO: A "go:nosplitrec" annotation would be perfect for this.
+//
+//go:nowritebarrierrec
+//go:nosplit
+func wbBufFlush(dst *uintptr, src uintptr) {
+
+}
