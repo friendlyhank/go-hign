@@ -27,3 +27,7 @@ func printint(v int64) {
 func printpointer(p unsafe.Pointer) {
 
 }
+
+func printstring(s string){
+
+}

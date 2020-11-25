@@ -50,6 +50,10 @@ type p struct{
 	wbBuf wbBuf
 }
 
+type schedt struct{
+	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
+}
+
 type gobuf struct {
 	// The offsets of sp, pc, and g are known to (hard-coded in) libmach.
 	//

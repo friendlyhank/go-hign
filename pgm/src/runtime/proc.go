@@ -92,6 +92,15 @@ func main(){
 //
 // The new G calls runtime·main.
 func schedinit(){
+	// raceinit must be the first call to race detector.
+	// In particular, it must be done before mallocinit below calls racemapshadow.
+	_g_ :=getg()
+
+	println(_g_)
+
+	//最大的线程数量限制
+	sched.maxmcount =10000
+
 	if buildVersion == ""{
 		// Condition should never trigger. This code just serves
 		// to ensure runtime·buildVersion is kept in the resulting binary.
@@ -136,3 +145,7 @@ func mstart() {
 func newproc(siz int32,fn *funcval){
 
 }
+
+var(
+	sched schedt
+)

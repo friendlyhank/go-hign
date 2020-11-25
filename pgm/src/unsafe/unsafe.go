@@ -186,3 +186,9 @@ type Pointer *ArbitraryType
 // descriptor, not the size of the memory referenced by the slice.
 // The return value of Sizeof is a Go constant.
 func Sizeof(x ArbitraryType) uintptr
+
+// Offsetof returns the offset within the struct of the field represented by x,
+// which must be of the form structValue.field. In other words, it returns the
+// number of bytes between the start of the struct and the start of the field.
+// The return value of Offsetof is a Go constant.
+func Offsetof(x ArbitraryType) uintptr
