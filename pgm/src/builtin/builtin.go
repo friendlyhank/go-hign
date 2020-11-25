@@ -57,6 +57,14 @@ type float32 float32
 // float64 is the set of all IEEE-754 64-bit floating-point numbers.
 type float64 float64
 
+// complex64 is the set of all complex numbers with float32 real and
+// imaginary parts.
+type complex64 complex64
+
+// complex128 is the set of all complex numbers with float64 real and
+// imaginary parts.
+type complex128 complex128
+
 // string is the set of all strings of 8-bit bytes, conventionally but not
 // necessarily representing UTF-8-encoded text. A string may be empty, but
 // not nil. Values of string type are immutable.

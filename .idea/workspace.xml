@@ -2,28 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d64c1ac8-31ea-4a0f-89bd-fcee88048c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/internal/cpu/cpu.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/mgc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/builtin/builtin.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/builtin/builtin.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/internal/bytealg/equal_amd64.s" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/internal/bytealg/equal_amd64.s" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/internal/bytealg/equal_native.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/internal/bytealg/equal_native.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/internal/bytealg/indexbyte_native.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/internal/bytealg/indexbyte_native.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/alg.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/alg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/cgo.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/cgo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/debug.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/debug.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/error.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/error.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/internal/sys/arch_amd64.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/internal/sys/arch_amd64.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mwbbuf.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mwbbuf.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/print.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/print.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/symtab.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/symtab.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/sys_windows_amd64.s" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/sys_windows_amd64.s" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/unsafe/unsafe.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/unsafe/unsafe.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +48,7 @@
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="go.vendoring.notification.had.been.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../go-test" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../dgo" />
     <property name="settings.editor.selected.configurable" value="go.sdk" />
   </component>
   <component name="RecentsManager">
@@ -109,10 +95,10 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2334" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606190109624" />
-    <state x="2660" y="274" key="FileChooserDialogImpl" timestamp="1606261046744">
+    <state x="2660" y="274" key="FileChooserDialogImpl" timestamp="1606268716267">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2660" y="274" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606261046744" />
+    <state x="2660" y="274" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606268716267" />
     <state width="1877" height="281" key="GridCell.Tab.0.bottom" timestamp="1606217203145">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
@@ -149,14 +135,14 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2381" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606260924230" />
-    <state x="2582" y="254" width="596" height="532" key="find.popup" timestamp="1606261765019">
+    <state x="2582" y="254" width="596" height="532" key="find.popup" timestamp="1606263799981">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2582" y="254" width="596" height="532" key="find.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606261765019" />
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1606262274933">
+    <state x="2582" y="254" width="596" height="532" key="find.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606263799981" />
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1606263689087">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606262274933" />
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606263689087" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

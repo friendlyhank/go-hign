@@ -92,6 +92,8 @@ func main(){
 //
 // The new G calls runtime·main.
 func schedinit(){
+	println("come in")
+
 	// raceinit must be the first call to race detector.
 	// In particular, it must be done before mallocinit below calls racemapshadow.
 	_g_ :=getg()
