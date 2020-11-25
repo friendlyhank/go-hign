@@ -8,6 +8,10 @@ package runtime
 func args(c int32,v **byte){
 }
 
+func environ()[]string{
+	return envs
+}
+
 //asm_amd64.s_rt0_go
 func check(){
 
