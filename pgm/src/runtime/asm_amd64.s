@@ -332,23 +332,24 @@ TEXT runtime·mcall(SB), NOSPLIT, $0-8
 TEXT runtime·systemstack_switch(SB), NOSPLIT, $0-0
 	RET
 
-// func systemstack(fn func())
+// func systemstack(fn func()) 切换到g0栈后再执行运行相关操作
 TEXT runtime·systemstack(SB), NOSPLIT, $0-8
-	MOVQ	fn+0(FP), DI	// DI = fn
+	MOVQ	fn+0(FP), DI	// DI = fn 将fn参数放入DI
 	get_tls(CX)
-	MOVQ	g(CX), AX	// AX = g
-	MOVQ	g_m(AX), BX	// BX = m
+	MOVQ	g(CX), AX	// AX = g 获取当前的g()放入Ax
+	MOVQ	g_m(AX), BX	// BX = m 将g.m 放入BX
 
 	CMPQ	AX, m_gsignal(BX)
 	JEQ	noswitch
 
-	MOVQ	m_g0(BX), DX	// DX = g0
+	MOVQ	m_g0(BX), DX	// DX = g0 将m.g0 放入Dx
 	CMPQ	AX, DX
 	JEQ	noswitch
 
 	CMPQ	AX, m_curg(BX)
 	JNE	bad
 
+    //gobuf 保存现场
 	// switch stacks
 	// save our state in g->sched. Pretend to
 	// be systemstack_switch if the G stack is scanned.
@@ -358,7 +359,7 @@ TEXT runtime·systemstack(SB), NOSPLIT, $0-8
 	MOVQ	AX, (g_sched+gobuf_g)(AX)
 	MOVQ	BP, (g_sched+gobuf_bp)(AX)
 
-	// switch to g0
+	// switch to g0 切换到g0
 	MOVQ	DX, g(CX)
 	MOVQ	(g_sched+gobuf_sp)(DX), BX
 	// make it look like mstart called systemstack on g0, to stop traceback
@@ -367,12 +368,12 @@ TEXT runtime·systemstack(SB), NOSPLIT, $0-8
 	MOVQ	DX, 0(BX)
 	MOVQ	BX, SP
 
-	// call target function
+	// call target function 调用方法
 	MOVQ	DI, DX
 	MOVQ	0(DI), DI
 	CALL	DI
 
-	// switch back to g
+	// switch back to g 切换回当前g
 	get_tls(CX)
 	MOVQ	g(CX), AX
 	MOVQ	g_m(AX), BX
