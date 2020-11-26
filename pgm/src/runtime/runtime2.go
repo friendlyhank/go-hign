@@ -29,7 +29,7 @@ type g struct{
 	stackguard0 uintptr // offset known to liblink
 	stackguard1 uintptr // offset known to liblink
 
-	m            *m      // current m; offset known to arm liblink
+	m            *m      //当前绑定的m current m; offset known to arm liblink
 	sched        gobuf
 }
 
@@ -43,9 +43,14 @@ type m struct{
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	throwing int32 //1有异常 0无异常
 
+	// these are here because they are too large to be on the stack
+	// of low-level NOSPLIT functions.
+	//系统内核调用os.windows
+	libcall libcall
 	libcallpc uintptr //for cpu profiler
 	libcallsp uintptr
 	libcallg  guintptr
+	syscall libcall
 }
 
 type p struct{
@@ -137,11 +142,12 @@ type puintptr uintptr
 
 type sudog struct {}
 
+//系统调用
 type libcall struct{
-	fn uintptr
-	n uintptr
-	args uintptr
-	r1 uintptr
+	fn uintptr //系统调用方法
+	n uintptr  //参数的个数
+	args uintptr //参数
+	r1 uintptr //return values 返回值
 	r2 uintptr
 	err uintptr
 }
@@ -155,6 +161,9 @@ type wincallbackcontext struct {
 type itab struct {}
 
 var(
+	allm *m
+	ncpu int32 //cpu的数量
+
 	// Information about what cpu features are available.
 	// Packages outside the runtime should not use these
 	// as they are not an external api.

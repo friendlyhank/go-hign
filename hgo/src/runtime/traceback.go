@@ -1019,7 +1019,7 @@ func topofstack(f funcInfo, g0 bool) bool {
 // system (that is, the finalizer goroutine) is considered a user
 // goroutine.
 func isSystemGoroutine(gp *g, fixed bool) bool {
-	// Keep this in sync with hcmd/trace/trace.go:isSystemGoroutine.
+	// Keep this in sync with cmd/trace/trace.go:isSystemGoroutine.
 	f := findfunc(gp.startpc)
 	if !f.valid() {
 		return false

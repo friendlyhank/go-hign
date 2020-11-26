@@ -19,7 +19,7 @@ import (
 
 func TestHmapSize(t *testing.T) {
 	// The structure of hmap is defined in runtime/map.go
-	// and in hcmd/compile/internal/gc/reflect.go and must be in sync.
+	// and in cmd/compile/internal/gc/reflect.go and must be in sync.
 	// The size of hmap should be 48 bytes on 64 bit and 28 bytes on 32 bit platforms.
 	var hmapSize = uintptr(8 + 5*sys.PtrSize)
 	if runtime.RuntimeHmapSize != hmapSize {

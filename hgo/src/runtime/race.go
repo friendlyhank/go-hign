@@ -280,7 +280,7 @@ var __tsan_go_ignore_sync_end byte
 //go:linkname __tsan_report_count __tsan_report_count
 var __tsan_report_count byte
 
-// Mimic what hcmd/cgo would do.
+// Mimic what cmd/cgo would do.
 //go:cgo_import_static __tsan_init
 //go:cgo_import_static __tsan_fini
 //go:cgo_import_static __tsan_proc_create

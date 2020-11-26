@@ -404,7 +404,7 @@ TEXT runtime·kevent(SB),NOSPLIT,$8
 // func closeonexec(fd int32)
 TEXT runtime·closeonexec(SB),NOSPLIT,$0
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVW	$2, R1			// arg 2 - hcmd (F_SETFD)
+	MOVW	$2, R1			// arg 2 - cmd (F_SETFD)
 	MOVW	$1, R2			// arg 3 - arg (FD_CLOEXEC)
 	MOVW	$92, R12		// sys_fcntl
 	INVOKE_SYSCALL

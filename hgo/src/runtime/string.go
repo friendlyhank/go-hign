@@ -297,7 +297,7 @@ func rawruneslice(size int) (b []rune) {
 	return
 }
 
-// used by hcmd/cgo
+// used by cmd/cgo
 func gobytes(p *byte, n int) (b []byte) {
 	if n == 0 {
 		return make([]byte, 0)

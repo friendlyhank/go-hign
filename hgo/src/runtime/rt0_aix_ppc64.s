@@ -5,7 +5,7 @@
 #include "textflag.h"
 
 // _rt0_ppc64_aix is a function descriptor of the entrypoint function
-// __start. This name is needed by hcmd/link.
+// __start. This name is needed by cmd/link.
 DATA	_rt0_ppc64_aix+0(SB)/8, $__start<>(SB)
 DATA	_rt0_ppc64_aix+8(SB)/8, $TOC(SB)
 GLOBL	_rt0_ppc64_aix(SB), NOPTR, $16

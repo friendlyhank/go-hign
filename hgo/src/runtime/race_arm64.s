@@ -13,7 +13,7 @@
 // from Go code without going all the way through cgo.
 // First, it's much faster (up to 50% speedup for real Go programs).
 // Second, it eliminates race-related special cases from cgocall and scheduler.
-// Third, in long-term it will allow to remove cyclic runtime/race dependency on hcmd/go.
+// Third, in long-term it will allow to remove cyclic runtime/race dependency on cmd/go.
 
 // A brief recap of the arm64 calling convention.
 // Arguments are passed in R0...R7, the rest is on stack.

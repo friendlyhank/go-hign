@@ -795,7 +795,7 @@ const (
 
 // Layout of in-memory per-function information prepared by linker
 // See https://golang.org/s/go12symtab.
-// Keep in sync with linker (../hcmd/link/internal/ld/pcln.go:/pclntab)
+// Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
 // and with package debug/gosym and with symtab.go in package runtime.
 type _func struct {
 	entry   uintptr // start pc
@@ -827,7 +827,7 @@ type funcinl struct {
 // layout of Itab known to compilers
 // allocated in non-garbage-collected memory
 // Needs to be in sync with
-// ../hcmd/compile/internal/gc/reflect.go:/^func.dumptabs.
+// ../cmd/compile/internal/gc/reflect.go:/^func.dumptabs.
 type itab struct {
 	inter *interfacetype
 	_type *_type
@@ -876,8 +876,8 @@ func extendRandom(r []byte, n int) {
 
 // A _defer holds an entry on the list of deferred calls.
 // If you add a field here, add code to clear it in freedefer and deferProcStack
-// This struct must match the code in hcmd/compile/internal/gc/reflect.go:deferstruct
-// and hcmd/compile/internal/gc/ssa.go:(*state).call.
+// This struct must match the code in cmd/compile/internal/gc/reflect.go:deferstruct
+// and cmd/compile/internal/gc/ssa.go:(*state).call.
 // Some defers will be allocated on the stack and some on the heap.
 // All defers are logically part of the stack, so write barriers to
 // initialize them are not required. All defers must be manually scanned,
@@ -1049,8 +1049,8 @@ var (
 	isIntel              bool
 	lfenceBeforeRdtsc    bool
 
-	goarm                uint8 // set by hcmd/link on arm systems
-	framepointer_enabled bool  // set by hcmd/link
+	goarm                uint8 // set by cmd/link on arm systems
+	framepointer_enabled bool  // set by cmd/link
 )
 
 // Set by the linker so the runtime can determine the buildmode.

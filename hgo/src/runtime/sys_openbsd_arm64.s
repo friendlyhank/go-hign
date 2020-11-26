@@ -426,7 +426,7 @@ TEXT runtime·kevent(SB),NOSPLIT,$0
 // func closeonexec(fd int32)
 TEXT runtime·closeonexec(SB),NOSPLIT,$0
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVD	$2, R1			// arg 2 - hcmd (F_SETFD)
+	MOVD	$2, R1			// arg 2 - cmd (F_SETFD)
 	MOVD	$1, R2			// arg 3 - arg (FD_CLOEXEC)
 	MOVD	$92, R8			// sys_fcntl
 	INVOKE_SYSCALL
@@ -435,14 +435,14 @@ TEXT runtime·closeonexec(SB),NOSPLIT,$0
 // func runtime·setNonblock(int32 fd)
 TEXT runtime·setNonblock(SB),NOSPLIT|NOFRAME,$0-4
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVD	$3, R1			// arg 2 - hcmd (F_GETFL)
+	MOVD	$3, R1			// arg 2 - cmd (F_GETFL)
 	MOVD	$0, R2			// arg 3
 	MOVD	$92, R8			// sys_fcntl
 	INVOKE_SYSCALL
 	MOVD	$4, R2			// O_NONBLOCK
 	ORR	R0, R2			// arg 3 - flags
 	MOVW	fd+0(FP), R0		// arg 1 - fd
-	MOVD	$4, R1			// arg 2 - hcmd (F_SETFL)
+	MOVD	$4, R1			// arg 2 - cmd (F_SETFL)
 	MOVD	$92, R8			// sys_fcntl
 	INVOKE_SYSCALL
 	RET

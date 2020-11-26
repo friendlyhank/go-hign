@@ -13,7 +13,7 @@ import (
 
 var buildVersion = sys.TheVersion
 
-// set using hcmd/go/internal/modload.ModInfoProg
+// set using cmd/go/internal/modload.ModInfoProg
 var modinfo string
 
 // Goroutine scheduler
