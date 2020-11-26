@@ -141,6 +141,19 @@ func schedinit(){
 	}
 }
 
+// 初始化m
+func mcommoninit(mp *m,id int64){
+	_g_ := getg()
+	// g0 stack won't make sense for user (and is not necessary unwindable).
+	//g0才能初始化m
+	if _g_ != _g_.m.g0{
+	}
+
+	if id >= 0{
+		mp.id =id
+	}
+}
+
 // mstart is the entry-point for new Ms.
 //
 // This must not split the stack because we may not even have stack
@@ -186,8 +199,10 @@ func (pp *p)init(id int32){
 // transitions it to status _Pdead.
 //
 // sched.lock must be held and the world must be stopped.
+//p的销毁
 func (pp *p)destroy(){
-
+	// Move all runnable goroutines to the global queue
+	//将所有的可执行的goroutines移动到全局队列
 }
 
 
