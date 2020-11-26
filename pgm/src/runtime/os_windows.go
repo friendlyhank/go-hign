@@ -53,11 +53,15 @@ var(
 // All these variables are set by the Windows executable
 // loader before the Go program starts.
 	_GetProcessAffinityMask,
+	_GetSystemInfo,
 	_ stdFunction
 )
 
-func osinit() {
+var asmstdcallAddr unsafe.Pointer
 
+func osinit() {
+	//获取cpu核数
+	ncpu =getproccount()
 }
 
 //获取cpu的数量
@@ -65,9 +69,21 @@ func getproccount() int32{
 	var mask,sysmask uintptr
 	ret :=stdcall3(_GetProcessAffinityMask,currentProcess,uintptr(unsafe.Pointer(&mask)),uintptr(unsafe.Pointer(&sysmask)))
 	if ret != 0{
-
+		n := 0
+		maskbits := int(unsafe.Sizeof(mask) * 8)
+		for i :=0; i <maskbits;i++{
+			if mask&(1<<uint(i)) != 0 {
+				n++
+			}
+		}
+		if n != 0{
+			return int32(n)
+		}
 	}
-	return 0
+	// use GetSystemInfo if GetProcessAffinityMask fails
+	var info systeminfo
+	stdcall1(_GetSystemInfo,uintptr(unsafe.Pointer(&info)))
+	return int32(info.dwnumberofprocessors)
 }
 
 const(
@@ -76,13 +92,28 @@ const(
 
 // Calling stdcall on os stack.
 // May run during STW, so write barriers are not allowed.
+//在线程栈上做系统调用
 //go:nowritebarrier
 //go:nosplit
 func stdcall(fn stdFunction)uintptr{
 	gp :=getg()
 	mp :=gp.m
 	mp.libcall.fn = uintptr(unsafe.Pointer(fn))
-	return uintptr(0)
+	resetLibcall := false
+	if mp.profilehz != 0 && mp.libcallsp == 0 {
+		// leave pc/sp for cpu profiler
+		mp.libcallg.set(gp)
+		mp.libcallpc = getcallerpc()
+		// sp must be the last, because once async cpu profiler finds
+		// all three values to be non-zero, it will use them
+		mp.libcallsp = getcallersp()
+		resetLibcall  = true // See comment in sys_darwin.go:libcCall
+	}
+	asmcgocall(asmstdcallAddr,unsafe.Pointer(&mp.libcall))
+	if resetLibcall{
+		mp.libcallsp  = 0
+	}
+	return mp.libcall.r1
 }
 
 //go:nosplit

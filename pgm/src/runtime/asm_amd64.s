@@ -250,6 +250,7 @@ TEXT runtime·asminit(SB),NOSPLIT,$0-0
  *  go-routine
  */
 
+//保存执行的现场
 // func gosave(buf *gobuf)
 // save state in Gobuf; setjmp
 TEXT runtime·gosave(SB), NOSPLIT, $0-8

@@ -84,6 +84,11 @@ func main(){
 }
 
 //go:nosplit
+func badctxt() {
+	throw("ctxt != 0")
+}
+
+//go:nosplit
 //go:nowritebarrierrec
 func badmorestackg0() {
 }
@@ -103,7 +108,6 @@ func badmorestackgsignal() {
 //
 // The new G calls runtime·main.
 func schedinit(){
-	println("come in")
 
 	// raceinit must be the first call to race detector.
 	// In particular, it must be done before mallocinit below calls racemapshadow.

@@ -42,6 +42,7 @@ type m struct{
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	throwing int32 //1有异常 0无异常
+	profilehz int32
 
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
@@ -49,7 +50,7 @@ type m struct{
 	libcall libcall
 	libcallpc uintptr //for cpu profiler
 	libcallsp uintptr
-	libcallg  guintptr
+	libcallg  guintptr //保存系统调用时的g
 	syscall libcall
 }
 
@@ -136,7 +137,14 @@ type eface struct{}
 // so I can't see them ever moving. If we did want to start moving data
 // in the GC, we'd need to allocate the goroutine structs from an
 // alternate arena. Using guintptr doesn't make that problem any worse.
+//g链表
 type guintptr uintptr
+
+//go:nosplit
+func (gp guintptr) ptr() *g { return (*g)(unsafe.Pointer(gp)) }
+
+//go:nosplit
+func (gp *guintptr) set(g *g) { *gp = guintptr(unsafe.Pointer(g)) }
 
 type puintptr uintptr
 
