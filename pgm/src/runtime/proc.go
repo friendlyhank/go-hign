@@ -174,6 +174,23 @@ func newproc(siz int32,fn *funcval){
 
 }
 
+
+// init initializes pp, which may be a freshly allocated p or a
+// previously destroyed p, and transitions it to status _Pgcstop.
+//初始化p
+func (pp *p)init(id int32){
+	pp.id = id
+}
+
+// destroy releases all of the resources associated with pp and
+// transitions it to status _Pdead.
+//
+// sched.lock must be held and the world must be stopped.
+func (pp *p)destroy(){
+
+}
+
+
 // Change number of processors. The world is stopped, sched is locked.
 // gcworkbufs are not being modified by either the GC or
 // the write barrier code.
@@ -183,6 +200,7 @@ func procresize(nprocs int32)*p{
 	if old <0 || nprocs <= 0{
 		throw("procresize:invalid arg")
 	}
+
 	// update statistics
 	now :=nanotime()
 	if sched.procresizetime != 0{
@@ -208,6 +226,19 @@ func procresize(nprocs int32)*p{
 		if pp == nil{
 			pp = new(p)
 		}
+		pp.init(i)
+	}
+
+	//release resources from unused P's 释放多余的p
+	for i := nprocs;i <old;i++{
+		p :=allp[i]
+		p.destroy()
+		// can't free P itself because it can be referenced by an M in syscall
+	}
+
+	// Trim allp.
+	if int32(len(allp)) != nprocs{
+		allp = allp[:nprocs]
 	}
 }
 

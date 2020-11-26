@@ -55,10 +55,27 @@ type m struct{
 }
 
 type p struct{
+	id int32
+	status uint32 //one of pidle/prunning/.. p的状态
 	// wbBuf is this P's GC write barrier buffer.
 	//
 	// TODO: Consider caching this in the running G.
 	wbBuf wbBuf
+
+	// Queue of runnable goroutines. Accessed without lock.
+	runqhead uint32 //队列头部
+	runqtail uint32 //队列尾部
+	runq [256]guintptr //队列g
+	// runnext, if non-nil, is a runnable G that was ready'd by
+	// the current G and should be run next instead of what's in
+	// runq if there's time remaining in the running G's time
+	// slice. It will inherit the time left in the current time
+	// slice. If a set of goroutines is locked in a
+	// communicate-and-wait pattern, this schedules that set as a
+	// unit and eliminates the (potentially large) scheduling
+	// latency that otherwise arises from adding the ready'd
+	// goroutines to the end of the run queue.
+	runnext guintptr //优先队列g
 }
 
 type schedt struct{
