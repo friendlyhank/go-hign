@@ -54,6 +54,7 @@ var(
 // loader before the Go program starts.
 	_GetProcessAffinityMask,
 	_GetSystemInfo,
+	_QueryPerformanceCounter,
 	_ stdFunction
 )
 
@@ -62,6 +63,23 @@ var asmstdcallAddr unsafe.Pointer
 func osinit() {
 	//获取cpu核数
 	ncpu =getproccount()
+}
+
+// useQPCTime controls whether time.now and nanotime use QueryPerformanceCounter.
+// This is only set to 1 when running under Wine.
+var useQPCTime uint8
+
+var qpcStartCounter int64
+var qpcMultiplier int64
+
+//runtime/sys_windows_amd64.s
+//go:nosplit
+func nanotimeQPC() int64 {
+	var counter int64 = 0
+	stdcall1(_QueryPerformanceCounter, uintptr(unsafe.Pointer(&counter)))
+
+	// returns number of nanoseconds 返回毫秒
+	return (counter - qpcStartCounter) * qpcMultiplier
 }
 
 //获取cpu的数量

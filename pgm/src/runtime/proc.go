@@ -83,11 +83,13 @@ func main(){
 
 }
 
+//runtime/asm_amd64.s
 //go:nosplit
 func badctxt() {
 	throw("ctxt != 0")
 }
 
+//runtime/asm_amd64.s
 //go:nosplit
 //go:nowritebarrierrec
 func badmorestackg0() {
@@ -117,6 +119,15 @@ func schedinit(){
 
 	//最大的线程数量限制
 	sched.maxmcount =10000
+
+	//栈、内存分配器、调取器相关初始化
+
+	//初始化参数和环境变量
+
+	//垃圾回收站初始化
+
+	proc :=ncpu
+	println(proc)
 
 	if buildVersion == ""{
 		// Condition should never trigger. This code just serves
@@ -161,6 +172,43 @@ func mstart() {
 //go:nosplit
 func newproc(siz int32,fn *funcval){
 
+}
+
+// Change number of processors. The world is stopped, sched is locked.
+// gcworkbufs are not being modified by either the GC or
+// the write barrier code.
+// Returns list of Ps with local work, they need to be scheduled by the caller.
+func procresize(nprocs int32)*p{
+	old := gomaxprocs
+	if old <0 || nprocs <= 0{
+		throw("procresize:invalid arg")
+	}
+	// update statistics
+	now :=nanotime()
+	if sched.procresizetime != 0{
+		sched.totaltime +=int64(old) * (now - sched.procresizetime)
+	}
+	sched.procresizetime =  now
+
+	//Grow allp if necessary. p的数量需要增加
+	for nprocs > int32(len(allp)){
+		if nprocs <= int32(cap(allp)){
+			allp =allp[:nprocs]
+		}else{
+			nallp := make([]*p,nprocs)
+			// Copy everything up to allp's cap so we
+			// never lose old allocated Ps.
+			copy(nallp,allp[:cap(allp)])
+			allp =nallp
+		}
+	}
+	// initialize new P's
+	for i := old;i <nprocs;i++{
+		pp := allp[i]
+		if pp == nil{
+			pp = new(p)
+		}
+	}
 }
 
 var(

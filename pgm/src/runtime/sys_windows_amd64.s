@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//系统环境调用相关
+
 #include "go_asm.h"
 #include "go_tls.h"
 #include "textflag.h"

@@ -477,6 +477,7 @@ TEXT runtime·switchtothread(SB),NOSPLIT|NOFRAME,$0
 #define time_hi1 4
 #define time_hi2 8
 
+//获取当前时间(毫秒)
 TEXT runtime·nanotime1(SB),NOSPLIT,$0-8
 	CMPB	runtime·useQPCTime(SB), $0
 	JNE	useQPC
@@ -496,6 +497,7 @@ useQPC:
 	JMP	runtime·nanotimeQPC(SB)
 	RET
 
+//获取当前时间
 TEXT time·now(SB),NOSPLIT,$0-24
 	CMPB	runtime·useQPCTime(SB), $0
 	JNE	useQPC

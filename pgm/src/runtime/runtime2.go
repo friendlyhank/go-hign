@@ -63,6 +63,9 @@ type p struct{
 
 type schedt struct{
 	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
+
+	procresizetime int64 // nanotime() of last change to gomaxprocs 最后一次调整p数量的时间(毫秒)
+	totaltime int64 // ∫gomaxprocs dt up to procresizetime 最后一次和最新调整p数量的总时间
 }
 
 type gobuf struct {
@@ -170,7 +173,9 @@ type itab struct {}
 
 var(
 	allm *m
-	ncpu int32 //cpu的数量
+	allp       []*p  // len(allp) == gomaxprocs; may change at safe points, otherwise immutable p的数量,一般与gomaxprocs相等
+	ncpu int32 //cpu的核数
+	gomaxprocs int32 //当前最大的p的数量
 
 	// Information about what cpu features are available.
 	// Packages outside the runtime should not use these
