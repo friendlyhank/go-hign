@@ -9,6 +9,19 @@ import (
 	"unsafe"
 	)
 
+// Mutual exclusion locks.  In the uncontended case,
+// as fast as spin locks (just a few user-level instructions),
+// but on the contention path they sleep in the kernel.
+// A zeroed Mutex is unlocked (no need to initialize each lock).
+// Initialization is helpful for static lock ranking, but not required.
+type mutex struct{
+	lockRankStruct
+	// Futex-based impl treats it as uint32 key,
+	// while sema-based impl as M* waitm.
+	// Used to be a union, but unions break precise GC.
+	key uintptr
+}
+
 // Stack describes a Go execution stack.
 // The bounds of the stack are exactly [lo, hi),
 // with no implicit data structures on either side.
@@ -44,6 +57,7 @@ type m struct{
 	id int64
 	throwing int32 //1有异常 0无异常
 	profilehz int32
+	alllink *m // on allm 等于allm
 
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
@@ -80,7 +94,20 @@ type p struct{
 }
 
 type schedt struct{
+
+	lock mutex
+
+	mnext int64 //number of m's that have been created and next M ID 下一个m的id
 	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
+	nmfreed int64 //cumulative number of freed m's 累计释放的m的数量
+
+
+	pidle puintptr //idle p's 空闲的p链表
+	npidle uint32
+
+	// Global runnable queue. 全局的g队列
+	runq gQueue
+	runqsize int32
 
 	procresizetime int64 // nanotime() of last change to gomaxprocs 最后一次调整p数量的时间(毫秒)
 	totaltime int64 // ∫gomaxprocs dt up to procresizetime 最后一次和最新调整p数量的总时间
@@ -190,10 +217,11 @@ type wincallbackcontext struct {
 type itab struct {}
 
 var(
-	allm *m
+	allm *m //m相当于是链表,通过m.alllink链接起来
 	allp       []*p  // len(allp) == gomaxprocs; may change at safe points, otherwise immutable p的数量,一般与gomaxprocs相等
 	ncpu int32 //cpu的核数
 	gomaxprocs int32 //当前最大的p的数量
+	sched schedt
 
 	// Information about what cpu features are available.
 	// Packages outside the runtime should not use these

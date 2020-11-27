@@ -10,7 +10,7 @@ import (
 	"unsafe"
 )
 
-// lockRankStruct is embedded in mutex
+
 type lockRankStruct struct {
 	// static lock ranking of the lock
 	rank lockRank

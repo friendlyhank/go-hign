@@ -70,6 +70,16 @@ const (
 	_StackGuard = 928*sys.StackGuardMultiplier + _StackSystem
 )
 
+// Global pool of spans that have free stacks.
+// Stacks are assigned an order according to size.
+//     order = log_2(size/FixedStack)
+// There is a free list for each order.
+
+//栈信息的初始化
+func stackinit(){
+
+}
+
 // Called from runtime·morestack when more stack is needed.
 // Allocate larger stack and relocate to new stack.
 // Stack growth is multiplicative, for constant amortized cost.

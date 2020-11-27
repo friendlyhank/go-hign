@@ -660,6 +660,7 @@ func mcommoninit(mp *m, id int64) {
 		mp.fastrand[1] = 1
 	}
 
+
 	mpreinit(mp)
 	if mp.gsignal != nil {
 		mp.gsignal.stackguard1 = mp.gsignal.stack.lo + _StackGuard

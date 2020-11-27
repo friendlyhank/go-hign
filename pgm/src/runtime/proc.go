@@ -2,6 +2,7 @@ package runtime
 
 import(
 	"runtime/internal/sys"
+	"unsafe"
 )
 
 var buildVersion = sys.TheVersion
@@ -110,17 +111,18 @@ func badmorestackgsignal() {
 //
 // The new G calls runtime·main.
 func schedinit(){
+	lockInit(&sched.lock,lockRankSched)
 
 	// raceinit must be the first call to race detector.
 	// In particular, it must be done before mallocinit below calls racemapshadow.
 	_g_ :=getg()
 
-	println(_g_)
-
 	//最大的线程数量限制
 	sched.maxmcount =10000
 
 	//栈、内存分配器、调取器相关初始化
+	stackinit()
+	mcommoninit(_g_.m,-1)
 
 	//初始化参数和环境变量
 
@@ -141,7 +143,7 @@ func schedinit(){
 	}
 }
 
-// 初始化m
+//初始化m,g0才可以去初始化
 func mcommoninit(mp *m,id int64){
 	_g_ := getg()
 	// g0 stack won't make sense for user (and is not necessary unwindable).
@@ -149,9 +151,47 @@ func mcommoninit(mp *m,id int64){
 	if _g_ != _g_.m.g0{
 	}
 
+	lock(&sched.lock)
+
 	if id >= 0{
 		mp.id =id
+	}else{
+		mp.id = mReserveID()
 	}
+
+	// Add to allm so garbage collector doesn't free g->m
+	// when it is just in a register or thread-local storage.
+	//可以理解为allm是一个链表,每个m通过alllink链接起来
+	mp.alllink = allm
+
+	// NumCgoCall() iterates over allm w/o schedlock,
+	// so we need to publish it safely.
+	//保证原子操作
+	atomicstorep(unsafe.Pointer(&allm),unsafe.Pointer(mp))
+}
+
+func checkmcount(){
+	// sched lock is held
+	if mcount() > sched.maxmcount {
+		print("runtime: program exceeds ",sched.maxmcount,"-thread limit\n")
+		throw("thread exhaustion")
+	}
+}
+
+// mReserveID returns the next ID to use for a new m. This new m is immediately
+// considered 'running' by checkdead.
+//
+// sched.lock must be held.
+//生成m的id
+func mReserveID()int64{
+	if sched.mnext +1 < sched.mnext{
+		throw("runtime: thread ID overflow")
+	}
+	id := sched.mnext
+	sched.mnext++
+	//检查m的数量是否超出限制
+	checkmcount()
+	return id
 }
 
 // mstart is the entry-point for new Ms.
@@ -257,6 +297,15 @@ func procresize(nprocs int32)*p{
 	}
 }
 
-var(
-	sched schedt
-)
+func mcount()int32{
+	return int32(sched.mnext - sched.nmfreed)
+}
+
+// A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
+// be on one gQueue or gList at a time.
+type gQueue struct{
+	head guintptr
+	tail guintptr
+}
+
+
