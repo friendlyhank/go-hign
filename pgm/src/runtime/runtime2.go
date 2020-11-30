@@ -122,7 +122,8 @@ type g struct{
 	stackguard1 uintptr // offset known to liblink
 
 	m            *m      //当前绑定的m current m; offset known to arm liblink
-	sched        gobuf
+	sched        gobuf //用于保存执行现场
+	schedlink    guintptr //下一个链接的g构造成链表
 }
 
 type m struct{
@@ -174,6 +175,11 @@ type p struct{
 	// latency that otherwise arises from adding the ready'd
 	// goroutines to the end of the run queue.
 	runnext guintptr //优先队列g
+
+	gFree struct{
+		gList
+		n int32
+	}
 }
 
 type schedt struct{
@@ -191,6 +197,14 @@ type schedt struct{
 	// Global runnable queue. 全局的g队列
 	runq gQueue
 	runqsize int32
+
+	// Global cache of dead G's.
+	gFree struct{
+		lock mutex
+		stack gList // Gs with stacks
+		noStack gList // Gs without stacks
+		n int32
+	}
 
 	procresizetime int64 // nanotime() of last change to gomaxprocs 最后一次调整p数量的时间(毫秒)
 	totaltime int64 // ∫gomaxprocs dt up to procresizetime 最后一次和最新调整p数量的总时间

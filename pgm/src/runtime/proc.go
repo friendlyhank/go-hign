@@ -239,26 +239,6 @@ func mstart() {
 
 }
 
-// Create a new g running fn with siz bytes of arguments.
-// Put it on the queue of g's waiting to run.
-// The compiler turns a go statement into a call to this.
-//
-// The stack layout of this call is unusual: it assumes that the
-// arguments to pass to fn are on the stack sequentially immediately
-// after &fn. Hence, they are logically part of newproc's argument
-// frame, even though they don't appear in its signature (and can't
-// because their types differ between call sites).
-//
-// This must be nosplit because this stack layout means there are
-// untyped arguments in newproc's argument frame. Stack copies won't
-// be able to adjust them and stack splits won't be able to copy them.
-//
-//go:nosplit
-func newproc(siz int32,fn *funcval){
-
-}
-
-
 // init initializes pp, which may be a freshly allocated p or a
 // previously destroyed p, and transitions it to status _Pgcstop.
 //初始化p
@@ -348,6 +328,78 @@ func procresize(nprocs int32)*p{
 	}
 	return nil
 }
+// Create a new g running fn with siz bytes of arguments.
+// Put it on the queue of g's waiting to run.
+// The compiler turns a go statement into a call to this.
+//
+// The stack layout of this call is unusual: it assumes that the
+// arguments to pass to fn are on the stack sequentially immediately
+// after &fn. Hence, they are logically part of newproc's argument
+// frame, even though they don't appear in its signature (and can't
+// because their types differ between call sites).
+//
+// This must be nosplit because this stack layout means there are
+// untyped arguments in newproc's argument frame. Stack copies won't
+// be able to adjust them and stack splits won't be able to copy them.
+//
+//go:nosplit
+func newproc(siz int32, fn *funcval) {
+	gp := getg()
+	systemstack(func(){
+		newg := newproc1()
+	})
+}
+
+// Create a new g in state _Grunnable, starting at fn, with narg bytes
+// of arguments starting at argp. callerpc is the address of the go
+// statement that created this. The caller is responsible for adding
+// the new g to the scheduler.
+//
+// This must run on the system stack because it's the continuation of
+// newproc, which cannot split the stack.
+//
+//创建一个g,只能在系统的栈上调用
+//go:systemstack
+func newproc1()*g{
+	_g_ := getg()
+
+	_p_ := _g_.m.p.ptr()
+	newg :=gfget(_p_) //从全局或当前的p中获取一个空闲的g
+}
+
+// Get from gfree list.
+// If local list is empty, grab a batch from global list.
+//从全局队列或当前p队列获取一个空闲的g
+func gfget(_p_ *p) *g{
+retry:
+	if _p_.gFree.empty() && (!sched.gFree.stack.empty() || !sched.gFree.noStack.empty()){
+		lock(&sched.gFree.lock)
+		// Move a batch of free Gs to the P.
+		//从全局队列的剩余空闲g列表中转移，最多转移32个
+		for _p_.gFree.n < 32{
+			// Prefer Gs with stacks.
+			gp := sched.gFree.stack.pop()
+			if gp == nil{
+				gp = sched.gFree.noStack.pop()
+				if gp == nil{
+					break
+				}
+			}
+			sched.gFree.n--
+			_p_.gFree.push(gp)
+			_p_.gFree.n++
+		}
+		unlock(&sched.gFree.lock)
+		goto retry
+	}
+	//从当前p中取一个空闲的g
+	gp := _p_.gFree.pop()
+	if gp == nil{
+		return nil
+	}
+	_p_.gFree.n--
+	return gp
+}
 
 func mcount()int32{
 	return int32(sched.mnext - sched.nmfreed)
@@ -377,4 +429,29 @@ func (q *gQueue) push(gp *g) {
 	}
 }
 
+// A gList is a list of Gs linked through g.schedlink. A G can only be
+// on one gQueue or gList at a time.
+type gList struct{
+	head guintptr
+}
+
+// empty reports whether l is empty.
+func (l *gList)empty()bool{
+	return l.head  == 0
+}
+
+// push adds gp to the head of l.
+func (l *gList)push(gp *g){
+	gp.schedlink =l.head
+	l.head.set(gp)
+}
+
+// pop removes and returns the head of l. If l is empty, it returns nil.
+func (l *gList)pop()*g{
+	gp :=l.head.ptr()
+	if gp != nil{
+		l.head =gp.schedlink
+	}
+	return gp
+}
 
