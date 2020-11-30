@@ -22,6 +22,85 @@ type mutex struct{
 	key uintptr
 }
 
+type iface struct{}
+
+type eface struct{}
+
+// The guintptr, muintptr, and puintptr are all used to bypass write barriers.
+// It is particularly important to avoid write barriers when the current P has
+// been released, because the GC thinks the world is stopped, and an
+// unexpected write barrier would not be synchronized with the GC,
+// which can lead to a half-executed write barrier that has marked the object
+// but not queued it. If the GC skips the object and completes before the
+// queuing can occur, it will incorrectly free the object.
+//
+// We tried using special assignment functions invoked only when not
+// holding a running P, but then some updates to a particular memory
+// word went through write barriers and some did not. This breaks the
+// write barrier shadow checking mode, and it is also scary: better to have
+// a word that is completely ignored by the GC than to have one for which
+// only a few updates are ignored.
+//
+// Gs and Ps are always reachable via true pointers in the
+// allgs and allp lists or (during allocation before they reach those lists)
+// from stack variables.
+//
+// Ms are always reachable via true pointers either from allm or
+// freem. Unlike Gs and Ps we do free Ms, so it's important that
+// nothing ever hold an muintptr across a safe point.
+
+// A guintptr holds a goroutine pointer, but typed as a uintptr
+// to bypass write barriers. It is used in the Gobuf goroutine state
+// and in scheduling lists that are manipulated without a P.
+//
+// The Gobuf.g goroutine pointer is almost always updated by assembly code.
+// In one of the few places it is updated by Go code - func save - it must be
+// treated as a uintptr to avoid a write barrier being emitted at a bad time.
+// Instead of figuring out how to emit the write barriers missing in the
+// assembly manipulation, we change the type of the field to uintptr,
+// so that it does not require write barriers at all.
+//
+// Goroutine structs are published in the allg list and never freed.
+// That will keep the goroutine structs from being collected.
+// There is never a time that Gobuf.g's contain the only references
+// to a goroutine: the publishing of the goroutine in allg comes first.
+// Goroutine pointers are also kept in non-GC-visible places like TLS,
+// so I can't see them ever moving. If we did want to start moving data
+// in the GC, we'd need to allocate the goroutine structs from an
+// alternate arena. Using guintptr doesn't make that problem any worse.
+type guintptr uintptr
+
+//go:nosplit
+func (gp guintptr) ptr() *g { return (*g)(unsafe.Pointer(gp)) }
+
+//go:nosplit
+func (gp *guintptr) set(g *g) { *gp = guintptr(unsafe.Pointer(g)) }
+
+type puintptr uintptr
+
+//go:nosplit
+func (pp puintptr) ptr() *p { return (*p)(unsafe.Pointer(pp)) }
+
+//go:nosplit
+func (pp *puintptr) set(p *p) { *pp = puintptr(unsafe.Pointer(p)) }
+
+// muintptr is a *m that is not tracked by the garbage collector.
+//
+// Because we do free Ms, there are some additional constrains on
+// muintptrs:
+//
+// 1. Never hold an muintptr locally across a safe point.
+//
+// 2. Any muintptr in the heap must be owned by the M itself so it can
+//    ensure it is not in use when the last true *m is released.
+type muintptr uintptr
+
+//go:nosplit
+func (mp muintptr) ptr() *m { return (*m)(unsafe.Pointer(mp)) }
+
+//go:nosplit
+func (mp *muintptr) set(m *m) { *mp = muintptr(unsafe.Pointer(m)) }
+
 // Stack describes a Go execution stack.
 // The bounds of the stack are exactly [lo, hi),
 // with no implicit data structures on either side.
@@ -56,8 +135,10 @@ type m struct{
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	id int64
 	throwing int32 //1有异常 0无异常
+	locks int32 //统计锁的数量
 	profilehz int32
 	alllink *m // on allm 等于allm
+	nextwaitm     muintptr    // next m waiting for lock
 
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
@@ -67,6 +148,8 @@ type m struct{
 	libcallsp uintptr
 	libcallg  guintptr //保存系统调用时的g
 	syscall libcall
+
+	mOS
 }
 
 type p struct{
@@ -138,63 +221,6 @@ type gobuf struct {
 type funcval struct{
 
 }
-
-type iface struct{}
-
-type eface struct{}
-
-// The guintptr, muintptr, and puintptr are all used to bypass write barriers.
-// It is particularly important to avoid write barriers when the current P has
-// been released, because the GC thinks the world is stopped, and an
-// unexpected write barrier would not be synchronized with the GC,
-// which can lead to a half-executed write barrier that has marked the object
-// but not queued it. If the GC skips the object and completes before the
-// queuing can occur, it will incorrectly free the object.
-//
-// We tried using special assignment functions invoked only when not
-// holding a running P, but then some updates to a particular memory
-// word went through write barriers and some did not. This breaks the
-// write barrier shadow checking mode, and it is also scary: better to have
-// a word that is completely ignored by the GC than to have one for which
-// only a few updates are ignored.
-//
-// Gs and Ps are always reachable via true pointers in the
-// allgs and allp lists or (during allocation before they reach those lists)
-// from stack variables.
-//
-// Ms are always reachable via true pointers either from allm or
-// freem. Unlike Gs and Ps we do free Ms, so it's important that
-// nothing ever hold an muintptr across a safe point.
-
-// A guintptr holds a goroutine pointer, but typed as a uintptr
-// to bypass write barriers. It is used in the Gobuf goroutine state
-// and in scheduling lists that are manipulated without a P.
-//
-// The Gobuf.g goroutine pointer is almost always updated by assembly code.
-// In one of the few places it is updated by Go code - func save - it must be
-// treated as a uintptr to avoid a write barrier being emitted at a bad time.
-// Instead of figuring out how to emit the write barriers missing in the
-// assembly manipulation, we change the type of the field to uintptr,
-// so that it does not require write barriers at all.
-//
-// Goroutine structs are published in the allg list and never freed.
-// That will keep the goroutine structs from being collected.
-// There is never a time that Gobuf.g's contain the only references
-// to a goroutine: the publishing of the goroutine in allg comes first.
-// Goroutine pointers are also kept in non-GC-visible places like TLS,
-// so I can't see them ever moving. If we did want to start moving data
-// in the GC, we'd need to allocate the goroutine structs from an
-// alternate arena. Using guintptr doesn't make that problem any worse.
-//g链表
-type guintptr uintptr
-
-//go:nosplit
-func (gp guintptr) ptr() *g { return (*g)(unsafe.Pointer(gp)) }
-
-//go:nosplit
-func (gp *guintptr) set(g *g) { *gp = guintptr(unsafe.Pointer(g)) }
-
-type puintptr uintptr
 
 type sudog struct {}
 

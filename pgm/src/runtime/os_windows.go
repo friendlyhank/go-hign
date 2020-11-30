@@ -52,11 +52,21 @@ var(
 // Following syscalls are available on every Windows PC.
 // All these variables are set by the Windows executable
 // loader before the Go program starts.
+	_CloseHandle,
+	_CreateEventA,
 	_GetProcessAffinityMask,
 	_GetSystemInfo,
 	_QueryPerformanceCounter,
+	_SetEvent,
+	_WaitForSingleObject,
+	_WaitForMultipleObjects,
 	_ stdFunction
 )
+
+type mOS struct{
+	waitsema   uintptr // semaphore for parking on locks
+	resumesema uintptr // semaphore to indicate suspend/resume
+}
 
 var asmstdcallAddr unsafe.Pointer
 
@@ -107,6 +117,105 @@ func getproccount() int32{
 const(
 	currentProcess = ^uintptr(0) // -1 = current process
 )
+
+func getlasterror() uint32
+func setlasterror(err uint32)
+
+//创建锁的事件
+//go:nosplit
+func semacreate(mp *m) {
+	if mp.waitsema != 0 {
+		return
+	}
+	mp.waitsema = stdcall4(_CreateEventA, 0, 0, 0, 0)
+	if mp.waitsema == 0 {
+		systemstack(func() {
+			print("runtime: createevent failed; errno=", getlasterror(), "\n")
+			throw("runtime.semacreate")
+		})
+	}
+	mp.resumesema = stdcall4(_CreateEventA, 0, 0, 0, 0)
+	if mp.resumesema == 0 {
+		systemstack(func() {
+			print("runtime: createevent failed; errno=", getlasterror(), "\n")
+			throw("runtime.semacreate")
+		})
+		stdcall1(_CloseHandle, mp.waitsema)
+		mp.waitsema = 0
+	}
+}
+
+//进入等待，等待时间为纳秒
+//go:nosplit
+func semasleep(ns int64) int32 {
+	const (
+		_WAIT_ABANDONED = 0x00000080
+		_WAIT_OBJECT_0  = 0x00000000
+		_WAIT_TIMEOUT   = 0x00000102
+		_WAIT_FAILED    = 0xFFFFFFFF
+	)
+
+	var result uintptr
+	if ns < 0 {
+		result = stdcall2(_WaitForSingleObject, getg().m.waitsema, uintptr(_INFINITE))
+	} else {
+		start := nanotime()
+		elapsed := int64(0)
+		for {
+			ms := int64(timediv(ns-elapsed, 1000000, nil))
+			if ms == 0 {
+				ms = 1
+			}
+			result = stdcall4(_WaitForMultipleObjects, 2,
+				uintptr(unsafe.Pointer(&[2]uintptr{getg().m.waitsema, getg().m.resumesema})),
+				0, uintptr(ms))
+			if result != _WAIT_OBJECT_0+1 {
+				// Not a suspend/resume event
+				break
+			}
+			elapsed = nanotime() - start
+			if elapsed >= ns {
+				return -1
+			}
+		}
+	}
+	switch result {
+	case _WAIT_OBJECT_0: // Signaled
+		return 0
+
+	case _WAIT_TIMEOUT:
+		return -1
+
+	case _WAIT_ABANDONED:
+		systemstack(func() {
+			throw("runtime.semasleep wait_abandoned")
+		})
+
+	case _WAIT_FAILED:
+		systemstack(func() {
+			print("runtime: waitforsingleobject wait_failed; errno=", getlasterror(), "\n")
+			throw("runtime.semasleep wait_failed")
+		})
+
+	default:
+		systemstack(func() {
+			print("runtime: waitforsingleobject unexpected; result=", result, "\n")
+			throw("runtime.semasleep unexpected")
+		})
+	}
+
+	return -1 // unreachable
+}
+
+//go:nosplit
+func semawakeup(mp *m) {
+	if stdcall1(_SetEvent, mp.waitsema) == 0 {
+		systemstack(func() {
+			print("runtime: setevent failed; errno=", getlasterror(), "\n")
+			throw("runtime.semawakeup")
+		})
+	}
+}
 
 // Calling stdcall on os stack.
 // May run during STW, so write barriers are not allowed.
