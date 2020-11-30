@@ -365,6 +365,10 @@ func newproc1()*g{
 
 	_p_ := _g_.m.p.ptr()
 	newg :=gfget(_p_) //从全局或当前的p中获取一个空闲的g
+	//如果获取不到空闲的g,直接新建一个g
+	if newg == nil{
+
+	}
 }
 
 // Get from gfree list.
