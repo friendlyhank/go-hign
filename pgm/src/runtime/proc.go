@@ -369,6 +369,7 @@ func newproc1()*g{
 	if newg == nil{
 
 	}
+	return newg
 }
 
 // Get from gfree list.
