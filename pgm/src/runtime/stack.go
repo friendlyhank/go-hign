@@ -95,3 +95,5 @@ func stackinit(){
 func newstack() {
 
 }
+
+var maxstacksize uintptr = 1 << 20 // enough until runtime.main sets it for real

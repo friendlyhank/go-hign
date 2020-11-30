@@ -54,6 +54,7 @@ var(
 // loader before the Go program starts.
 	_CloseHandle,
 	_CreateEventA,
+	_ExitProcess,
 	_GetProcessAffinityMask,
 	_GetSystemInfo,
 	_QueryPerformanceCounter,
@@ -120,6 +121,18 @@ const(
 
 func getlasterror() uint32
 func setlasterror(err uint32)
+
+// exiting is set to non-zero when the process is exiting.
+var exiting uint32
+
+//go:nosplit
+func exit(code int32) {
+	// Disallow thread suspension for preemption. Otherwise,
+	// ExitProcess and SuspendThread can race: SuspendThread
+	// queues a suspension request for this thread, ExitProcess
+	// kills the suspending thread, and then this thread suspends.
+	stdcall1(_ExitProcess,uintptr(code))
+}
 
 //创建锁的事件
 //go:nosplit

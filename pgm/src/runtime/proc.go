@@ -79,9 +79,37 @@ var(
 	g0  g
 )
 
+//go:linkname main_main main.main
+func main_main()
+
+// mainStarted indicates that the main M has started.
+var mainStarted bool
+
 // The main goroutine
 func main(){
+	g :=getg()
 
+	// Max stack size is 1 GB on 64-bit, 250 MB on 32-bit.
+	// Using decimal instead of binary GB and MB because
+	// they look nicer in the stack overflow failure message.
+	//在64位情况下最大时1GB,32位最大的栈大小是250mb
+	if sys.PtrSize == 8{
+		maxstacksize =1000000000
+	}else{
+		maxstacksize =250000000
+	}
+
+	//Allow newproc to start new Ms.
+	mainStarted = true
+
+	if g.m != &m0{
+		throw("runtime.main not on m0")
+	}
+
+	fn := main_main// make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
+	fn()
+
+	exit(0)
 }
 
 //runtime/asm_amd64.s
