@@ -245,6 +245,7 @@ type itab struct {}
 var(
 	allm *m //m相当于是链表,通过m.alllink链接起来
 	allp       []*p  // len(allp) == gomaxprocs; may change at safe points, otherwise immutable p的数量,一般与gomaxprocs相等
+	allpLock   mutex // Protects P-less reads of allp and all writes 操作allp的锁
 	ncpu int32 //cpu的核数
 	gomaxprocs int32 //当前最大的p的数量
 	sched schedt

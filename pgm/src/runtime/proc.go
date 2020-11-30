@@ -128,8 +128,10 @@ func schedinit(){
 
 	//垃圾回收站初始化
 
-	proc :=ncpu
-	println(proc)
+	procs :=ncpu
+	if procresize(procs) != nil{
+		throw("unknown runnable goroutine during bootstrap")
+	}
 
 	if buildVersion == ""{
 		// Condition should never trigger. This code just serves
@@ -168,6 +170,7 @@ func mcommoninit(mp *m,id int64){
 	// so we need to publish it safely.
 	//保证原子操作
 	atomicstorep(unsafe.Pointer(&allm),unsafe.Pointer(mp))
+	unlock(&sched.lock)
 }
 
 func checkmcount(){
@@ -243,6 +246,18 @@ func (pp *p)init(id int32){
 func (pp *p)destroy(){
 	// Move all runnable goroutines to the global queue
 	//将所有的可执行的goroutines移动到全局队列
+	for pp.runqhead != pp.runqtail {
+		// Pop from tail of local queue
+		pp.runqtail--
+		gp := pp.runq[pp.runqtail%uint32(len(pp.runq))].ptr()
+		// Push onto head of global queue
+		globrunqputhead(gp)
+	}
+	//将优先队列的移动到全局队列
+	if pp.runnext != 0 {
+		globrunqputhead(pp.runnext.ptr())
+		pp.runnext = 0
+	}
 }
 
 
@@ -265,6 +280,9 @@ func procresize(nprocs int32)*p{
 
 	//Grow allp if necessary. p的数量需要增加
 	for nprocs > int32(len(allp)){
+		// Synchronize with retake, which could be running
+		// concurrently since it doesn't run on a P.
+		lock(&allpLock)
 		if nprocs <= int32(cap(allp)){
 			allp =allp[:nprocs]
 		}else{
@@ -274,6 +292,7 @@ func procresize(nprocs int32)*p{
 			copy(nallp,allp[:cap(allp)])
 			allp =nallp
 		}
+		unlock(&allpLock)
 	}
 	// initialize new P's
 	for i := old;i <nprocs;i++{
@@ -282,6 +301,7 @@ func procresize(nprocs int32)*p{
 			pp = new(p)
 		}
 		pp.init(i)
+		atomicstorep(unsafe.Pointer(&allp[i]), unsafe.Pointer(pp))
 	}
 
 	//release resources from unused P's 释放多余的p
@@ -291,14 +311,27 @@ func procresize(nprocs int32)*p{
 		// can't free P itself because it can be referenced by an M in syscall
 	}
 
+	//将多余的allp释放
 	// Trim allp.
-	if int32(len(allp)) != nprocs{
+	if int32(len(allp)) != nprocs {
+		lock(&allpLock)
 		allp = allp[:nprocs]
+		unlock(&allpLock)
 	}
+	return nil
 }
 
 func mcount()int32{
 	return int32(sched.mnext - sched.nmfreed)
+}
+
+// Put gp at the head of the global runnable queue.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func globrunqputhead(gp *g) {
+	sched.runq.push(gp)
+	sched.runqsize++
 }
 
 // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
@@ -306,6 +339,14 @@ func mcount()int32{
 type gQueue struct{
 	head guintptr
 	tail guintptr
+}
+
+// push adds gp to the head of q.
+func (q *gQueue) push(gp *g) {
+	q.head.set(gp)
+	if q.tail == 0 {
+		q.tail.set(gp)
+	}
 }
 
 
