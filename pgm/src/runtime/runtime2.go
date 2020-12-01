@@ -10,6 +10,108 @@ import (
 	"unsafe"
 	)
 
+// defined constants
+const(
+	// G status
+	//
+	// Beyond indicating the general state of a G, the G status
+	// acts like a lock on the goroutine's stack (and hence its
+	// ability to execute user code).
+	//
+	// If you add to this list, add to the list
+	// of "okay during garbage collection" status
+	// in mgcmark.go too.
+	//
+	// TODO(austin): The _Gscan bit could be much lighter-weight.
+	// For example, we could choose not to run _Gscanrunnable
+	// goroutines found in the run queue, rather than CAS-looping
+	// until they become _Grunnable. And transitions like
+	// _Gscanwaiting -> _Gscanrunnable are actually okay because
+	// they don't affect stack ownership.
+
+	// _Gidle means this goroutine was just allocated and has not
+	// yet been initialized.
+	//刚刚被分配并且还没有被初始化
+	_Gidle = iota // 0
+
+	// _Grunnable means this goroutine is on a run queue. It is
+	// not currently executing user code. The stack is not owned.
+	//没有执行代码，没有栈的所有权，存储在运行队列中
+	_Grunnable // 1
+
+	// _Grunning means this goroutine may execute user code. The
+	// stack is owned by this goroutine. It is not on a run queue.
+	// It is assigned an M and a P (g.m and g.m.p are valid).
+	//可以执行代码，拥有栈的所有权，被赋予了内核线程 M 和处理器 P
+	_Grunning // 2
+
+	// _Gsyscall means this goroutine is executing a system call.
+	// It is not executing user code. The stack is owned by this
+	// goroutine. It is not on a run queue. It is assigned an M.
+	//正在执行系统调用，拥有栈的所有权，没有执行用户代码，被赋予了内核线程 M 但是不在运行队列上
+	_Gsyscall // 3
+
+	// _Gwaiting means this goroutine is blocked in the runtime.
+	// It is not executing user code. It is not on a run queue,
+	// but should be recorded somewhere (e.g., a channel wait
+	// queue) so it can be ready()d when necessary. The stack is
+	// not owned *except* that a channel operation may read or
+	// write parts of the stack under the appropriate channel
+	// lock. Otherwise, it is not safe to access the stack after a
+	// goroutine enters _Gwaiting (e.g., it may get moved).
+	//由于运行时而被阻塞，没有执行用户代码并且不在运行队列上，但是可能存在于 Channel 的等待队列上
+	_Gwaiting // 4
+
+	// _Gmoribund_unused is currently unused, but hardcoded in gdb
+	// scripts.
+	_Gmoribund_unused // 5
+
+	// _Gdead means this goroutine is currently unused. It may be
+	// just exited, on a free list, or just being initialized. It
+	// is not executing user code. It may or may not have a stack
+	// allocated. The G and its stack (if any) are owned by the M
+	// that is exiting the G or that obtained the G from the free
+	// list.
+	//没有被使用，没有执行代码，可能有分配的栈
+	_Gdead // 6
+
+	// _Genqueue_unused is currently unused.
+	_Genqueue_unused // 7
+
+	// _Gcopystack means this goroutine's stack is being moved. It
+	// is not executing user code and is not on a run queue. The
+	// stack is owned by the goroutine that put it in _Gcopystack.
+	//栈正在被拷贝，没有执行代码，不在运行队列上
+	_Gcopystack // 8
+
+	// _Gpreempted means this goroutine stopped itself for a
+	// suspendG preemption. It is like _Gwaiting, but nothing is
+	// yet responsible for ready()ing it. Some suspendG must CAS
+	// the status to _Gwaiting to take responsibility for
+	// ready()ing this G.
+	//由于抢占而被阻塞，没有执行用户代码并且不在运行队列上，等待唤醒
+	_Gpreempted // 9
+
+	// _Gscan combined with one of the above states other than
+	// _Grunning indicates that GC is scanning the stack. The
+	// goroutine is not executing user code and the stack is owned
+	// by the goroutine that set the _Gscan bit.
+	//
+	// _Gscanrunning is different: it is used to briefly block
+	// state transitions while GC signals the G to scan its own
+	// stack. This is otherwise like _Grunning.
+	//
+	// atomicstatus&~Gscan gives the state the goroutine will
+	// return to when the scan completes.
+	//GC 正在扫描栈空间，没有执行代码，可以与其他状态同时存在
+	_Gscan          = 0x1000
+	_Gscanrunnable  = _Gscan + _Grunnable  // 0x1001
+	_Gscanrunning   = _Gscan + _Grunning   // 0x1002
+	_Gscansyscall   = _Gscan + _Gsyscall   // 0x1003
+	_Gscanwaiting   = _Gscan + _Gwaiting   // 0x1004
+	_Gscanpreempted = _Gscan + _Gpreempted // 0x1009
+)
+
 // Mutual exclusion locks.  In the uncontended case,
 // as fast as spin locks (just a few user-level instructions),
 // but on the contention path they sleep in the kernel.
@@ -127,8 +229,12 @@ type g struct{
 	stackguard0 uintptr // offset known to liblink
 	stackguard1 uintptr // offset known to liblink
 
+	_panic *_painc // innermost panic - offset known to liblink 最内侧的painc结构体
+	_defer *_defer // innermost defer 最内侧的延迟函数结构体
 	m            *m      //当前绑定的m current m; offset known to arm liblink
-	sched        gobuf //用于保存执行现场
+	sched        gobuf //用于存储调度相关的信息
+	atomicstatus uint32//go 运行的状态
+	goid int64 // Goroutine的ID
 	schedlink    guintptr //下一个链接的g构造成链表
 }
 
@@ -229,11 +335,11 @@ type gobuf struct {
 	// and restores it doesn't need write barriers. It's still
 	// typed as a pointer so that any other writes from Go get
 	// write barriers.
-	sp   uintptr
-	pc   uintptr
-	g    guintptr
+	sp   uintptr //栈指针
+	pc   uintptr //程序计数器
+	g    guintptr //持有runtime.gobuf的Goroutine
 	ctxt unsafe.Pointer
-	ret  sys.Uintreg
+	ret  sys.Uintreg //系统调用的返回值
 	lr   uintptr
 	bp   uintptr // for GOEXPERIMENT=framepointer
 }
@@ -261,6 +367,31 @@ type wincallbackcontext struct {
 }
 
 type itab struct {}
+
+// A _defer holds an entry on the list of deferred calls.
+// If you add a field here, add code to clear it in freedefer and deferProcStack
+// This struct must match the code in cmd/compile/internal/gc/reflect.go:deferstruct
+// and cmd/compile/internal/gc/ssa.go:(*state).call.
+// Some defers will be allocated on the stack and some on the heap.
+// All defers are logically part of the stack, so write barriers to
+// initialize them are not required. All defers must be manually scanned,
+// and for heap defers, marked.
+type _defer struct{
+	link *_defer
+}
+
+// A _panic holds information about an active panic.
+//
+// This is marked go:notinheap because _panic values must only ever
+// live on the stack.
+//
+// The argp and link fields are stack pointers, but don't need special
+// handling during stack growth: because they are pointer-typed and
+// _panic values only live on the stack, regular stack pointer
+// adjustment takes care of them.
+type _painc struct{
+	link *_painc
+}
 
 var(
 	allm *m //m相当于是链表,通过m.alllink链接起来
