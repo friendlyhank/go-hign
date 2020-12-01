@@ -238,7 +238,37 @@ func mstart1(){
 // One round of scheduler: find a runnable goroutine and execute it.
 // Never returns.
 func schedule() {
+	_g_ := getg()
+	if _g_.m.locks != 0{
+		throw("schedule: holding locks")
+	}
+top:
+	var gp *g
+	var inheritTime bool
 
+	if gp == nil{
+
+	}
+
+	if gp == nil{
+
+	}
+}
+
+// Schedules gp to run on the current M.
+// If inheritTime is true, gp inherits the remaining time in the
+// current time slice. Otherwise, it starts a new time slice.
+// Never returns.
+//
+// Write barriers are allowed because this is called immediately after
+// acquiring a P in several places.
+//
+//go:yeswritebarrierrec
+func execute(gp *g, inheritTime bool) {
+	_g_ := getg()
+	_g_.m.curg = gp
+
+	gogo(&gp.sched)
 }
 
 func checkmcount(){
@@ -511,6 +541,36 @@ func runqputslow(_p_ *p,gp *g,h,t uint32)bool{
 	globrunqputbatch(&q,int32(n+1))
 	unlock(&sched.lock)
 	return true
+}
+
+// Get g from local runnable queue.
+// If inheritTime is true, gp should inherit the remaining time in the
+// current time slice. Otherwise, it should start a new time slice.
+// Executed only by the owner P.
+func runqget(_p_ *p) (gp *g, inheritTime bool) {
+	// If there's a runnext, it's the next G to run.
+	//从优先队列中获取
+	for{
+		next :=_p_.runnext
+		if next == 0{
+			break
+		}
+		if _p_.runnext.cas(next,0){
+			return next.ptr(),true
+		}
+	}
+
+	for{
+		h :=atomic.LoadAcq(&_p_.runqhead) //load-acquire, synchronize with other consumers
+		t := _p_.runqtail
+		if h == t {
+			return nil,false
+		}
+		gp := _p_.runq[h%uint32(len(_p_.runq))].ptr()
+		if atomic.CasRel(&_p_.runqhead, h, h+1) { // cas-release, commits consume
+			return gp, false
+		}
+	}
 }
 
 // Put gp at the head of the global runnable queue.

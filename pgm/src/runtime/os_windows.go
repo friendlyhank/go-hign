@@ -54,6 +54,7 @@ var(
 // loader before the Go program starts.
 	_CloseHandle,
 	_CreateEventA,
+	_DuplicateHandle,
 	_ExitProcess,
 	_GetProcessAffinityMask,
 	_GetSystemInfo,
@@ -120,6 +121,7 @@ func getproccount() int32{
 
 const(
 	currentProcess = ^uintptr(0) // -1 = current process
+	currentThread  = ^uintptr(1) // -2 = current thread
 )
 
 func getlasterror() uint32
@@ -326,5 +328,11 @@ func stdcall7(fn stdFunction, a0, a1, a2, a3, a4, a5, a6 uintptr) uintptr {
 // Called to initialize a new m (including the bootstrap m).
 // Called on the new thread, cannot allocate memory.
 func minit(){
+	var thandle uintptr
+	stdcall7(_DuplicateHandle, currentProcess, currentThread, currentProcess, uintptr(unsafe.Pointer(&thandle)), 0, 0, _DUPLICATE_SAME_ACCESS)
 
+	mp := getg().m
+	lock(&mp.threadLock)
+	mp.thread = thandle
+	unlock(&mp.threadLock)
 }

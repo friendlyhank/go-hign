@@ -88,6 +88,9 @@ func noescape(p unsafe.Pointer) unsafe.Pointer {
 	return unsafe.Pointer(x ^ 0)
 }
 
+func gogo(buf *gobuf)//执行栈信息
+func gosave(buf *gobuf)//保存执行栈现场
+
 // reflectcall calls fn with a copy of the n argument bytes pointed at by arg.
 // After fn returns, reflectcall copies n-retoffset result bytes
 // back into arg+retoffset before returning. If copying result bytes back,
