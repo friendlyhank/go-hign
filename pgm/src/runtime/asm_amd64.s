@@ -274,9 +274,9 @@ TEXT runtime·gosave(SB), NOSPLIT, $0-8
 // func gogo(buf *gobuf)
 // restore state from Gobuf; longjmp
 TEXT runtime·gogo(SB), NOSPLIT, $16-8
-	MOVQ	buf+0(FP), BX		// gobuf
+	MOVQ	buf+0(FP), BX		// gobuf 获取调度信息
 	MOVQ	gobuf_g(BX), DX
-	MOVQ	0(DX), CX		// make sure g != nil
+	MOVQ	0(DX), CX		// make sure g != nil 保证g不为nil
 	get_tls(CX)
 	MOVQ	DX, g(CX)
 	MOVQ	gobuf_sp(BX), SP	// restore SP
@@ -286,9 +286,9 @@ TEXT runtime·gogo(SB), NOSPLIT, $16-8
 	MOVQ	$0, gobuf_sp(BX)	// clear to help garbage collector
 	MOVQ	$0, gobuf_ret(BX)
 	MOVQ	$0, gobuf_ctxt(BX)
-	MOVQ	$0, gobuf_bp(BX)
+	MOVQ	$0, gobuf_bp(BX) //开始执行函数的程序计数器
 	MOVQ	gobuf_pc(BX), BX
-	JMP	BX
+	JMP	BX //开始执行
 
 // func mcall(fn func(*g))
 // Switch to m->g0's stack, call fn(g).
