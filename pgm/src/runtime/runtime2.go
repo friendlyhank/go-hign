@@ -112,6 +112,61 @@ const(
 	_Gscanpreempted = _Gscan + _Gpreempted // 0x1009
 )
 
+const(
+	// P status
+
+	// _Pidle means a P is not being used to run user code or the
+	// scheduler. Typically, it's on the idle P list and available
+	// to the scheduler, but it may just be transitioning between
+	// other states.
+	//
+	// The P is owned by the idle list or by whatever is
+	// transitioning its state. Its run queue is empty.
+	//处理器没有运行用户代码或者调度器，被空闲队列或者改变其状态的结构持有，运行队列为空
+	_Pidle = iota
+
+	// _Prunning means a P is owned by an M and is being used to
+	// run user code or the scheduler. Only the M that owns this P
+	// is allowed to change the P's status from _Prunning. The M
+	// may transition the P to _Pidle (if it has no more work to
+	// do), _Psyscall (when entering a syscall), or _Pgcstop (to
+	// halt for the GC). The M may also hand ownership of the P
+	// off directly to another M (e.g., to schedule a locked G).
+	//被线程 M 持有，并且正在执行用户代码或者调度器
+	_Prunning
+
+	// _Psyscall means a P is not running user code. It has
+	// affinity to an M in a syscall but is not owned by it and
+	// may be stolen by another M. This is similar to _Pidle but
+	// uses lightweight transitions and maintains M affinity.
+	//
+	// Leaving _Psyscall must be done with a CAS, either to steal
+	// or retake the P. Note that there's an ABA hazard: even if
+	// an M successfully CASes its original P back to _Prunning
+	// after a syscall, it must understand the P may have been
+	// used by another M in the interim.
+	//没有执行用户代码，当前线程陷入系统调用
+	_Psyscall
+
+	// _Pgcstop means a P is halted for STW and owned by the M
+	// that stopped the world. The M that stopped the world
+	// continues to use its P, even in _Pgcstop. Transitioning
+	// from _Prunning to _Pgcstop causes an M to release its P and
+	// park.
+	//
+	// The P retains its run queue and startTheWorld will restart
+	// the scheduler on Ps with non-empty run queues.
+	//被线程 M 持有，当前处理器由于垃圾回收被停止
+	_Pgcstop
+
+	// _Pdead means a P is no longer used (GOMAXPROCS shrank). We
+	// reuse Ps if GOMAXPROCS increases. A dead P is mostly
+	// stripped of its resources, though a few things remain
+	// (e.g., trace buffers).
+	//当前处理器已经不被使用
+	_Pdead
+)
+
 // Mutual exclusion locks.  In the uncontended case,
 // as fast as spin locks (just a few user-level instructions),
 // but on the contention path they sleep in the kernel.
