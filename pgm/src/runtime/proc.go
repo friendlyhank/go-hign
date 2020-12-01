@@ -242,17 +242,21 @@ func schedule() {
 	if _g_.m.locks != 0{
 		throw("schedule: holding locks")
 	}
-top:
+
 	var gp *g
 	var inheritTime bool
 
 	if gp == nil{
-
+		gp,inheritTime = runqget(_g_.m.p.ptr())
+		// We can see gp != nil here even if the M is spinning,
+		// if checkTimers added a local goroutine via goready.
 	}
 
 	if gp == nil{
-
+		gp,inheritTime =findrunnable()
 	}
+
+	execute(gp,inheritTime)
 }
 
 // Schedules gp to run on the current M.
@@ -269,6 +273,24 @@ func execute(gp *g, inheritTime bool) {
 	_g_.m.curg = gp
 
 	gogo(&gp.sched)
+}
+
+// Finds a runnable goroutine to execute.
+// Tries to steal from other P's, get g from local or global queue, poll network.
+func findrunnable()(gp *g,inheritTime bool){
+	_g_ := getg()
+
+	// The conditions here and in handoffp must agree: if
+	// findrunnable would return a G to run, handoffp must start
+	// an M.
+
+top:
+	_p_ := _g_.m.p.ptr()
+	// local runq
+	if gp, inheritTime := runqget(_p_); gp != nil {
+		return gp, inheritTime
+	}
+	goto top
 }
 
 func checkmcount(){

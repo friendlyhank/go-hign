@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/defs_windows_amd64.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/defs_windows_amd64.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/internal/atomic/atomic_amd64.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/internal/atomic/atomic_amd64.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
