@@ -1,6 +1,7 @@
 package runtime
 
 import(
+	"runtime/internal/atomic"
 	"runtime/internal/sys"
 	"unsafe"
 )
@@ -201,6 +202,45 @@ func mcommoninit(mp *m,id int64){
 	unlock(&sched.lock)
 }
 
+// mstart is the entry-point for new Ms.
+//
+// This must not split the stack because we may not even have stack
+// bounds set up yet.
+//
+// May run during STW (because it doesn't have a P yet), so write
+// barriers are not allowed.
+//
+//启动m
+//go:nosplit
+//go:nowritebarrierrec
+func mstart(){
+	_g_ := getg()
+	mstart1()
+	println(_g_)
+	//Exit this thread. 停止这个线程
+}
+
+func mstart1(){
+	_g_ := getg()
+	if _g_ != _g_.m.g0{
+		throw("bad runtime·mstart")
+	}
+	minit()
+
+	// Record the caller for use as the top of stack in mcall and
+	// for terminating the thread.
+	// We're never coming back to mstart1 after we call schedule,
+	// so other calls can reuse the current frame.
+	schedule()
+}
+
+//进入循环调度
+// One round of scheduler: find a runnable goroutine and execute it.
+// Never returns.
+func schedule() {
+
+}
+
 func checkmcount(){
 	// sched lock is held
 	if mcount() > sched.maxmcount {
@@ -223,20 +263,6 @@ func mReserveID()int64{
 	//检查m的数量是否超出限制
 	checkmcount()
 	return id
-}
-
-// mstart is the entry-point for new Ms.
-//
-// This must not split the stack because we may not even have stack
-// bounds set up yet.
-//
-// May run during STW (because it doesn't have a P yet), so write
-// barriers are not allowed.
-//
-//go:nosplit
-//go:nowritebarrierrec
-func mstart() {
-
 }
 
 // init initializes pp, which may be a freshly allocated p or a
@@ -346,7 +372,10 @@ func procresize(nprocs int32)*p{
 func newproc(siz int32, fn *funcval) {
 	gp := getg()
 	systemstack(func(){
-		newg := newproc1()
+		newg := newproc1(gp)
+
+		_p_ :=getg().m.p.ptr()
+		runqput(_p_,newg,true)
 	})
 }
 
@@ -360,7 +389,7 @@ func newproc(siz int32, fn *funcval) {
 //
 //创建一个g,只能在系统的栈上调用
 //go:systemstack
-func newproc1()*g{
+func newproc1(callergp *g)*g{
 	_g_ := getg()
 
 	_p_ := _g_.m.p.ptr()
@@ -410,6 +439,80 @@ func mcount()int32{
 	return int32(sched.mnext - sched.nmfreed)
 }
 
+// runqput tries to put g on the local runnable queue.
+// If next is false, runqput adds g to the tail of the runnable queue.
+// If next is true, runqput puts g in the _p_.runnext slot.
+// If the run queue is full, runnext puts g on the global queue.
+// Executed only by the owner P.
+//如果next等于false,将G放到本地的队列中
+//如果next等于true,将G放到本地的优先队列中
+//如果本地的队列已经满了,本地的g会移到全局的队列中
+func runqput(_p_ *p,gp *g,next bool){
+	if next{
+		retryNext:
+			oldnext := _p_.runnext
+			if !_p_.runnext.cas(oldnext,guintptr(unsafe.Pointer(gp))){
+				goto retryNext
+			}
+			if oldnext == 0{
+				return
+			}
+		// Kick the old runnext out to the regular run queue.
+		//原来优先队列的g会被放到本地队列
+		gp = oldnext.ptr()
+	}
+retry:
+	h :=atomic.LoadAcq(&_p_.runqhead)
+	t :=_p_.runqtail
+	//如果本地队列没慢,则放入本地队列
+	if t-h < uint32(len(_p_.runq)){
+		_p_.runq[t%uint32(len(_p_.runq))].set(gp)
+		atomic.StoreRel(&_p_.runqtail, t+1) // store-release, makes the item available for consumption
+		return
+	}
+	//本地队列已满,放入全局队列
+	if runqputslow(_p_,gp,h,t){
+		return
+	}
+	goto retry
+}
+
+// Put g and a batch of work from local runnable queue on global queue.
+// Executed only by the owner P.
+//将g放到全局队列
+func runqputslow(_p_ *p,gp *g,h,t uint32)bool{
+	var batch [len(_p_.runq)/2 + 1]*g
+
+	//从P本地转移一半到全局队列
+	// First, grab a batch from local queue.
+	n := t - h
+	n = n / 2
+	if n != uint32(len(_p_.runq)/2){
+		throw("runqputslow: queue is not full")
+	}
+	//从列表头部开始读取
+	for i := uint32(0);i < n;i++{
+		batch[i] =_p_.runq[(h+i)%uint32(len(_p_.runq))].ptr()
+	}
+	//调整p队列头部的位置
+	batch[n] = gp
+
+	// Link the goroutines.将g像链表一样链接起来
+	for i :=uint32(0);i < n;i++{
+		batch[i].schedlink.set(batch[i+1])
+	}
+
+	var q gQueue
+	q.head.set(batch[0])
+	q.tail.set(batch[n])
+
+	// Now put the batch on global queue.插入到全局队列
+	lock(&sched.lock)
+	globrunqputbatch(&q,int32(n+1))
+	unlock(&sched.lock)
+	return true
+}
+
 // Put gp at the head of the global runnable queue.
 // Sched must be locked.
 // May run during STW, so write barriers are not allowed.
@@ -417,6 +520,15 @@ func mcount()int32{
 func globrunqputhead(gp *g) {
 	sched.runq.push(gp)
 	sched.runqsize++
+}
+
+// Put a batch of runnable goroutines on the global runnable queue.
+// This clears *batch.
+// Sched must be locked.
+func globrunqputbatch(batch *gQueue,n int32){
+	sched.runq.pushBackAll(*batch)
+	sched.runqsize +=n
+	*batch =gQueue{}
 }
 
 // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
@@ -432,6 +544,19 @@ func (q *gQueue) push(gp *g) {
 	if q.tail == 0 {
 		q.tail.set(gp)
 	}
+}
+
+func (q *gQueue)pushBackAll(q2 gQueue){
+	if q2.tail == 0{
+		return
+	}
+	q2.tail.ptr().schedlink = 0
+	if q.tail != 0{
+		q.tail.ptr().schedlink = q2.head
+	}else{
+		q.head = q2.head
+	}
+	q.tail = q2.tail
 }
 
 // A gList is a list of Gs linked through g.schedlink. A G can only be

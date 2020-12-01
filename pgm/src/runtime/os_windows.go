@@ -65,6 +65,9 @@ var(
 )
 
 type mOS struct{
+	threadLock mutex // protects "thread" and prevents closing
+	thread uintptr // thread handle 线程绑定处理
+
 	waitsema   uintptr // semaphore for parking on locks
 	resumesema uintptr // semaphore to indicate suspend/resume
 }
@@ -318,4 +321,10 @@ func stdcall7(fn stdFunction, a0, a1, a2, a3, a4, a5, a6 uintptr) uintptr {
 	mp.libcall.n = 7
 	mp.libcall.args = uintptr(noescape(unsafe.Pointer(&a0)))
 	return stdcall(fn)
+}
+
+// Called to initialize a new m (including the bootstrap m).
+// Called on the new thread, cannot allocate memory.
+func minit(){
+
 }
