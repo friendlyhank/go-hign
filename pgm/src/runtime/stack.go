@@ -5,7 +5,9 @@
 package runtime
 
 import (
+	"internal/cpu"
 	"runtime/internal/sys"
+	"unsafe"
 )
 
 /*
@@ -74,6 +76,20 @@ const (
 // Stacks are assigned an order according to size.
 //     order = log_2(size/FixedStack)
 // There is a free list for each order.
+var stackpool [_NumStackOrders]struct {
+	item stackpoolItem
+	_    [cpu.CacheLinePadSize - unsafe.Sizeof(stackpoolItem{})%cpu.CacheLinePadSize]byte
+}
+
+//go:notinheap
+type stackpoolItem struct {
+
+}
+
+// Global pool of spans that have free stacks.
+// Stacks are assigned an order according to size.
+//     order = log_2(size/FixedStack)
+// There is a free list for each order.
 
 //栈信息的初始化
 func stackinit(){
@@ -97,3 +113,10 @@ func newstack() {
 }
 
 var maxstacksize uintptr = 1 << 20 // enough until runtime.main sets it for real
+
+// This is exported as ABI0 via linkname so obj can call it.
+//
+//go:nosplit
+//go:linkname morestackc
+func morestackc() {
+}

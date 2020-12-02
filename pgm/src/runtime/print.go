@@ -20,6 +20,9 @@ func printunlock() {
 
 func printnl() {}
 
+func printuint(){
+}
+
 func printint(v int64) {
 
 }

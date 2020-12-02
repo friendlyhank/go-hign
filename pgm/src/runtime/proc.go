@@ -157,10 +157,7 @@ func schedinit(){
 
 	//垃圾回收站初始化
 
-	procs :=ncpu
-	if procresize(procs) != nil{
-		throw("unknown runnable goroutine during bootstrap")
-	}
+	//设置p的数量
 
 	if buildVersion == ""{
 		// Condition should never trigger. This code just serves
@@ -450,6 +447,7 @@ func newproc1(callergp *g)*g{
 	if newg == nil{
 
 	}
+	//memmove将参数拷贝到栈上
 	return newg
 }
 
