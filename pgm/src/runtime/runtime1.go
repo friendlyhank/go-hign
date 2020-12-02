@@ -94,6 +94,31 @@ func check(){
 	}
 }
 
+// Holds variables parsed from GODEBUG env var,
+// except for "memprofilerate" since there is an
+// existing int var for that value, which may
+// already have an initial value.
+var debug struct {
+	allocfreetrace     int32
+	cgocheck           int32
+	clobberfree        int32
+	efence             int32
+	gccheckmark        int32
+	gcpacertrace       int32
+	gcshrinkstackoff   int32
+	gcstoptheworld     int32
+	gctrace            int32
+	invalidptr         int32
+	madvdontneed       int32 // for Linux; issue 28466
+	sbrk               int32
+	scavenge           int32
+	scavtrace          int32
+	scheddetail        int32
+	schedtrace         int32
+	tracebackancestors int32
+	asyncpreemptoff    int32
+}
+
 // Poor mans 64-bit division.
 // This is a very special function, do not use it if you are not sure what you are doing.
 // int64 division is lowered into _divv() call on 386, which does not fit into nosplit functions.
