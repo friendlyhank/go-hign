@@ -452,7 +452,35 @@ func procresize(nprocs int32)*p{
 //go:yeswritebarrierrec
 //当前m和p进行绑定
 func acquirep(_p_ *p) {
+	// Do the part that isn't allowed to have write barriers.
 
+}
+
+// wirep is the first step of acquirep, which actually associates the
+// current M to _p_. This is broken out so we can disallow write
+// barriers for this part, since we don't yet have a P.
+//
+//go:nowritebarrierrec
+//go:nosplit
+func wirep(_p_ *p) {
+	_g_ := getg()
+
+	//m已经被绑定,抛出异常
+	if _g_.m.p != 0{
+		throw("wirep: already in go")
+	}
+	//p如果被绑定，抛出异常
+	if _p_.m != 0 || _p_.status != _Pidle{
+		id := int64(0)
+		if _p_.m != 0 {
+			id = _p_.m.ptr().id
+		}
+		print("wirep: p->m=", _p_.m, "(", id, ") p->status=", _p_.status, "\n")
+		throw("wirep: invalid p state")
+	}
+	_g_.m.p.set(_p_)
+	_p_.m.set(_g_.m)
+	_p_.status = _Prunning
 }
 
 // Create a new g running fn with siz bytes of arguments.
