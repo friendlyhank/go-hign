@@ -13,7 +13,7 @@ import "unsafe"
 // The number of logical CPUs on the local machine can be queried with NumCPU.
 // This call will go away when the scheduler improves.
 func GOMAXPROCS(n int) int {
-	return n
+	return 1
 }
 
 // NumCPU returns the number of logical CPUs usable by the current process.
@@ -22,18 +22,18 @@ func GOMAXPROCS(n int) int {
 // at process startup. Changes to operating system CPU allocation after
 // process startup are not reflected.
 func NumCPU()int{
-	return 6
+	return 1
 }
 
 // NumCgoCall returns the number of cgo calls made by the current process.
 func NumCgoCall() int64 {
 	_ = unsafe.Pointer(&allm)
-	return 0
+	return 1
 }
 
 // NumGoroutine returns the number of goroutines that currently exist.
 func NumGoroutine() int {
-	return 0
+	return 1
 }
 
 //go:linkname debug_modinfo runtime/debug.modinfo

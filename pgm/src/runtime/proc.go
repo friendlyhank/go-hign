@@ -151,6 +151,7 @@ func schedinit(){
 
 	//栈、内存分配器、调取器相关初始化
 	stackinit()
+	mallocinit()
 	mcommoninit(_g_.m,-1)
 
 	//初始化参数和环境变量
@@ -158,6 +159,10 @@ func schedinit(){
 	//垃圾回收站初始化
 
 	//设置p的数量
+	procs := ncpu
+	if procresize(procs) != nil {
+		throw("unknown runnable goroutine during bootstrap")
+	}
 
 	if buildVersion == ""{
 		// Condition should never trigger. This code just serves
@@ -187,6 +192,12 @@ func mcommoninit(mp *m,id int64){
 		mp.id = mReserveID()
 	}
 
+	mp.fastrand[0] = uint32(int64Hash(uint64(mp.id),fastrandseed))
+	mp.fastrand[1] = uint32(int64Hash(uint64(cputicks()),^fastrandseed))
+	if mp.fastrand[0]|mp.fastrand[1] == 0{
+		mp.fastrand[1] = 1
+	}
+
 	// Add to allm so garbage collector doesn't free g->m
 	// when it is just in a register or thread-local storage.
 	//可以理解为allm是一个链表,每个m通过alllink链接起来
@@ -197,6 +208,13 @@ func mcommoninit(mp *m,id int64){
 	//保证原子操作
 	atomicstorep(unsafe.Pointer(&allm),unsafe.Pointer(mp))
 	unlock(&sched.lock)
+}
+
+var fastrandseed uintptr
+
+func fastrandinit(){
+	s := (*[unsafe.Sizeof(fastrandseed)]byte)(unsafe.Pointer(&fastrandseed))[:]
+	getRandomData(s)
 }
 
 // mstart is the entry-point for new Ms.

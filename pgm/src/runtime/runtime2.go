@@ -267,9 +267,10 @@ func (mp *muintptr) set(m *m) { *mp = muintptr(unsafe.Pointer(m)) }
 // Stack describes a Go execution stack.
 // The bounds of the stack are exactly [lo, hi),
 // with no implicit data structures on either side.
+//栈的范围是[lo,hi)
 type stack struct {
-	lo uintptr
-	hi uintptr
+	lo uintptr //低地址
+	hi uintptr //高地址
 }
 
 type g struct{
@@ -305,8 +306,9 @@ type m struct{
 	throwing int32 //1有异常 0无异常
 	locks int32 //统计锁的数量
 	profilehz int32
+	fastrand [2]uint32 //random
 	alllink *m // on allm 等于allm
-	nextwaitm     muintptr    // next m waiting for lock
+	nextwaitm     muintptr    //next m waiting for lock下一个等待锁的m
 
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
@@ -422,6 +424,27 @@ type wincallbackcontext struct {
 }
 
 type itab struct {}
+
+// extendRandom extends the random numbers in r[:n] to the whole slice r.
+// Treats n<0 as n==0.
+func extendRandom(r []byte, n int) {
+	if n < 0 {
+		n = 0
+	}
+	for n < len(r) {
+		// Extend random bits using hash function & time seed
+		w := n
+		if w > 16 {
+			w = 16
+		}
+		h := memhash(unsafe.Pointer(&r[n-w]), uintptr(nanotime()), uintptr(w))
+		for i := 0; i < sys.PtrSize && n < len(r); i++ {
+			r[n] = byte(h)
+			n++
+			h >>= 8
+		}
+	}
+}
 
 // A _defer holds an entry on the list of deferred calls.
 // If you add a field here, add code to clear it in freedefer and deferProcStack

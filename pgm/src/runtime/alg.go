@@ -2,6 +2,12 @@ package runtime
 
 import "unsafe"
 
+// in asm_*.s
+func memhash(p unsafe.Pointer, h, s uintptr) uintptr
+func memhash32(p unsafe.Pointer, h uintptr) uintptr
+func memhash64(p unsafe.Pointer, h uintptr) uintptr
+func strhash(p unsafe.Pointer, h uintptr) uintptr
+
 func memequal0(p, q unsafe.Pointer) bool {
 	return true
 }
@@ -34,4 +40,17 @@ func c128equal(p, q unsafe.Pointer) bool {
 }
 func strequal(p, q unsafe.Pointer) bool {
 	return *(*string)(p) == *(*string)(q)
+}
+
+// Testing adapters for hash quality tests (see hash_test.go)
+func stringHash(s string, seed uintptr) uintptr {
+	return strhash(noescape(unsafe.Pointer(&s)), seed)
+}
+
+func int32Hash(i uint32, seed uintptr) uintptr {
+	return memhash32(noescape(unsafe.Pointer(&i)), seed)
+}
+
+func int64Hash(i uint64, seed uintptr) uintptr {
+	return memhash64(noescape(unsafe.Pointer(&i)), seed)
 }

@@ -61,6 +61,7 @@ functions to make sure that this limit cannot be violated.
 */
 
 const (
+	//栈的范围控制会引发扩容和缩容
 	// StackSystem is a number of additional bytes to add
 	// to each stack below the usual guard area for OS-specific
 	// purposes like signal handling. Used on Windows, Plan 9,
@@ -70,6 +71,15 @@ const (
 	// The stack guard is a pointer this many bytes above the
 	// bottom of the stack.
 	_StackGuard = 928*sys.StackGuardMultiplier + _StackSystem
+
+	// After a stack split check the SP is allowed to be this
+	// many bytes below the stack guard. This saves an instruction
+	// in the checking sequence for tiny frames.
+	_StackSmall = 128
+
+	// The maximum number of bytes that a chain of NOSPLIT
+	// functions can use.
+	_StackLimit = _StackGuard - _StackSystem - _StackSmall
 )
 
 // Global pool of spans that have free stacks.

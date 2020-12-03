@@ -62,6 +62,17 @@ var(
 	_SetEvent,
 	_WaitForSingleObject,
 	_WaitForMultipleObjects,
+
+	// Use RtlGenRandom to generate cryptographically random data.
+	// This approach has been recommended by Microsoft (see issue
+	// 15589 for details).
+	// The RtlGenRandom is not listed in advapi32.dll, instead
+	// RtlGenRandom function can be found by searching for SystemFunction036.
+	// Also some versions of Mingw cannot link to SystemFunction036
+	// when building executable as Cgo. So load SystemFunction036
+	// manually during runtime startup.
+	_RtlGenRandom stdFunction //生成随机数
+
 	_ stdFunction
 )
 
@@ -126,6 +137,15 @@ const(
 
 func getlasterror() uint32
 func setlasterror(err uint32)
+
+//go:nosplit
+func getRandomData(r []byte) {
+	n := 0
+	if stdcall2(_RtlGenRandom, uintptr(unsafe.Pointer(&r[0])), uintptr(len(r)))&0xff != 0 {
+		n = len(r)
+	}
+	extendRandom(r,n)
+}
 
 // exiting is set to non-zero when the process is exiting.
 var exiting uint32
@@ -323,6 +343,12 @@ func stdcall7(fn stdFunction, a0, a1, a2, a3, a4, a5, a6 uintptr) uintptr {
 	mp.libcall.n = 7
 	mp.libcall.args = uintptr(noescape(unsafe.Pointer(&a0)))
 	return stdcall(fn)
+}
+
+// Called to initialize a new m (including the bootstrap m).
+// Called on the parent thread (main thread in case of bootstrap), can allocate memory.
+//这就是空实现
+func mpreinit(mp *m) {
 }
 
 // Called to initialize a new m (including the bootstrap m).
