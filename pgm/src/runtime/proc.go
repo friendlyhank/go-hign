@@ -337,6 +337,7 @@ func mReserveID()int64{
 //初始化p
 func (pp *p)init(id int32){
 	pp.id = id
+	pp.status =_Pgcstop
 }
 
 // destroy releases all of the resources associated with pp and
@@ -405,6 +406,27 @@ func procresize(nprocs int32)*p{
 		atomicstorep(unsafe.Pointer(&allp[i]), unsafe.Pointer(pp))
 	}
 
+	_g_ := getg()
+	if _g_.m.p != 0 && _g_.m.p.ptr().id < nprocs{
+		// continue to use the current P
+		//startTheWorld重新唤起的时候会调用
+		_g_.m.p.ptr().status =_Prunning
+	}else{
+		// release the current P and acquire allp[0].
+		//
+		// We must do this before destroying our current P
+		// because p.destroy itself has write barriers, so we
+		// need to do that from a valid P.
+		//这里会去绑定p
+		if _g_.m.p != 0{
+			_g_.m.p.ptr().m = 0
+		}
+		_g_.m.p = 0
+		p := allp[0] //切换到p0
+		p.m = 0
+		//m和p进行绑定
+	}
+
 	//release resources from unused P's 释放多余的p
 	for i := nprocs;i <old;i++{
 		p :=allp[i]
@@ -421,6 +443,18 @@ func procresize(nprocs int32)*p{
 	}
 	return nil
 }
+
+// Associate p and the current m.
+//
+// This function is allowed to have write barriers even if the caller
+// isn't because it immediately acquires _p_.
+//
+//go:yeswritebarrierrec
+//当前m和p进行绑定
+func acquirep(_p_ *p) {
+
+}
+
 // Create a new g running fn with siz bytes of arguments.
 // Put it on the queue of g's waiting to run.
 // The compiler turns a go statement into a call to this.

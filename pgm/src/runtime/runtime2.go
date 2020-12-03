@@ -325,6 +325,8 @@ type m struct{
 type p struct{
 	id int32
 	status uint32 //one of pidle/prunning/.. p的状态
+	m muintptr //back-link to associated m (nil if idle)绑定的p
+
 	// wbBuf is this P's GC write barrier buffer.
 	//
 	// TODO: Consider caching this in the running G.

@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/cputicks.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/alg.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/alg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/debug.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/debug.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stack.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,10 +51,10 @@
     <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="2660" y="275" key="FileChooserDialogImpl" timestamp="1606952174304">
+    <state x="2660" y="275" key="FileChooserDialogImpl" timestamp="1606993451835">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606952174304" />
+    <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1606993451835" />
     <state x="2601" y="261" width="648" height="524" key="StructurePopup" timestamp="1606953654945">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
