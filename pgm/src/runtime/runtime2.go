@@ -308,6 +308,7 @@ type m struct{
 	profilehz int32
 	fastrand [2]uint32 //random
 	alllink *m // on allm 等于allm
+	schedlink     muintptr//和sched.midle形成链表，记录空闲的m
 	nextwaitm     muintptr    //next m waiting for lock下一个等待锁的m
 
 	// these are here because they are too large to be on the stack
@@ -358,6 +359,11 @@ type schedt struct{
 
 	lock mutex
 
+	// When increasing nmidle, nmidlelocked, nmsys, or nmfreed, be
+	// sure to call checkdead().
+
+	midle muintptr //idle m's waiting for work 空闲的m链表
+	nmidle int32//number of idle m's waiting for work 空闲的m的数量
 	mnext int64 //number of m's that have been created and next M ID 下一个m的id
 	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
 	nmfreed int64 //cumulative number of freed m's 累计释放的m的数量

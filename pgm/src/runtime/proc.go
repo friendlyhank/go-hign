@@ -447,10 +447,18 @@ func procresize(nprocs int32)*p{
 	var runnablePs *p
 	for i := nprocs -1;i >= 0;i --{
 		p := allp[i]
+		//当前的p已经绑定m并且已经是使用状态
+		if _g_.m.p.ptr() == p{
+			continue
+		}
+		//如果是未使用的p,则放入空闲链表
+		if runqempty(p){
+			pidleput(p)
+		}else{
 
-
+		}
 	}
-	return nil
+	return runnablePs
 }
 
 // Associate p and the current m.
@@ -680,6 +688,19 @@ func runqget(_p_ *p) (gp *g, inheritTime bool) {
 			return gp, false
 		}
 	}
+}
+
+// Try to get an m from midle list.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func mget()*m{
+	mp :=sched.midle.ptr()
+	if mp != nil{
+		sched.midle =mp.schedlink
+		sched.nmidle--
+	}
+	return mp
 }
 
 // Put gp at the head of the global runnable queue.

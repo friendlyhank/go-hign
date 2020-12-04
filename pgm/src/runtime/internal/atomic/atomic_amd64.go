@@ -1,5 +1,7 @@
 package atomic
 
+import "unsafe"
+
 //runtime/internal/atomic/asm_amd64.s
 // Export some functions via linkname to assembly in sync/atomic.
 //go:linkname Load
@@ -10,6 +12,12 @@ package atomic
 //go:noinline
 func Load(ptr *uint32) uint32 {
 	return *ptr
+}
+
+//go:nosplit
+//go:noinline
+func Loadp(ptr unsafe.Pointer) unsafe.Pointer {
+	return *(*unsafe.Pointer)(ptr)
 }
 
 //go:noescape
