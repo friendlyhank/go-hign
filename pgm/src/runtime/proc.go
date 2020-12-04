@@ -458,6 +458,8 @@ func procresize(nprocs int32)*p{
 
 		}
 	}
+	var int32p *int32 = &gomaxprocs // make compiler check that gomaxprocs is an int32
+	atomic.Store((*uint32)(unsafe.Pointer(int32p)), uint32(nprocs))
 	return runnablePs
 }
 

@@ -33,5 +33,8 @@ func LoadAcq(ptr *uint32) uint32 {
 func CasRel(ptr *uint32, old, new uint32) bool
 
 //go:noescape
+func Store(ptr *uint32, val uint32)
+
+//go:noescape
 func StoreRel(ptr *uint32, val uint32)
 
