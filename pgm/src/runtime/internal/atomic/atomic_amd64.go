@@ -1,6 +1,19 @@
 package atomic
 
 //runtime/internal/atomic/asm_amd64.s
+// Export some functions via linkname to assembly in sync/atomic.
+//go:linkname Load
+//go:linkname Loadp
+//go:linkname Load64
+
+//go:nosplit
+//go:noinline
+func Load(ptr *uint32) uint32 {
+	return *ptr
+}
+
+//go:noescape
+func Xadd(ptr *uint32, delta int32) uint32
 
 //go:nosplit
 //go:noinline

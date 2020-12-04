@@ -325,6 +325,7 @@ type m struct{
 type p struct{
 	id int32
 	status uint32 //one of pidle/prunning/.. p的状态
+	link puintptr //与schedt.pidle形成空闲p的链表
 	m muintptr //back-link to associated m (nil if idle)绑定的p
 
 	// wbBuf is this P's GC write barrier buffer.
@@ -362,8 +363,8 @@ type schedt struct{
 	nmfreed int64 //cumulative number of freed m's 累计释放的m的数量
 
 
-	pidle puintptr //idle p's 空闲的p链表
-	npidle uint32
+	pidle puintptr //idle p's 空闲的p链表,下一个链接的p在p.link中取出
+	npidle uint32 //空闲的p数量
 
 	// Global runnable queue. 全局的g队列
 	runq gQueue

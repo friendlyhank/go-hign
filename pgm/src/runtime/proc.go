@@ -424,7 +424,9 @@ func procresize(nprocs int32)*p{
 		_g_.m.p = 0
 		p := allp[0] //切换到p0
 		p.m = 0
+		p.status =_Pidle
 		//m和p进行绑定
+		acquirep(p)
 	}
 
 	//release resources from unused P's 释放多余的p
@@ -441,6 +443,13 @@ func procresize(nprocs int32)*p{
 		allp = allp[:nprocs]
 		unlock(&allpLock)
 	}
+
+	var runnablePs *p
+	for i := nprocs -1;i >= 0;i --{
+		p := allp[i]
+
+
+	}
 	return nil
 }
 
@@ -453,7 +462,7 @@ func procresize(nprocs int32)*p{
 //当前m和p进行绑定
 func acquirep(_p_ *p) {
 	// Do the part that isn't allowed to have write barriers.
-
+	wirep(_p_)
 }
 
 // wirep is the first step of acquirep, which actually associates the
@@ -689,6 +698,49 @@ func globrunqputbatch(batch *gQueue,n int32){
 	sched.runq.pushBackAll(*batch)
 	sched.runqsize +=n
 	*batch =gQueue{}
+}
+
+// Put p to on _Pidle list.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func pidleput(_p_ *p){
+	if !runqempty(_p_){
+		throw("pidleput: P has non-empty run queue")
+	}
+	_p_.link = sched.pidle
+	sched.pidle.set(_p_)
+	atomic.Xadd(&sched.npidle,1)// TODO: fast atomic
+}
+
+// Try get a p from _Pidle list.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func pidleget() *p {
+	_p_ := sched.pidle.ptr()
+	if _p_ != nil{
+		sched.pidle = _p_.link
+		atomic.Xadd(&sched.npidle,-1) //TODO: fast atomic
+	}
+	return _p_
+}
+
+// runqempty reports whether _p_ has no Gs on its local run queue.
+// It never returns true spuriously.
+func runqempty(_p_ *p)bool{
+	// Defend against a race where 1) _p_ has G1 in runqnext but runqhead == runqtail,
+	// 2) runqput on _p_ kicks G1 to the runq, 3) runqget on _p_ empties runqnext.
+	// Simply observing that runqhead == runqtail and then observing that runqnext == nil
+	// does not mean the queue is empty.
+	for{
+		head := atomic.Load(&_p_.runqhead)
+		tail := atomic.Load(&_p_.runqtail)
+		runnext :=atomic.Loaduintptr((*uintptr)(unsafe.Pointer(&_p_.runnext)))
+		if tail == atomic.Load(&_p_.runqtail){
+			return head == tail && runnext == 0
+		}
+	}
 }
 
 // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
