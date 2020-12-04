@@ -3,6 +3,10 @@ package runtime
 import "runtime/internal/sys"
 
 const (
+
+	// Per-P, per order stack segment cache size.
+	_StackCacheSize = 32 * 1024
+
 	// Number of orders that get caching. Order 0 is FixedStack
 	// and each successive order is twice as large.
 	// We want to cache 2KB, 4KB, 8KB, and 16KB stacks. Larger stacks

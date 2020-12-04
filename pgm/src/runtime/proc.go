@@ -139,6 +139,7 @@ func badmorestackgsignal() {
 //	call runtime·mstart
 //
 // The new G calls runtime·main.
+//调度器的初始化
 func schedinit(){
 	lockInit(&sched.lock,lockRankSched)
 
@@ -367,6 +368,7 @@ func (pp *p)destroy(){
 // gcworkbufs are not being modified by either the GC or
 // the write barrier code.
 // Returns list of Ps with local work, they need to be scheduled by the caller.
+//调整p的数量,startTheWorld,schedinit的时候会调用
 func procresize(nprocs int32)*p{
 	old := gomaxprocs
 	if old <0 || nprocs <= 0{
@@ -502,6 +504,18 @@ func wirep(_p_ *p) {
 	_p_.status = _Prunning
 }
 
+// Allocate a new g, with a stack big enough for stacksize bytes.
+//内存分配一个g
+func malg(stacksize int32)*g{
+	newg := new(g)
+	if stacksize  > 0{
+		stacksize = round2(_StackSystem + stacksize)
+		systemstack(func() {
+			newg.stack = stackalloc(uint32(stacksize))
+		})
+	}
+}
+
 // Create a new g running fn with siz bytes of arguments.
 // Put it on the queue of g's waiting to run.
 // The compiler turns a go statement into a call to this.
@@ -518,9 +532,10 @@ func wirep(_p_ *p) {
 //
 //go:nosplit
 func newproc(siz int32, fn *funcval) {
+	argp := add(unsafe.Pointer(&fn),sys.PtrSize)
 	gp := getg()
 	systemstack(func(){
-		newg := newproc1(gp)
+		newg := newproc1(fn,argp,siz,gp)
 
 		_p_ :=getg().m.p.ptr()
 		runqput(_p_,newg,true)
@@ -537,8 +552,12 @@ func newproc(siz int32, fn *funcval) {
 //
 //创建一个g,只能在系统的栈上调用
 //go:systemstack
-func newproc1(callergp *g)*g{
+func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 	_g_ := getg()
+
+	if fn == nil{
+
+	}
 
 	_p_ := _g_.m.p.ptr()
 	newg :=gfget(_p_) //从全局或当前的p中获取一个空闲的g
