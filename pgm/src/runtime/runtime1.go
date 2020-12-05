@@ -146,3 +146,15 @@ func timediv(v int64, div int32, rem *int32) int32 {
 	}
 	return res
 }
+
+// Helpers for Go. Must be NOSPLIT, must only call NOSPLIT functions, and must not block.
+//给m上锁
+func acquirem()*m{
+	_g_ := getg()
+	_g_.m.locks++
+	return _g_.m
+}
+
+func releasem(mp *m){
+	mp.locks--
+}

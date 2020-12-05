@@ -302,6 +302,7 @@ type m struct{
 
 	gsignal       *g           // signal-handling g
 	tls           [6]uintptr   // thread-local storage (for x86 extern register)
+	mstartfn  func() //设置启动函数
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	id int64
@@ -329,6 +330,7 @@ type p struct{
 	id int32
 	status uint32 //one of pidle/prunning/.. p的状态
 	link puintptr //与schedt.pidle形成空闲p的链表
+	schedtick   uint32     // incremented on every scheduler call每次调用schedule就会增加1,用于可以随机从全局中获取g
 	m muintptr //back-link to associated m (nil if idle)绑定的p
 	mcache *mcache
 

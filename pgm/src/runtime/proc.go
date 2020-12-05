@@ -269,7 +269,7 @@ func mstart(){
 	_g_ := getg()
 
 	osStack := _g_.stack.lo == 0
-	if osStack == 0{
+	if osStack {
 
 	}
 	mstart1()
@@ -286,7 +286,7 @@ func mstart1(){
 	// Install signal handlers; after minit so that minit can
 	// prepare the thread to be able to handle the signals.
 	if _g_.m == &m0{
-		mstartm0()//m0的启动会创建出更多的m出来
+		mstartm0()//这里还可以创建额外的m
 	}
 
 	// Record the caller for use as the top of stack in mcall and
@@ -335,8 +335,38 @@ func lockextra(nilokay bool) *m {
 			usleep(1)
 			continue
 		}
+		if atomic.Casuintptr(&extram, old, locked) {
+			return (*m)(unsafe.Pointer(old))
+		}
+		osyield()
 		continue
 	}
+}
+
+//go:nosplit
+func unlockextra(mp *m) {
+	atomic.Storeuintptr(&extram, uintptr(unsafe.Pointer(mp)))
+}
+
+// Allocate a new m unassociated with any thread.
+// Can use p for allocation context if needed.
+// fn is recorded as the new m's m.mstartfn.
+// id is optional pre-allocated m ID. Omit by passing -1.
+//
+// This function is allowed to have write barriers even if the caller
+// isn't because it borrows _p_.
+//
+//分配一个新的m并进行初始化
+//go:yeswritebarrierrec
+func allocm(_p_ *p, fn func(), id int64) *m {
+	_g_ := getg()
+	acquirem() // disable GC because it can be called from sysmon 加锁
+
+	mp := new(m)
+	mp.mstartfn = fn
+	mcommoninit(mp,id)
+	releasem(_g_.m) //解锁
+	return nil
 }
 
 // newextram allocates m's and puts them on the extra list.
@@ -344,11 +374,43 @@ func lockextra(nilokay bool) *m {
 // like call schedlock and allocate.
 func newextram() {
 	c := atomic.Xchg(&extraMWaiters, 0)
-	if c > 0{
+	if c > 0 {
 
-	}else{
-		// Make sure there is at least one extra M.
+	}else {
+		// Make sure there is at least one extra M.保证至少有一个额外的m
+		mp := lockextra(true)
+		unlockextra(mp)
+		if mp == nil {
+			oneNewExtraM()
+		}
 	}
+}
+
+// oneNewExtraM allocates an m and puts it on the extra list.
+func oneNewExtraM(){
+	// Create extra goroutine locked to extra m.
+	// The goroutine is the context in which the cgo callback will run.
+	// The sched.pc will never be returned to, but setting it to
+	// goexit makes clear to the traceback routines where
+	// the goroutine stack ends.
+	mp := allocm(nil, nil, -1)
+	gp := malg(4096)
+	gp.sched.g = guintptr(unsafe.Pointer(gp))
+	// malg returns status as _Gidle. Change to _Gdead before
+	// adding to allg where GC can see it. We use _Gdead to hide
+	// this from tracebacks and stack scans since it isn't a
+	// "real" goroutine until needm grabs it.
+	casgstatus(gp, _Gidle, _Gdead)
+	gp.m = mp
+	mp.curg = gp
+	// put on allg for garbage collector 新的g放入全局allg
+	allgadd(gp)
+
+	// Add m to the extra list.
+	mnext := lockextra(true)
+	mp.schedlink.set(mnext)
+	extraMCount++
+	unlockextra(mp)
 }
 
 //进入循环调度
@@ -362,6 +424,17 @@ func schedule() {
 
 	var gp *g
 	var inheritTime bool
+
+	if gp == nil{
+		// Check the global runnable queue once in a while to ensure fairness.
+		// Otherwise two goroutines can completely occupy the local runqueue
+		// by constantly respawning each other.
+		if _g_.m.p.ptr().schedtick%61 == 0 && sched.runqsize > 0{
+			lock(&sched.lock)
+			gp  =globrunqget(_g_)
+			unlock(&sched.lock)
+		}
+	}
 
 	if gp == nil{
 		gp,inheritTime = runqget(_g_.m.p.ptr())
@@ -811,6 +884,14 @@ func runqputslow(_p_ *p,gp *g,h,t uint32)bool{
 	return true
 }
 
+// Try get a batch of G's from the global runnable queue.
+// Sched must be locked.
+func globrunqget(_p_ *p, max int32) *g {
+	if sched.runqsize == 0{
+		return nil
+	}
+}
+
 // Get g from local runnable queue.
 // If inheritTime is true, gp should inherit the remaining time in the
 // current time slice. Otherwise, it should start a new time slice.
@@ -968,4 +1049,5 @@ func (l *gList)pop()*g{
 	}
 	return gp
 }
+
 
