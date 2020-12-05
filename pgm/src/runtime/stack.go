@@ -160,15 +160,16 @@ func stackalloc(n uint32)stack{
 	// Small stacks are allocated with a fixed-size free-list allocator.
 	// If we need a stack of a bigger size, we fall back on allocating
 	// a dedicated span.
-	var v unsafe.Pointer
+	//var v unsafe.Pointer
 	if n < _FixedStack<<_NumStackOrders && n < _StackCacheSize{
-		var x gclinkptr
+		//var x gclinkptr
 		if stackNoCache != 0{
 
 		}else{
 
 		}
 	}
+	return stack{}
 }
 
 // round x up to a power of 2.

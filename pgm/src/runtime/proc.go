@@ -78,6 +78,7 @@ var(
 	//定义m0,g0
 	m0  m
 	g0  g
+	mcache0 *mcache //p0会绑定m缓存
 )
 
 //go:linkname main_main main.main
@@ -111,6 +112,29 @@ func main(){
 	fn()
 
 	exit(0)
+}
+
+var (
+	allgs []*g //所有的g
+	allglock mutex//操作所有g的锁
+)
+
+func allgadd(gp *g){
+	if readgstatus(gp) ==_Gidle{
+		throw("allgadd: bad status Gidle")
+	}
+
+	lock(&allglock)
+	allgs = append(allgs,gp)
+	allglen = uintptr(len(allgs))
+	unlock(&allglock)
+}
+
+// All reads and writes of g's status go through readgstatus, casgstatus
+// castogscanstatus, casfrom_Gscanstatus.
+//go:nosplit
+func readgstatus(gp *g)uint32{
+	return atomic.Load(&gp.atomicstatus)
 }
 
 //runtime/asm_amd64.s
@@ -218,6 +242,18 @@ func fastrandinit(){
 	getRandomData(s)
 }
 
+// If asked to move to or from a Gscanstatus this will throw. Use the castogscanstatus
+// and casfrom_Gscanstatus instead.
+// casgstatus will loop if the g->atomicstatus is in a Gscan status until the routine that
+// put it in the Gscan state is finished.
+//修改g的状态
+//go:nosplit
+func casgstatus(gp *g, oldval, newval uint32) {
+	for i := 0; !atomic.Cas(&gp.atomicstatus,oldval,newval);i++{
+
+	}
+}
+
 // mstart is the entry-point for new Ms.
 //
 // This must not split the stack because we may not even have stack
@@ -231,8 +267,12 @@ func fastrandinit(){
 //go:nowritebarrierrec
 func mstart(){
 	_g_ := getg()
+
+	osStack := _g_.stack.lo == 0
+	if osStack == 0{
+
+	}
 	mstart1()
-	println(_g_)
 	//Exit this thread. 停止这个线程
 }
 
@@ -243,11 +283,72 @@ func mstart1(){
 	}
 	minit()
 
+	// Install signal handlers; after minit so that minit can
+	// prepare the thread to be able to handle the signals.
+	if _g_.m == &m0{
+		mstartm0()//m0的启动会创建出更多的m出来
+	}
+
 	// Record the caller for use as the top of stack in mcall and
 	// for terminating the thread.
 	// We're never coming back to mstart1 after we call schedule,
 	// so other calls can reuse the current frame.
 	schedule()
+}
+
+// mstartm0 implements part of mstart1 that only runs on the m0.
+//
+// Write barriers are allowed here because we know the GC can't be
+// running yet, so they'll be no-ops.
+//
+//m0的启动可以根据cpu的数量创建出更多的m出来
+//go:yeswritebarrierrec
+func mstartm0(){
+	if GOOS == "windows"{
+		newextram()
+	}
+}
+
+var extram uintptr
+var extraMCount uint32 // Protected by lockextra
+var extraMWaiters uint32
+
+//生成m的锁,保证只搞一次
+func lockextra(nilokay bool) *m {
+	const locked = 1
+
+	incr := false
+	for{
+		old := atomic.Loaduintptr(&extram)
+		if old == locked {
+			osyield()
+			continue
+		}
+		if old == 0 && !nilokay {
+			if !incr {
+				// Add 1 to the number of threads
+				// waiting for an M.
+				// This is cleared by newextram.
+				atomic.Xadd(&extraMWaiters, 1)
+				incr = true
+			}
+			usleep(1)
+			continue
+		}
+		continue
+	}
+}
+
+// newextram allocates m's and puts them on the extra list.
+// It is called with a working local m, so that it can do things
+// like call schedlock and allocate.
+func newextram() {
+	c := atomic.Xchg(&extraMWaiters, 0)
+	if c > 0{
+
+	}else{
+		// Make sure there is at least one extra M.
+	}
 }
 
 //进入循环调度
@@ -339,6 +440,19 @@ func mReserveID()int64{
 func (pp *p)init(id int32){
 	pp.id = id
 	pp.status =_Pgcstop
+	if pp.mcache == nil{
+		if id == 0{
+			if mcache0 == nil{
+				throw("missing mcache?")
+			}
+			// Use the bootstrap mcache0. Only one P will get
+			// mcache0: the one with ID 0.
+			//p0绑定mcache0
+			pp.mcache = mcache0
+		}else{
+			pp.mcache =allocmcache()
+		}
+	}
 }
 
 // destroy releases all of the resources associated with pp and
@@ -369,6 +483,7 @@ func (pp *p)destroy(){
 // the write barrier code.
 // Returns list of Ps with local work, they need to be scheduled by the caller.
 //调整p的数量,startTheWorld,schedinit的时候会调用
+//p0在这里和m0,g0绑定
 func procresize(nprocs int32)*p{
 	old := gomaxprocs
 	if old <0 || nprocs <= 0{
@@ -513,7 +628,9 @@ func malg(stacksize int32)*g{
 		systemstack(func() {
 			newg.stack = stackalloc(uint32(stacksize))
 		})
+		newg.stackguard0 =newg.stack.lo + _StackGuard //栈大小的范围,超出会扩容
 	}
+	return newg
 }
 
 // Create a new g running fn with siz bytes of arguments.
@@ -535,6 +652,7 @@ func newproc(siz int32, fn *funcval) {
 	argp := add(unsafe.Pointer(&fn),sys.PtrSize)
 	gp := getg()
 	systemstack(func(){
+		//获取一个新的g
 		newg := newproc1(fn,argp,siz,gp)
 
 		_p_ :=getg().m.p.ptr()
@@ -563,9 +681,21 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 	newg :=gfget(_p_) //从全局或当前的p中获取一个空闲的g
 	//如果获取不到空闲的g,直接新建一个g
 	if newg == nil{
-
+		newg = malg(_StackMin)
+		casgstatus(newg,_Gidle,_Gdead)//变更状态为没有被使用,没有执行代码,但有分配栈的状态
+		allgadd(newg)
 	}
-	//memmove将参数拷贝到栈上
+	if newg.stack.hi  == 0{
+		throw("newproc1: newg missing stack")
+	}
+	if readgstatus(newg) !=_Gdead{
+		throw("newproc1: new g is not Gdead")
+	}
+
+	newg.sched.g =guintptr(unsafe.Pointer(newg))
+	newg.startpc = fn.fn //保存的要执行的逻辑代码
+	casgstatus(newg,_Gdead,_Grunnable) //修改状态为可运行状态
+
 	return newg
 }
 

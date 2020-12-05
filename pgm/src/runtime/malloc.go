@@ -91,5 +91,6 @@ const (
 // marks a region such that it will always fault if accessed. Used only for
 // debugging the runtime.
 func mallocinit(){
-
+	//mcache0缓存在这里设置
+	mcache0 =allocmcache()
 }

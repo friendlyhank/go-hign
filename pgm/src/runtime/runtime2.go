@@ -292,6 +292,8 @@ type g struct{
 	atomicstatus uint32//go 运行的状态
 	goid int64 // Goroutine的ID
 	schedlink    guintptr //下一个链接的g构造成链表
+
+	startpc uintptr  //pc of goroutine function g的调用函数
 }
 
 type m struct{
@@ -328,6 +330,7 @@ type p struct{
 	status uint32 //one of pidle/prunning/.. p的状态
 	link puintptr //与schedt.pidle形成空闲p的链表
 	m muintptr //back-link to associated m (nil if idle)绑定的p
+	mcache *mcache
 
 	// wbBuf is this P's GC write barrier buffer.
 	//
@@ -410,8 +413,10 @@ type gobuf struct {
 	bp   uintptr // for GOEXPERIMENT=framepointer
 }
 
+//g存储参数方法信息,会被转化成funcInfo
 type funcval struct{
-
+	fn uintptr
+	//variable-size, fn-specific data here
 }
 
 type sudog struct {}
@@ -481,6 +486,7 @@ type _painc struct{
 }
 
 var(
+	allglen    uintptr //所有g的数量
 	allm *m //m相当于是链表,通过m.alllink链接起来
 	allp       []*p  // len(allp) == gomaxprocs; may change at safe points, otherwise immutable p的数量,一般与gomaxprocs相等
 	allpLock   mutex // Protects P-less reads of allp and all writes 操作allp的锁

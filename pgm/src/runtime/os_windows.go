@@ -345,6 +345,22 @@ func stdcall7(fn stdFunction, a0, a1, a2, a3, a4, a5, a6 uintptr) uintptr {
 	return stdcall(fn)
 }
 
+// in sys_windows_386.s and sys_windows_amd64.s
+func onosstack(fn unsafe.Pointer, arg uint32)
+
+var usleep2Addr unsafe.Pointer
+
+//go:nosplit
+func osyield() {
+	onosstack(switchtothreadAddr, 0)
+}
+
+//go:nosplit
+func usleep(us uint32) {
+	// Have 1us units; want 100ns units.
+	onosstack(usleep2Addr, 10*us)
+}
+
 // Called to initialize a new m (including the bootstrap m).
 // Called on the parent thread (main thread in case of bootstrap), can allocate memory.
 //这就是空实现

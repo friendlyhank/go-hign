@@ -2,6 +2,8 @@ package atomic
 
 //runtime/internal/atomic/asm_amd64.s
 
+//go:noescape
+func Cas(ptr *uint32, old, new uint32) bool
 
 //go:noescape
 func Casuintptr(ptr *uintptr, old, new uintptr) bool
