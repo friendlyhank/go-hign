@@ -13,6 +13,22 @@ func add(p unsafe.Pointer, x uintptr) unsafe.Pointer {
 // that fetch the g directly (from TLS or from the dedicated register).
 func getg()*g
 
+// mcall switches from the g to the g0 stack and invokes fn(g),
+// where g is the goroutine that made the call.
+// mcall saves g's current PC/SP in g->sched so that it can be restored later.
+// It is up to fn to arrange for that later execution, typically by recording
+// g in a data structure, causing something to call ready(g) later.
+// mcall returns to the original goroutine g later, when g has been rescheduled.
+// fn must not return at all; typically it ends by calling schedule, to let the m
+// run other goroutines.
+//
+// mcall can only be called from g stacks (not g0, not gsignal).
+//
+// This must NOT be go:noescape: if fn is a stack-allocated closure,
+// fn puts g on a run queue, and g executes before fn returns, the
+// closure will be invalidated while it is still executing.
+func mcall(fn func(*g))
+
 // systemstack runs fn on a system stack.
 // If systemstack is called from the per-OS-thread (g0) stack, or
 // if systemstack is called from the signal handling (gsignal) stack,
@@ -127,7 +143,19 @@ func reflectcall(argtype *_type, fn, arg unsafe.Pointer, argsize uint32, retoffs
 
 func procyield(cycles uint32)
 
+type neverCallThisFunction struct{}
 
+// goexit is the return stub at the top of every goroutine call stack.
+// Each goroutine stack is constructed as if goexit called the
+// goroutine's entry point function, so that when the entry point
+// function returns, it will return to goexit, which will call goexit1
+// to perform the actual exit.
+//
+// This function must never be called directly. Call goexit1 instead.
+// gentraceback assumes that goexit terminates the stack. A direct
+// call on the stack will cause gentraceback to stop walking the stack
+// prematurely and if there is leftover state it may panic.
+func goexit(neverCallThisFunction)
 
 var switchtothreadAddr unsafe.Pointer
 

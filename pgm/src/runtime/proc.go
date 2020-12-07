@@ -487,6 +487,19 @@ func schedule() {
 	execute(gp,inheritTime)
 }
 
+// Finishes execution of the current goroutine.
+func goexit1(){
+	mcall(goexit0)
+}
+
+// goexit continuation on g0.
+func goexit0(gp *g){
+
+	casgstatus(gp,_Grunning,_Gdead)
+
+	schedule()
+}
+
 // Schedules gp to run on the current M.
 // If inheritTime is true, gp inherits the remaining time in the
 // current time slice. Otherwise, it starts a new time slice.
@@ -820,7 +833,10 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 		memmove(unsafe.Pointer(spArg),argp,uintptr(narg))
 	}
 	newg.sched.sp = sp //记录栈指针
+	//此处保存的goexit地址,这是循环调度的关键
+	newg.sched.pc  = funcPC(goexit) + sys.PCQuantum// +PCQuantum so that previous instruction is in same function
 	newg.sched.g =guintptr(unsafe.Pointer(newg))
+	gostartcallfn(&newg.sched,fn)//这里会导致sched.pc和sched.sp的变化
 	newg.startpc = fn.fn //保存的要执行的逻辑代码
 	casgstatus(newg,_Gdead,_Grunnable) //修改状态为可运行状态
 

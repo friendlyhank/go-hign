@@ -1,6 +1,7 @@
 package sys
 
 const (
+	PCQuantum           = 1
 	MinFrameSize        = 0
 )
 

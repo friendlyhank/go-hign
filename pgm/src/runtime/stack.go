@@ -197,6 +197,23 @@ func newstack() {
 
 }
 
+//go:nosplit
+func nilfunc() {
+	*(*uint8)(nil) = 0
+}
+
+// adjust Gobuf as if it executed a call to fn
+// and then did an immediate gosave.
+func gostartcallfn(gobuf *gobuf, fv *funcval) {
+	var fn unsafe.Pointer
+	if fv != nil {
+		fn = unsafe.Pointer(fv.fn)
+	} else {
+		fn = unsafe.Pointer(funcPC(nilfunc))
+	}
+	gostartcall(gobuf, fn, unsafe.Pointer(fv))
+}
+
 var maxstacksize uintptr = 1 << 20 // enough until runtime.main sets it for real
 
 // This is exported as ABI0 via linkname so obj can call it.
@@ -205,3 +222,4 @@ var maxstacksize uintptr = 1 << 20 // enough until runtime.main sets it for real
 //go:linkname morestackc
 func morestackc() {
 }
+

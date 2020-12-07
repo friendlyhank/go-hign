@@ -273,13 +273,14 @@ TEXT runtime·gosave(SB), NOSPLIT, $0-8
 
 // func gogo(buf *gobuf)
 // restore state from Gobuf; longjmp
+
 TEXT runtime·gogo(SB), NOSPLIT, $16-8
 	MOVQ	buf+0(FP), BX		// gobuf 获取调度信息
 	MOVQ	gobuf_g(BX), DX  //G
 	MOVQ	0(DX), CX		// make sure g != nil 保证g不为nil
 	get_tls(CX)
 	MOVQ	DX, g(CX)      //g = G
-	MOVQ	gobuf_sp(BX), SP	// restore SP 通过恢复 SP 寄存器切换到G栈
+	MOVQ	gobuf_sp(BX), SP	// restore SP 将 runtime.goexit 函数的 PC 恢复到 SP 中
 	MOVQ	gobuf_ret(BX), AX
 	MOVQ	gobuf_ctxt(BX), DX
 	MOVQ	gobuf_bp(BX), BP
@@ -289,6 +290,10 @@ TEXT runtime·gogo(SB), NOSPLIT, $16-8
 	MOVQ	$0, gobuf_bp(BX) //开始执行函数的程序计数器
 	MOVQ	gobuf_pc(BX), BX //获取G任务函数地址
 	JMP	BX //开始执行
+//正常的函数调用都会使用CALL指令,该指令会将调用方的返回地址加入栈寄存器SP中,然后跳转到目标函数；
+//当目标函数返回后，会从栈中查找调用的地址并跳转回调用方继续执行剩下的代码。
+//runtime.gogo就是例用了Go语言的调用惯例成功模拟这一调用过程,上面通过JMP指令调用栈中数据后,当Goroutine中
+//运行的函数返回时就会跳转到runtime.goexit所在的位置执行该函数
 
 // func mcall(fn func(*g))
 // Switch to m->g0's stack, call fn(g).
