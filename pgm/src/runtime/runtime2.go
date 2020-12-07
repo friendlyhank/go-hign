@@ -289,7 +289,7 @@ type g struct{
 	// It is stack.lo+StackGuard on g0 and gsignal stacks.
 	// It is ~0 on other goroutine stacks, to trigger a call to morestackc (and crash).
 	stack       stack   // offset known to runtime/cgo
-	stackguard0 uintptr // offset known to liblink
+	stackguard0 uintptr // offset known to liblink 栈扩容的标志
 	stackguard1 uintptr // offset known to liblink
 
 	_panic *_painc // innermost panic - offset known to liblink 最内侧的painc结构体
