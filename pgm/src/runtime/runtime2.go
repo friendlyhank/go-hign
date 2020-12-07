@@ -182,7 +182,14 @@ type mutex struct{
 
 type iface struct{}
 
-type eface struct{}
+type eface struct{
+	_type *_type
+	data unsafe.Pointer
+}
+
+func efaceOf(ep *interface{}) *eface {
+	return (*eface)(unsafe.Pointer(ep))
+}
 
 // The guintptr, muintptr, and puintptr are all used to bypass write barriers.
 // It is particularly important to avoid write barriers when the current P has

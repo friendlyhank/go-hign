@@ -73,13 +73,24 @@ var modinfo string
 // Note that all this complexity does not apply to global run queue as we are not
 // sloppy about thread unparking when submitting to global queue. Also see comments
 // for nmspinning manipulation.
-
 var(
 	//定义m0,g0
 	m0  m
 	g0  g
 	mcache0 *mcache //p0会绑定m缓存
 )
+
+// funcPC returns the entry PC of the function f.
+// It assumes that f is a func value. Otherwise the behavior is undefined.
+// CAREFUL: In programs with plugins, funcPC can return different values
+// for the same function (because there are actually multiple copies of
+// the same function in the address space). To be safe, don't use the
+// results of this function in any == expression. It is only safe to
+// use the result as an address at which to start executing code.
+//go:nosplit
+func funcPC(f interface{}) uintptr {
+	return *(*uintptr)(efaceOf(&f).data)
+}
 
 //go:linkname main_main main.main
 func main_main()
@@ -103,6 +114,12 @@ func main(){
 
 	//Allow newproc to start new Ms.
 	mainStarted = true
+
+	if GOARCH != "wasm"{// no threads on wasm yet, so no sysmon
+		systemstack(func() {
+			newm(sysmon,nil,-1)//创建新的m
+		})
+	}
 
 	if g.m != &m0{
 		throw("runtime.main not on m0")
@@ -289,6 +306,11 @@ func mstart1(){
 		mstartm0()//这里还可以创建额外的m
 	}
 
+	//有些m的启动函数会绑定runtime.sysmon()
+	if fn :=_g_.m.mstartfn;fn != nil{
+		fn()
+	}
+
 	// Record the caller for use as the top of stack in mcall and
 	// for terminating the thread.
 	// We're never coming back to mstart1 after we call schedule,
@@ -346,6 +368,22 @@ func lockextra(nilokay bool) *m {
 //go:nosplit
 func unlockextra(mp *m) {
 	atomic.Storeuintptr(&extram, uintptr(unsafe.Pointer(mp)))
+}
+
+// Create a new m. It will start off with a call to fn, or else the scheduler.
+// fn needs to be static and not a heap allocated closure.
+// May run with m.p==nil, so write barriers are not allowed.
+//
+// id is optional pre-allocated m ID. Omit by passing -1.
+//创建新的m,带有启动的函数并且会绑定线程
+//go:nowritebarrierrec
+func newm(fn func(), _p_ *p, id int64) {
+	mp :=allocm(_p_,fn,id)
+	newm1(mp)
+}
+
+func newm1(mp *m){
+	newosproc(mp)//绑定线程
 }
 
 // Allocate a new m unassociated with any thread.
@@ -431,7 +469,7 @@ func schedule() {
 		// by constantly respawning each other.
 		if _g_.m.p.ptr().schedtick%61 == 0 && sched.runqsize > 0{
 			lock(&sched.lock)
-			gp  =globrunqget(_g_)
+			gp  =globrunqget(_g_.m.p.ptr(),1)
 			unlock(&sched.lock)
 		}
 	}
@@ -460,7 +498,12 @@ func schedule() {
 //go:yeswritebarrierrec
 func execute(gp *g, inheritTime bool) {
 	_g_ := getg()
+
+	// Assign gp.m before entering _Grunning so running Gs have an
+	// M.
 	_g_.m.curg = gp
+	gp.m = _g_.m
+	casgstatus(gp,_Grunnable,_Grunning)
 
 	gogo(&gp.sched)
 }
@@ -749,6 +792,8 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 	if fn == nil{
 
 	}
+	siz :=narg
+	siz = (siz + 7) &^ 7
 
 	_p_ := _g_.m.p.ptr()
 	newg :=gfget(_p_) //从全局或当前的p中获取一个空闲的g
@@ -765,6 +810,16 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 		throw("newproc1: new g is not Gdead")
 	}
 
+	totalSize := 4*sys.RegSize + uintptr(siz) + sys.MinFrameSize // extra space in case of reads slightly beyond frame
+	totalSize +=-totalSize & (sys.SpAlign - 1)
+	//确定sp和参数的入栈位置
+	sp :=newg.stack.hi - totalSize
+	spArg := sp
+	if narg > 0{
+		//将执行的参数拷贝入栈
+		memmove(unsafe.Pointer(spArg),argp,uintptr(narg))
+	}
+	newg.sched.sp = sp //记录栈指针
 	newg.sched.g =guintptr(unsafe.Pointer(newg))
 	newg.startpc = fn.fn //保存的要执行的逻辑代码
 	casgstatus(newg,_Gdead,_Grunnable) //修改状态为可运行状态
@@ -890,6 +945,27 @@ func globrunqget(_p_ *p, max int32) *g {
 	if sched.runqsize == 0{
 		return nil
 	}
+
+	n :=sched.runqsize/gomaxprocs + 1
+	if n > sched.runqsize{
+		n = sched.runqsize
+	}
+	if max > 0 && n > max{
+		n = max
+	}
+	if n > int32(len(_p_.runq))/2{
+		n = int32(len(_p_.runq)) / 2
+	}
+
+	sched.runqsize -= n
+
+	gp :=sched.runq.pop()
+	n--
+	for ; n > 0; n-- {
+		gp1 := sched.runq.pop()
+		runqput(_p_,gp1,false)
+	}
+	return gp
 }
 
 // Get g from local runnable queue.
@@ -920,6 +996,13 @@ func runqget(_p_ *p) (gp *g, inheritTime bool) {
 			return gp, false
 		}
 	}
+}
+
+// Always runs without a P, so write barriers are not allowed.
+//
+//go:nowritebarrierrec
+func sysmon(){
+
 }
 
 // Try to get an m from midle list.
@@ -1022,6 +1105,19 @@ func (q *gQueue)pushBackAll(q2 gQueue){
 		q.head = q2.head
 	}
 	q.tail = q2.tail
+}
+
+// pop removes and returns the head of queue q. It returns nil if
+// q is empty.
+func (q *gQueue)pop()*g{
+	gp :=q.head.ptr()
+	if gp != nil{
+		q.head =gp.schedlink
+		if q.head == 0{
+			q.tail = 0
+		}
+	}
+	return  gp
 }
 
 // A gList is a list of Gs linked through g.schedlink. A G can only be

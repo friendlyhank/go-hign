@@ -54,6 +54,7 @@ var(
 // loader before the Go program starts.
 	_CloseHandle,
 	_CreateEventA,
+	_CreateThread,
 	_DuplicateHandle,
 	_ExitProcess,
 	_GetProcessAffinityMask,
@@ -75,6 +76,11 @@ var(
 
 	_ stdFunction
 )
+
+// Function to be called by windows CreateThread
+// to start new os thread.
+//runtime.sys_windows_amd64.s启动线程
+func tstart_stdcall(newm *m)
 
 type mOS struct{
 	threadLock mutex // protects "thread" and prevents closing
@@ -359,6 +365,25 @@ func osyield() {
 func usleep(us uint32) {
 	// Have 1us units; want 100ns units.
 	onosstack(usleep2Addr, 10*us)
+}
+
+// May run with m.p==nil, so write barriers are not allowed. This
+// function is called by newosproc0, so it is also required to
+// operate without stack guards.
+//m包装线程
+//go:nowritebarrierrec
+//go:nosplit
+func newosproc(mp *m){
+	// We pass 0 for the stack size to use the default for this binary.
+	thandle :=stdcall6(_CreateThread,0,0,
+		funcPC(tstart_stdcall),uintptr(unsafe.Pointer(mp)),
+		0,0)
+	if thandle == 0{
+		print("runtime: failed to create new OS thread (have ", mcount(), " already; errno=", getlasterror(), ")\n")
+		throw("runtime.newosproc")
+	}
+	// Close thandle to avoid leaking the thread object if it exits.
+	stdcall1(_CloseHandle, thandle)
 }
 
 // Called to initialize a new m (including the bootstrap m).

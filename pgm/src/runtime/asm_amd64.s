@@ -275,11 +275,11 @@ TEXT runtime·gosave(SB), NOSPLIT, $0-8
 // restore state from Gobuf; longjmp
 TEXT runtime·gogo(SB), NOSPLIT, $16-8
 	MOVQ	buf+0(FP), BX		// gobuf 获取调度信息
-	MOVQ	gobuf_g(BX), DX
+	MOVQ	gobuf_g(BX), DX  //G
 	MOVQ	0(DX), CX		// make sure g != nil 保证g不为nil
 	get_tls(CX)
-	MOVQ	DX, g(CX)
-	MOVQ	gobuf_sp(BX), SP	// restore SP
+	MOVQ	DX, g(CX)      //g = G
+	MOVQ	gobuf_sp(BX), SP	// restore SP 通过恢复 SP 寄存器切换到G栈
 	MOVQ	gobuf_ret(BX), AX
 	MOVQ	gobuf_ctxt(BX), DX
 	MOVQ	gobuf_bp(BX), BP
@@ -287,7 +287,7 @@ TEXT runtime·gogo(SB), NOSPLIT, $16-8
 	MOVQ	$0, gobuf_ret(BX)
 	MOVQ	$0, gobuf_ctxt(BX)
 	MOVQ	$0, gobuf_bp(BX) //开始执行函数的程序计数器
-	MOVQ	gobuf_pc(BX), BX
+	MOVQ	gobuf_pc(BX), BX //获取G任务函数地址
 	JMP	BX //开始执行
 
 // func mcall(fn func(*g))
