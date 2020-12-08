@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/sizeclasses.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stack.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

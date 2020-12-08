@@ -12,3 +12,9 @@ type mSpanList struct{
 //go:notinheap
 type mspan struct {
 }
+
+// Initialize an empty doubly-linked list.
+func (list *mSpanList) init() {
+	list.first = nil
+	list.last =  nil
+}

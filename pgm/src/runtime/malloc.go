@@ -6,6 +6,9 @@ const (
 
 	pageShift = _PageShift
 
+	_PageSize = 1 << _PageShift
+	_PageMask = _PageSize - 1
+
 	// _64bit = 1 on 64-bit systems, 0 on 32-bit systems
 	_64bit = 1 << (^uintptr(0) >> 63) / 2
 

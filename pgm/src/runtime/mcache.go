@@ -8,12 +8,17 @@ package runtime
 //线程的缓存
 //go:notinheap
 type mcache struct{
-	stackcache [_NumStackOrders]stackfreelist
+	stackcache [_NumStackOrders]stackfreelist //栈缓存 与全局栈缓存stackpool相比减少了锁竞争影响
 }
 
 // A gclinkptr is a pointer to a gclink, but it is opaque
 // to the garbage collector.
 type gclinkptr uintptr
+
+type stackfreelist struct{
+	list gclinkptr// linked list of free stacks
+	size uintptr // total size of stacks in list
+}
 
 //初始化分配mcache
 func allocmcache()*mcache{

@@ -130,8 +130,8 @@ type stackpoolItem struct {
 }
 
 // Global pool of large stack spans.
-//大栈缓存  大于32KB的内存
-type stackLarge struct{
+//全局大栈缓存  大于32KB的内存
+var  stackLarge struct{
 	lock mutex
 	free [heapAddrBits - pageShift]mSpanList // free lists by log_2(s.npages)
 }
@@ -143,7 +143,15 @@ type stackLarge struct{
 
 //栈信息的初始化
 func stackinit(){
-
+	if _StackCacheSize&_PageMask != 0 {
+		throw("cache size must be a multiple of page size")
+	}
+	for i := range stackpool{
+		stackpool[i].item.span.init()
+	}
+	for i := range stackLarge.free{
+		stackLarge.free[i].init()
+	}
 }
 
 // stackalloc allocates an n byte stack.
