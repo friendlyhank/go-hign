@@ -289,7 +289,7 @@ type g struct{
 	// It is stack.lo+StackGuard on g0 and gsignal stacks.
 	// It is ~0 on other goroutine stacks, to trigger a call to morestackc (and crash).
 	stack       stack   // offset known to runtime/cgo
-	stackguard0 uintptr // offset known to liblink 调度器抢占是调度的标志
+	stackguard0 uintptr // offset known to liblink 扩容的标志,同时也是调度器抢占调度的标志
 	stackguard1 uintptr // offset known to liblink
 
 	_panic *_painc // innermost panic - offset known to liblink 最内侧的painc结构体
@@ -313,9 +313,10 @@ type m struct{
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	id int64
-	throwing int32 //1有异常 0无异常
+	throwing int32 //1、-1有异常 0无异常
 	locks int32 //统计锁的数量
 	profilehz int32
+	spinning      bool //是否处于自选状态(自旋的意思是正在找可运行的g) m is out of work and is actively looking for work
 	fastrand [2]uint32 //random
 	alllink *m // on allm 等于allm
 	schedlink     muintptr//和sched.midle形成链表，记录空闲的m
@@ -383,6 +384,7 @@ type schedt struct{
 
 	pidle puintptr //idle p's 空闲的p链表,下一个链接的p在p.link中取出
 	npidle uint32 //空闲的p数量
+	nmspinning uint32 //目前有多少m处于自旋状态 See "Worker thread parking/unparking" comment in proc.go.
 
 	// Global runnable queue. 全局的g队列
 	runq gQueue

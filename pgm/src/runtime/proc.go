@@ -117,7 +117,7 @@ func main(){
 
 	if GOARCH != "wasm"{// no threads on wasm yet, so no sysmon
 		systemstack(func() {
-			newm(sysmon,nil,-1)//创建新的m
+			newm(sysmon,nil,-1)//创建新的m,还会启动监控sysmon
 		})
 	}
 
@@ -803,8 +803,10 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 	_g_ := getg()
 
 	if fn == nil{
-
+		_g_.m.throwing = -1 // do not dump full stacks
+		throw("go of nil func value")
 	}
+	acquirem()
 	siz :=narg
 	siz = (siz + 7) &^ 7
 
@@ -839,6 +841,7 @@ func newproc1(fn *funcval,argp unsafe.Pointer,narg int32,callergp *g)*g{
 	gostartcallfn(&newg.sched,fn)//这里会导致sched.pc和sched.sp的变化
 	newg.startpc = fn.fn //保存的要执行的逻辑代码
 	casgstatus(newg,_Gdead,_Grunnable) //修改状态为可运行状态
+	releasem(_g_.m)
 
 	return newg
 }

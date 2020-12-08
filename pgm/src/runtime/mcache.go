@@ -5,10 +5,10 @@ package runtime
 //
 // mcaches are allocated from non-GC'd memory, so any heap pointers
 // must be specially handled.
-//
+//线程的缓存
 //go:notinheap
 type mcache struct{
-
+	stackcache [_NumStackOrders]stackfreelist
 }
 
 // A gclinkptr is a pointer to a gclink, but it is opaque

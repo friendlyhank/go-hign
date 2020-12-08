@@ -117,6 +117,7 @@ const(
 // Stacks are assigned an order according to size.
 //     order = log_2(size/FixedStack)
 // There is a free list for each order.
+//全局的栈缓存 分配小于32KB的内存
 var stackpool [_NumStackOrders]struct {
 	item stackpoolItem
 	_    [cpu.CacheLinePadSize - unsafe.Sizeof(stackpoolItem{})%cpu.CacheLinePadSize]byte
@@ -124,7 +125,15 @@ var stackpool [_NumStackOrders]struct {
 
 //go:notinheap
 type stackpoolItem struct {
+	mu mutex
+	span mSpanList
+}
 
+// Global pool of large stack spans.
+//大栈缓存  大于32KB的内存
+type stackLarge struct{
+	lock mutex
+	free [heapAddrBits - pageShift]mSpanList // free lists by log_2(s.npages)
 }
 
 // Global pool of spans that have free stacks.
