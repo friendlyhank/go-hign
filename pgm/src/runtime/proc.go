@@ -1015,7 +1015,7 @@ func runqget(_p_ *p) (gp *g, inheritTime bool) {
 }
 
 // Always runs without a P, so write barriers are not allowed.
-//
+//负责抢占和负责网络事件
 //go:nowritebarrierrec
 func sysmon(){
 
