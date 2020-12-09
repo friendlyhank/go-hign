@@ -73,4 +73,5 @@ package runtime
 
 const (
 	_PageShift      = 13
+	_NumSizeClasses = 67 //span的sizeclass
 )

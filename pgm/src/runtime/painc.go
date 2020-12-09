@@ -13,4 +13,5 @@ func throw(s string) {
 	if gp.m.throwing == 0{
 		gp.m.throwing = 1
 	}
+	*(*int)(nil) = 0 // not reached
 }

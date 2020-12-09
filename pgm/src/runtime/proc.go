@@ -106,21 +106,17 @@ var mainStarted bool
 // runtimeInitTime is the nanotime() at which the runtime started.
 var runtimeInitTime int64
 
-// funcPC returns the entry PC of the function f.
-// It assumes that f is a func value. Otherwise the behavior is undefined.
-// CAREFUL: In programs with plugins, funcPC can return different values
-// for the same function (because there are actually multiple copies of
-// the same function in the address space). To be safe, don't use the
-// results of this function in any == expression. It is only safe to
-// use the result as an address at which to start executing code.
-//go:nosplit
-func funcPC(f interface{}) uintptr {
-	return *(*uintptr)(efaceOf(&f).data)
-}
+// Value to use for signal mask for newly created M's.
+//TODO HANK return
+var initSigmask sigset
 
 // The main goroutine
 func main(){
 	g :=getg()
+
+	// Racectx of m0->g0 is used only as the parent of the main goroutine.
+	// It must not be used for anything else.
+	g.m.g0.racectx = 0
 
 	// Max stack size is 1 GB on 64-bit, 250 MB on 32-bit.
 	// Using decimal instead of binary GB and MB because
@@ -163,6 +159,18 @@ func main(){
 	fn()
 
 	exit(0)
+}
+
+// funcPC returns the entry PC of the function f.
+// It assumes that f is a func value. Otherwise the behavior is undefined.
+// CAREFUL: In programs with plugins, funcPC can return different values
+// for the same function (because there are actually multiple copies of
+// the same function in the address space). To be safe, don't use the
+// results of this function in any == expression. It is only safe to
+// use the result as an address at which to start executing code.
+//go:nosplit
+func funcPC(f interface{}) uintptr {
+	return *(*uintptr)(efaceOf(&f).data)
 }
 
 var (
@@ -433,6 +441,9 @@ func newm1(mp *m){
 func allocm(_p_ *p, fn func(), id int64) *m {
 	_g_ := getg()
 	acquirem() // disable GC because it can be called from sysmon 加锁
+	if _g_.m.p == 0{
+		acquirep(_p_)
+	}
 
 	mp := new(m)
 	mp.mstartfn = fn

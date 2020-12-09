@@ -300,7 +300,8 @@ type g struct{
 	goid int64 // Goroutine的ID
 	schedlink    guintptr //下一个链接的g构造成链表
 
-	startpc uintptr  //pc of goroutine function g的调用函数
+	startpc uintptr  //pc of goroutine function g的启用函数(比如main.main)
+	racectx uintptr //与race相关
 }
 
 type m struct{
@@ -312,6 +313,7 @@ type m struct{
 	mstartfn  func() //设置启动函数
 	curg          *g       // current running goroutine
 	p             puintptr // attached p for executing go code (nil if not executing go code)
+	nextp puintptr //下一个要绑定的p
 	id int64
 	throwing int32 //1、-1有异常 0无异常
 	locks int32 //统计锁的数量

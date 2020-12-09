@@ -114,6 +114,8 @@ func nanotimeQPC() int64 {
 	return (counter - qpcStartCounter) * qpcMultiplier
 }
 
+type sigset struct{}
+
 //获取cpu的数量
 func getproccount() int32{
 	var mask,sysmask uintptr
