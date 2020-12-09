@@ -77,8 +77,16 @@ var(
 	//定义m0,g0
 	m0  m
 	g0  g
-	mcache0 *mcache //p0会绑定m缓存
+	mcache0 *mcache //m0的缓存
 )
+
+//执行runtime初始化函数init()
+//go:linkname runtime_inittask runtime..inittask
+var runtime_inittask initTask
+
+//执行用户逻辑代码的init()
+//go:linkname main_inittask main..inittask
+var main_inittask initTask
 
 // funcPC returns the entry PC of the function f.
 // It assumes that f is a func value. Otherwise the behavior is undefined.
@@ -124,6 +132,10 @@ func main(){
 	if g.m != &m0{
 		throw("runtime.main not on m0")
 	}
+
+	doInit(&runtime_inittask)//执行runtime初始化函数init()
+
+	doInit(&main_inittask) //执行用户逻辑代码的init()
 
 	fn := main_main// make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
 	fn()
@@ -1163,6 +1175,40 @@ func (l *gList)pop()*g{
 		l.head =gp.schedlink
 	}
 	return gp
+}
+
+// An initTask represents the set of initializations that need to be done for a package.
+// Keep in sync with ../../test/initempty.go:initTask
+type initTask struct{
+	// TODO: pack the first 3 fields more tightly?
+	state uintptr //0不需要初始化 1需要初始化 2初始化完成 0 = uninitialized, 1 = in progress, 2 = done
+	ndeps uintptr
+	nfns  uintptr
+	// followed by ndeps instances of an *initTask, one per package depended on
+	// followed by nfns pcs, one per init function to run
+}
+
+//执行初始化函数init() TODO HANK return
+func doInit(t *initTask) {
+	switch t.state {
+	case 2: // fully initialized
+		return
+	case 1: // initialization in progress
+		throw("recursive call during initialization - linker skew")
+	default: // not initialized yet
+		t.state = 1 // initialization in progress
+		for i := uintptr(0); i < t.ndeps; i++ {
+			p := add(unsafe.Pointer(t), (3+i)*sys.PtrSize)
+			t2 := *(**initTask)(p)
+			doInit(t2)
+		}
+		for i := uintptr(0); i < t.nfns; i++ {
+			p := add(unsafe.Pointer(t), (3+t.ndeps+i)*sys.PtrSize)
+			f := *(*func())(unsafe.Pointer(&p))
+			f()
+		}
+		t.state = 2 // initialization done
+	}
 }
 
 
