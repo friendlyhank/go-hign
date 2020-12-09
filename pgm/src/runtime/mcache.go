@@ -28,6 +28,9 @@ type stackfreelist struct{
 	size uintptr // total size of stacks in list
 }
 
+// dummy mspan that contains no free objects.
+var emptymspan mspan
+
 //初始化分配mcache
 func allocmcache()*mcache{
 	var c *mcache
@@ -39,8 +42,12 @@ func allocmcache()*mcache{
 
 func (c *mcache)releaseAll(){
 	for i := range c.alloc {
-
+		s := c.alloc[i]
+		if s != &emptymspan{
+			c.alloc[i] = &emptymspan
+		}
 	}
+	// Clear tinyalloc pool.
 }
 
 // prepareForSweep flushes c if the system has entered a new sweep phase

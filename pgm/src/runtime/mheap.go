@@ -43,6 +43,12 @@ type mSpanList struct{
 type mspan struct {
 	next *mspan // next span in list, or nil if none
 	prev *mspan  // previous span in list, or nil if none
+	list *mSpanList // For debugging. TODO: Remove.
+
+	startAddr uintptr //起试的地址 address of first byte of span aka s.base()
+	npages    uintptr //包含页数 number of pages in span
+
+	spanclass   spanClass     //sizeclasses.go size class and noscan (uint8)
 }
 
 // Initialize an empty doubly-linked list.
