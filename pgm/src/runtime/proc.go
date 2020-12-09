@@ -88,6 +88,24 @@ var runtime_inittask initTask
 //go:linkname main_inittask main..inittask
 var main_inittask initTask
 
+// main_init_done is a signal used by cgocallbackg that initialization
+// has been completed. It is made before _cgo_notify_runtime_init_done,
+// so all cgo calls can rely on it existing. When main_init is complete,
+// it is closed, meaning cgocallbackg can reliably receive from it.
+//main_init_done单独被cgocallbackg方法使用,保证在执行cgo调用之前main init先完成初始化
+var main_init_done chan bool
+
+//main_main和main.main链接
+//go:linkname main_main main.main
+func main_main()
+
+//m0启动干活之后其他的m才能被创建启动
+// mainStarted indicates that the main M has started.
+var mainStarted bool
+
+// runtimeInitTime is the nanotime() at which the runtime started.
+var runtimeInitTime int64
+
 // funcPC returns the entry PC of the function f.
 // It assumes that f is a func value. Otherwise the behavior is undefined.
 // CAREFUL: In programs with plugins, funcPC can return different values
@@ -99,12 +117,6 @@ var main_inittask initTask
 func funcPC(f interface{}) uintptr {
 	return *(*uintptr)(efaceOf(&f).data)
 }
-
-//go:linkname main_main main.main
-func main_main()
-
-// mainStarted indicates that the main M has started.
-var mainStarted bool
 
 // The main goroutine
 func main(){
@@ -134,8 +146,18 @@ func main(){
 	}
 
 	doInit(&runtime_inittask)//执行runtime初始化函数init()
+	if nanotime() == 0{
+		throw("nanotime returning zero")
+	}
+
+	// Record when the world started.
+	runtimeInitTime = nanotime()
+
+	main_init_done = make(chan bool)
 
 	doInit(&main_inittask) //执行用户逻辑代码的init()
+
+	close(main_init_done)
 
 	fn := main_main// make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
 	fn()
