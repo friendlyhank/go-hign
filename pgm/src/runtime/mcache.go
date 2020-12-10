@@ -1,5 +1,7 @@
 package runtime
 
+import "runtime/internal/atomic"
+
 // Per-thread (in Go, per-P) cache for small objects.
 // No locking needed because it is per-thread (per-P).
 //
@@ -10,7 +12,7 @@ package runtime
 type mcache struct{
 	stackcache [_NumStackOrders]stackfreelist //栈缓存 与全局栈缓存stackpool相比减少了锁竞争影响
 
-	alloc [numSpanClasses]*mspan // spans to allocate from, indexed by spanClass
+	alloc [numSpanClasses]*mspan //每个缓存可以持有67(spanclasses)*2个runtime.span spans to allocate from, indexed by spanClass
 
 	// flushGen indicates the sweepgen during which this mcache
 	// was last flushed. If flushGen != mheap_.sweepgen, the spans
@@ -31,13 +33,55 @@ type stackfreelist struct{
 // dummy mspan that contains no free objects.
 var emptymspan mspan
 
-//初始化分配mcache
+//初始化分配mcache线程缓存
 func allocmcache()*mcache{
 	var c *mcache
 	systemstack(func() {
-
+		lock(&mheap_.lock)
+		c = (*mcache)(mheap_.cachealloc.alloc())
+		c.flushGen  = mheap_.sweepgen
+		unlock(&mheap_.lock)
 	})
+	for i := range c.alloc{
+		c.alloc[i] =&emptymspan
+	}
 	return c
+}
+
+// refill acquires a new span of span class spc for c. This span will
+// have at least one free object. The current span in c must be full.
+//
+// Must run in a non-preemptible context since otherwise the owner of
+// c could change.
+//线程已经满了,向中心缓存中申请内存
+func (c *mcache) refill(spc spanClass) {
+	// Return the current cached span to the central lists.
+	s := c.alloc[spc]
+
+	//没满
+	if uintptr(s.allocCount) != s.nelems {
+		throw("refill of span with free space remaining")
+	}
+
+	if s != &emptymspan {
+		// Mark this span as no longer cached.
+		if s.sweepgen != mheap_.sweepgen+3 {
+			throw("bad sweepgen in refill")
+		}
+		//版本兼容
+		if go115NewMCentralImpl {
+			mheap_.central[spc].mcentral.uncacheSpan(s)
+		} else {
+			atomic.Store(&s.sweepgen, mheap_.sweepgen)
+		}
+	}
+
+	// Get a new cached span from the central lists.
+	//先中心缓存申请内存
+	s = mheap_.central[spc].mcentral.cacheSpan()
+	if s == nil {
+		throw("out of memory")
+	}
 }
 
 func (c *mcache)releaseAll(){
