@@ -113,6 +113,16 @@ const(
 	stackNoCache     = 0 // disable per-P small stack caches
 )
 
+const(
+	uintptrMask = 1<<(8*sys.PtrSize) - 1
+
+	// Goroutine preemption request.
+	// Stored into g->stackguard0 to cause split stack check failure.
+	// Must be greater than any real sp.
+	// 0xfffffade in hex.
+	stackPreempt = uintptrMask & -1314
+)
+
 // Global pool of spans that have free stacks.
 // Stacks are assigned an order according to size.
 //     order = log_2(size/FixedStack)

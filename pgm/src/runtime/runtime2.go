@@ -296,12 +296,33 @@ type g struct{
 	_defer *_defer // innermost defer 最内侧的延迟函数结构体
 	m            *m      //当前绑定的m current m; offset known to arm liblink
 	sched        gobuf //用于存储调度相关的信息
+	syscallsp uintptr // if status==Gsyscall, syscallsp = sched.sp to use during gc
+	syscallpc    uintptr        // if status==Gsyscall, syscallpc = sched.pc to use during gc
+	stktopsp     uintptr        // expected sp at top of stack, to check in traceback
 	atomicstatus uint32//go 运行的状态
 	goid int64 // Goroutine的ID
 	schedlink    guintptr //下一个链接的g构造成链表
+	waitsince int64      // approx time when the g become blocked
+	waitreason waitReason // if status==Gwaiting
 
+	preempt bool //和stackguard0 = stackpreempt一样表示被抢占 preemption signal, duplicates stackguard0 = stackpreempt
+
+	throwsplit   bool // must not split stack
+
+	sysblocktraced bool     // StartTrace has emitted EvGoInSyscall about this goroutine
+	sysexitticks   int64    // cputicks when syscall has returned (for tracing)
+	traceseq       uint64   // trace event sequencer
+	lockedm        muintptr
+	sig uint32
+	writebuf []byte
+	sigcode0 uintptr
+	sigcode1 uintptr
+	sigpc uintptr
+	gopc           uintptr         // pc of go statement that created this goroutine
+	ancestors      *[]ancestorInfo // ancestor information goroutine(s) that created this goroutine (only used if debug.tracebackancestors)
 	startpc uintptr  //pc of goroutine function g的启用函数(比如main.main)
 	racectx uintptr //与race相关
+	cgoCtxt        []uintptr      // cgo traceback context
 }
 
 type m struct{
@@ -312,17 +333,32 @@ type m struct{
 	tls           [6]uintptr   // thread-local storage (for x86 extern register)
 	mstartfn  func() //设置启动函数
 	curg          *g       // current running goroutine
+	caughtsig guintptr // goroutine running during fatal signal
 	p             puintptr // attached p for executing go code (nil if not executing go code)
 	nextp puintptr //下一个要绑定的p
+	oldp          puintptr // the p that was attached before executing a syscall
 	id int64
+	mallocing int32
 	throwing int32 //1、-1有异常 0无异常
+	preemptoff string // if != "", keep curg running on this m
 	locks int32 //统计锁的数量
+	dying         int32
 	profilehz int32
 	spinning      bool //是否处于自选状态(自旋的意思是正在找可运行的g) m is out of work and is actively looking for work
+	blocked       bool // m is blocked on a note
+	incgo         bool   // m is executing a cgo call
 	fastrand [2]uint32 //random
+	traceback uint8
+	ncgocall      uint64      //cgo调用的总数 number of cgo calls in total
+	ncgo int32 // number of cgo calls currently in progress
+	cgoCallersUse uint32      // if non-zero, cgoCallers in use temporarily
+	cgoCallers    *cgoCallers // cgo traceback if crashing in cgo call
 	alllink *m // on allm 等于allm
 	schedlink     muintptr//和sched.midle形成链表，记录空闲的m
+	lockedg guintptr
 	nextwaitm     muintptr    //next m waiting for lock下一个等待锁的m
+	startingtrace bool
+	syscalltick   uint32
 
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
@@ -333,6 +369,11 @@ type m struct{
 	libcallg  guintptr //保存系统调用时的g
 	syscall libcall
 
+	// preemptGen counts the number of completed preemption
+	// signals. This is used to detect when a preemption is
+	// requested, but fails. Accessed atomically.
+	preemptGen uint32
+
 	mOS
 }
 
@@ -341,13 +382,9 @@ type p struct{
 	status uint32 //one of pidle/prunning/.. p的状态
 	link puintptr //与schedt.pidle形成空闲p的链表
 	schedtick   uint32     // incremented on every scheduler call每次调用schedule就会增加1,用于可以随机从全局中获取g
+	syscalltick uint32 //系统调用统计
 	m muintptr //back-link to associated m (nil if idle)绑定的p
 	mcache *mcache
-
-	// wbBuf is this P's GC write barrier buffer.
-	//
-	// TODO: Consider caching this in the running G.
-	wbBuf wbBuf
 
 	// Queue of runnable goroutines. Accessed without lock.
 	runqhead uint32 //队列头部
@@ -368,6 +405,29 @@ type p struct{
 		gList
 		n int32
 	}
+
+	tracebuf traceBufPtr
+
+	// Per-P GC state
+	gcAssistTime         int64    // Nanoseconds in assistAlloc
+	gcFractionalMarkTime int64    // Nanoseconds in fractional mark worker (atomic)
+	gcBgMarkWorker       guintptr // (atomic)
+
+	// wbBuf is this P's GC write barrier buffer.
+	//
+	// TODO: Consider caching this in the running G.
+	wbBuf wbBuf
+
+	runSafePointFn uint32 // if 1, run sched.safePointFn at next safe point
+
+	// Actions to take at some time. This is used to implement the
+	// standard library's time package.
+	// Must hold timersLock to access.
+	timers []*timer
+
+	// preempt is set to indicate that this P should be enter the
+	// scheduler ASAP (regardless of what G is running on it).
+	preempt bool //是否被抢占
 }
 
 type schedt struct{
@@ -379,6 +439,7 @@ type schedt struct{
 
 	midle muintptr //idle m's waiting for work 空闲的m链表
 	nmidle int32//number of idle m's waiting for work 空闲的m的数量
+	nmidlelocked int32
 	mnext int64 //number of m's that have been created and next M ID 下一个m的id
 	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
 	nmfreed int64 //cumulative number of freed m's 累计释放的m的数量
@@ -392,6 +453,18 @@ type schedt struct{
 	runq gQueue
 	runqsize int32
 
+	// disable controls selective disabling of the scheduler.
+	//
+	// Use schedEnableUser to control this.
+	//
+	// disable is protected by sched.lock.
+	disable struct {
+		// user disables scheduling of user goroutines.
+		user     bool
+		runnable gQueue // pending runnable Gs
+		n        int32  // length of runnable
+	}
+
 	// Global cache of dead G's.
 	gFree struct{
 		lock mutex
@@ -399,6 +472,18 @@ type schedt struct{
 		noStack gList // Gs without stacks
 		n int32
 	}
+
+	gcwaiting  uint32 //gc正在等待运行 gc is waiting to run
+	stopwait int32
+	stopnote   note
+	sysmonwait uint32
+	sysmonnote note
+
+	// safepointFn should be called on each P at the next GC
+	// safepoint if p.runSafePointFn is set.
+	safePointFn   func(*p)
+	safePointWait int32
+	safePointNote note
 
 	procresizetime int64 // nanotime() of last change to gomaxprocs 最后一次调整p数量的时间(毫秒)
 	totaltime int64 // ∫gomaxprocs dt up to procresizetime 最后一次和最新调整p数量的总时间
@@ -426,6 +511,33 @@ type gobuf struct {
 	bp   uintptr // for GOEXPERIMENT=framepointer
 }
 
+// sleep and wakeup on one-time events.
+// before any calls to notesleep or notewakeup,
+// must call noteclear to initialize the Note.
+// then, exactly one thread can call notesleep
+// and exactly one thread can call notewakeup (once).
+// once notewakeup has been called, the notesleep
+// will return.  future notesleep will return immediately.
+// subsequent noteclear must be called only after
+// previous notesleep has returned, e.g. it's disallowed
+// to call noteclear straight after notewakeup.
+//
+// notetsleep is like notesleep but wakes up after
+// a given number of nanoseconds even if the event
+// has not yet happened.  if a goroutine uses notetsleep to
+// wake up early, it must wait to call noteclear until it
+// can be sure that no other goroutine is calling
+// notewakeup.
+//
+// notesleep/notetsleep are generally called on g0,
+// notetsleepg is similar to notetsleep but is called on user g.
+type note struct {
+	// Futex-based impl treats it as uint32 key,
+	// while sema-based impl as M* waitm.
+	// Used to be a union, but unions break precise GC.
+	key uintptr
+}
+
 //g存储参数方法信息,会被转化成funcInfo
 type funcval struct{
 	fn uintptr
@@ -448,6 +560,26 @@ type libcall struct{
 type wincallbackcontext struct {
 	gobody unsafe.Pointer // go function to call
 	argsize uintptr // callback arguments size (in bytes)
+}
+
+// Layout of in-memory per-function information prepared by linker
+// See https://golang.org/s/go12symtab.
+// Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
+// and with package debug/gosym and with symtab.go in package runtime.
+type _func struct {
+	entry   uintptr // start pc
+	nameoff int32   // function name
+
+	args        int32  // in/out args size
+	deferreturn uint32 // offset of start of a deferreturn call instruction from entry, if any.
+
+	pcsp      int32
+	pcfile    int32
+	pcln      int32
+	npcdata   int32
+	funcID    funcID  // set for certain special runtime functions
+	_         [2]int8 // unused
+	nfuncdata uint8   // must be last
 }
 
 type itab struct {}
@@ -525,4 +657,107 @@ var(
 	processorVersionInfo uint32
 	isIntel bool
 	lfenceBeforeRdtsc bool
+
+	framepointer_enabled bool  // set by cmd/link
 )
+
+// The maximum number of frames we print for a traceback
+const _TracebackMaxFrames = 100
+
+// ancestorInfo records details of where a goroutine was started.
+type ancestorInfo struct {
+	pcs  []uintptr // pcs from the stack of this goroutine
+	goid int64     // goroutine id of this goroutine; original goroutine possibly dead
+	gopc uintptr   // pc of go statement that created this goroutine
+}
+
+const (
+	_TraceRuntimeFrames = 1 << iota // include frames for internal runtime functions.
+	_TraceTrap                      // the initial PC, SP are from a trap, not a return PC from a call
+	_TraceJumpStack                 // if traceback is on a systemstack, resume trace at g that called into it
+)
+
+// A waitReason explains why a goroutine has been stopped.
+// See gopark. Do not re-use waitReasons, add new ones.
+type waitReason uint8
+
+const (
+	waitReasonZero                  waitReason = iota // ""
+	waitReasonGCAssistMarking                         // "GC assist marking"
+	waitReasonIOWait                                  // "IO wait"
+	waitReasonChanReceiveNilChan                      // "chan receive (nil chan)"
+	waitReasonChanSendNilChan                         // "chan send (nil chan)"
+	waitReasonDumpingHeap                             // "dumping heap"
+	waitReasonGarbageCollection                       // "garbage collection"
+	waitReasonGarbageCollectionScan                   // "garbage collection scan"
+	waitReasonPanicWait                               // "panicwait"
+	waitReasonSelect                                  // "select"
+	waitReasonSelectNoCases                           // "select (no cases)"
+	waitReasonGCAssistWait                            // "GC assist wait"
+	waitReasonGCSweepWait                             // "GC sweep wait"
+	waitReasonGCScavengeWait                          // "GC scavenge wait"
+	waitReasonChanReceive                             // "chan receive"
+	waitReasonChanSend                                // "chan send"
+	waitReasonFinalizerWait                           // "finalizer wait"
+	waitReasonForceGCIdle                             // "force gc (idle)"
+	waitReasonSemacquire                              // "semacquire"
+	waitReasonSleep                                   // "sleep"
+	waitReasonSyncCondWait                            // "sync.Cond.Wait"
+	waitReasonTimerGoroutineIdle                      // "timer goroutine (idle)"
+	waitReasonTraceReaderBlocked                      // "trace reader (blocked)"
+	waitReasonWaitForGCCycle                          // "wait for GC cycle"
+	waitReasonGCWorkerIdle                            // "GC worker (idle)"
+	waitReasonPreempted                               // "preempted"
+	waitReasonDebugCall                               // "debug call"
+)
+
+var waitReasonStrings = [...]string{
+	waitReasonZero:                  "",
+	waitReasonGCAssistMarking:       "GC assist marking",
+	waitReasonIOWait:                "IO wait",
+	waitReasonChanReceiveNilChan:    "chan receive (nil chan)",
+	waitReasonChanSendNilChan:       "chan send (nil chan)",
+	waitReasonDumpingHeap:           "dumping heap",
+	waitReasonGarbageCollection:     "garbage collection",
+	waitReasonGarbageCollectionScan: "garbage collection scan",
+	waitReasonPanicWait:             "panicwait",
+	waitReasonSelect:                "select",
+	waitReasonSelectNoCases:         "select (no cases)",
+	waitReasonGCAssistWait:          "GC assist wait",
+	waitReasonGCSweepWait:           "GC sweep wait",
+	waitReasonGCScavengeWait:        "GC scavenge wait",
+	waitReasonChanReceive:           "chan receive",
+	waitReasonChanSend:              "chan send",
+	waitReasonFinalizerWait:         "finalizer wait",
+	waitReasonForceGCIdle:           "force gc (idle)",
+	waitReasonSemacquire:            "semacquire",
+	waitReasonSleep:                 "sleep",
+	waitReasonSyncCondWait:          "sync.Cond.Wait",
+	waitReasonTimerGoroutineIdle:    "timer goroutine (idle)",
+	waitReasonTraceReaderBlocked:    "trace reader (blocked)",
+	waitReasonWaitForGCCycle:        "wait for GC cycle",
+	waitReasonGCWorkerIdle:          "GC worker (idle)",
+	waitReasonPreempted:             "preempted",
+	waitReasonDebugCall:             "debug call",
+}
+
+func (w waitReason) String() string {
+	if w < 0 || w >= waitReason(len(waitReasonStrings)) {
+		return "unknown wait reason"
+	}
+	return waitReasonStrings[w]
+}
+
+// stack traces
+type stkframe struct {
+	fn       funcInfo   // function being run
+	pc       uintptr    // program counter within fn
+	continpc uintptr    // program counter where execution can continue, or 0 if not
+	lr       uintptr    // program counter at caller aka link register
+	sp       uintptr    // stack pointer at pc
+	fp       uintptr    // stack pointer at caller aka frame pointer
+	varp     uintptr    // top of local variables
+	argp     uintptr    // pointer to function arguments
+	arglen   uintptr    // number of bytes at argp
+	argmap   *bitvector // force use of this argmap
+}

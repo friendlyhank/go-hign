@@ -10,12 +10,67 @@ import (
 	"unsafe"
 )
 
+// Keep a cached value to make gotraceback fast,
+// since we call it on every call to gentraceback.
+// The cached value is a uint32 in which the low bits
+// are the "crash" and "all" settings and the remaining
+// bits are the traceback value (0 off, 1 on, 2 include system).
+const (
+	tracebackCrash = 1 << iota
+	tracebackAll
+	tracebackShift = iota
+)
+
+var traceback_cache uint32 = 2 << tracebackShift
+var traceback_env uint32
+
 //asm_amd64.s_rt0_go
 func args(c int32,v **byte){
 }
 
 func environ()[]string{
 	return envs
+}
+
+// TODO: These should be locals in testAtomic64, but we don't 8-byte
+// align stack variables on 386.
+var test_z64, test_x64 uint64
+
+func testAtomic64() {
+	test_z64 = 42
+	test_x64 = 0
+	if atomic.Cas64(&test_z64, test_x64, 1) {
+		throw("cas64 failed")
+	}
+	if test_x64 != 0 {
+		throw("cas64 failed")
+	}
+	test_x64 = 42
+	if !atomic.Cas64(&test_z64, test_x64, 1) {
+		throw("cas64 failed")
+	}
+	if test_x64 != 42 || test_z64 != 1 {
+		throw("cas64 failed")
+	}
+	if atomic.Load64(&test_z64) != 1 {
+		throw("load64 failed")
+	}
+	atomic.Store64(&test_z64, (1<<40)+1)
+	if atomic.Load64(&test_z64) != (1<<40)+1 {
+		throw("store64 failed")
+	}
+	if atomic.Xadd64(&test_z64, (1<<40)+1) != (2<<40)+2 {
+		throw("xadd64 failed")
+	}
+	if atomic.Load64(&test_z64) != (2<<40)+2 {
+		throw("xadd64 failed")
+	}
+	if atomic.Xchg64(&test_z64, (3<<40)+3) != (2<<40)+2 {
+		throw("xchg64 failed")
+	}
+	if atomic.Load64(&test_z64) != (3<<40)+3 {
+		throw("xchg64 failed")
+	}
 }
 
 //asm_amd64.s_rt0_go 数据类型检查
@@ -226,6 +281,28 @@ func timediv(v int64, div int32, rem *int32) int32 {
 		*rem = int32(v)
 	}
 	return res
+}
+
+// gotraceback returns the current traceback settings.
+//
+// If level is 0, suppress all tracebacks.
+// If level is 1, show tracebacks, but exclude runtime frames.
+// If level is 2, show tracebacks including runtime frames.
+// If all is set, print all goroutine stacks. Otherwise, print just the current goroutine.
+// If crash is set, crash (core dump, etc) after tracebacking.
+//
+//go:nosplit
+func gotraceback() (level int32, all, crash bool) {
+	_g_ := getg()
+	t := atomic.Load(&traceback_cache)
+	crash = t&tracebackCrash != 0
+	all = _g_.m.throwing > 0 || t&tracebackAll != 0
+	if _g_.m.traceback != 0 {
+		level = int32(_g_.m.traceback)
+	} else {
+		level = int32(t >> tracebackShift)
+	}
+	return
 }
 
 // Helpers for Go. Must be NOSPLIT, must only call NOSPLIT functions, and must not block.

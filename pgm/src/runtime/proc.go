@@ -260,6 +260,30 @@ func schedinit(){
 	}
 }
 
+func checkmcount(){
+	// sched lock is held
+	if mcount() > sched.maxmcount {
+		print("runtime: program exceeds ",sched.maxmcount,"-thread limit\n")
+		throw("thread exhaustion")
+	}
+}
+
+// mReserveID returns the next ID to use for a new m. This new m is immediately
+// considered 'running' by checkdead.
+//
+// sched.lock must be held.
+//生成m的id
+func mReserveID()int64{
+	if sched.mnext +1 < sched.mnext{
+		throw("runtime: thread ID overflow")
+	}
+	id := sched.mnext
+	sched.mnext++
+	//检查m的数量是否超出限制
+	checkmcount()
+	return id
+}
+
 //初始化m,g0才可以去初始化
 func mcommoninit(mp *m,id int64){
 	_g_ := getg()
@@ -299,6 +323,39 @@ var fastrandseed uintptr
 func fastrandinit(){
 	s := (*[unsafe.Sizeof(fastrandseed)]byte)(unsafe.Pointer(&fastrandseed))[:]
 	getRandomData(s)
+}
+
+// freezeStopWait is a large value that freezetheworld sets
+// sched.stopwait to in order to request that all Gs permanently stop.
+const freezeStopWait = 0x7fffffff
+
+// freezing is set to non-zero if the runtime is trying to freeze the
+// world.
+var freezing uint32
+
+// Similar to stopTheWorld but best-effort and can be called several times.
+// There is no reverse operation, used during crashing.
+// This function must not lock any mutexes.
+//比stopTheWorld 更小力度的,常用于抛出异常,这时候抢占所有的g
+func freezetheworld() {
+	atomic.Store(&freezing,1)
+	// stopwait and preemption requests can be lost
+	// due to races with concurrently executing threads,
+	// so try several times
+	for i :=0; i <5;i++{
+		// this should tell the scheduler to not start any new goroutines
+		sched.stopwait = freezeStopWait
+		atomic.Store(&sched.gcwaiting,1)
+		// this should stop running goroutines
+		if !preemptall(){
+			break // no running goroutines
+		}
+		usleep(1000)
+	}
+	// to be sure
+	usleep(1000)
+	preemptall()
+	usleep(1000)
 }
 
 // If asked to move to or from a Gscanstatus this will throw. Use the castogscanstatus
@@ -582,30 +639,6 @@ top:
 		return gp, inheritTime
 	}
 	goto top
-}
-
-func checkmcount(){
-	// sched lock is held
-	if mcount() > sched.maxmcount {
-		print("runtime: program exceeds ",sched.maxmcount,"-thread limit\n")
-		throw("thread exhaustion")
-	}
-}
-
-// mReserveID returns the next ID to use for a new m. This new m is immediately
-// considered 'running' by checkdead.
-//
-// sched.lock must be held.
-//生成m的id
-func mReserveID()int64{
-	if sched.mnext +1 < sched.mnext{
-		throw("runtime: thread ID overflow")
-	}
-	id := sched.mnext
-	sched.mnext++
-	//检查m的数量是否超出限制
-	checkmcount()
-	return id
 }
 
 // init initializes pp, which may be a freshly allocated p or a
@@ -1069,6 +1102,447 @@ func sysmon(){
 
 }
 
+// Tell all goroutines that they have been preempted and they should stop.
+// This function is purely best-effort. It can fail to inform a goroutine if a
+// processor just started running it.
+// No locks need to be held.
+// Returns true if preemption request was issued to at least one goroutine.
+//抢占所有的g,stopTheWorld和freezetheworl的时候会调用
+func preemptall()bool{
+	res := false
+	for _,_p_ := range allp{
+		if _p_.status !=_Grunning{
+			continue
+		}
+		if preemptone(_p_){
+			res = true
+		}
+	}
+	return res
+}
+
+// Tell the goroutine running on processor P to stop.
+// This function is purely best-effort. It can incorrectly fail to inform the
+// goroutine. It can send inform the wrong goroutine. Even if it informs the
+// correct goroutine, that goroutine might ignore the request if it is
+// simultaneously executing newstack.
+// No lock needs to be held.
+// Returns true if preemption request was issued.
+// The actual preemption will happen at some point in the future
+// and will be indicated by the gp->status no longer being
+// Grunning
+func preemptone(_p_ *p) bool {
+	mp :=_p_.m.ptr()
+	if mp == nil || mp == getg().m{
+		return false
+	}
+	gp := mp.curg
+	if gp == nil || gp == mp.g0{
+		return false
+	}
+
+	// Every call in a go routine checks for stack overflow by
+	// comparing the current stack pointer to gp->stackguard0.
+	// Setting gp->stackguard0 to StackPreempt folds
+	// preemption into the normal stack overflow check.
+	gp.stackguard0 =stackPreempt
+
+	// Request an async preemption of this P.
+	if preemptMSupported && debug.asyncpreemptoff == 0 {
+		_p_.preempt = true
+		preemptM(mp)
+	}
+	return true
+}
+
+// Standard syscall entry used by the go syscall library and normal cgo calls.
+//
+// This is exported via linkname to assembly in the syscall package.
+//
+//go:nosplit
+//go:linkname entersyscall
+func entersyscall() {
+	reentersyscall(getcallerpc(), getcallersp())
+}
+
+func entersyscall_sysmon() {
+	lock(&sched.lock)
+	if atomic.Load(&sched.sysmonwait) != 0 {
+		atomic.Store(&sched.sysmonwait, 0)
+		notewakeup(&sched.sysmonnote)
+	}
+	unlock(&sched.lock)
+}
+
+// The goroutine g is about to enter a system call.
+// Record that it's not using the cpu anymore.
+// This is called only from the go syscall library and cgocall,
+// not from the low-level system calls used by the runtime.
+//
+// Entersyscall cannot split the stack: the gosave must
+// make g->sched refer to the caller's stack segment, because
+// entersyscall is going to return immediately after.
+//
+// Nothing entersyscall calls can split the stack either.
+// We cannot safely move the stack during an active call to syscall,
+// because we do not know which of the uintptr arguments are
+// really pointers (back into the stack).
+// In practice, this means that we make the fast path run through
+// entersyscall doing no-split things, and the slow path has to use systemstack
+// to run bigger things on the system stack.
+//
+// reentersyscall is the entry point used by cgo callbacks, where explicitly
+// saved SP and PC are restored. This is needed when exitsyscall will be called
+// from a function further up in the call stack than the parent, as g->syscallsp
+// must always point to a valid stack frame. entersyscall below is the normal
+// entry point for syscalls, which obtains the SP and PC from the caller.
+//
+// Syscall tracing:
+// At the start of a syscall we emit traceGoSysCall to capture the stack trace.
+// If the syscall does not block, that is it, we do not emit any other events.
+// If the syscall blocks (that is, P is retaken), retaker emits traceGoSysBlock;
+// when syscall returns we emit traceGoSysExit and when the goroutine starts running
+// (potentially instantly, if exitsyscallfast returns true) we emit traceGoStart.
+// To ensure that traceGoSysExit is emitted strictly after traceGoSysBlock,
+// we remember current value of syscalltick in m (_g_.m.syscalltick = _g_.m.p.ptr().syscalltick),
+// whoever emits traceGoSysBlock increments p.syscalltick afterwards;
+// and we wait for the increment before emitting traceGoSysExit.
+// Note that the increment is done even if tracing is not enabled,
+// because tracing can be enabled in the middle of syscall. We don't want the wait to hang.
+//
+//go:nosplit
+func reentersyscall(pc, sp uintptr) {
+	_g_ := getg()
+
+	// Disable preemption because during this function g is in Gsyscall status,
+	// but can have inconsistent g->sched, do not let GC observe it.
+	_g_.m.locks++
+
+	// Entersyscall must not call any function that might split/grow the stack.
+	// (See details in comment above.)
+	// Catch calls that might, by replacing the stack guard with something that
+	// will trip any stack check and leaving a flag to tell newstack to die.
+	_g_.stackguard0 = stackPreempt
+	_g_.throwsplit = true
+
+	// Leave SP around for GC and traceback.
+	save(pc, sp)
+	_g_.syscallsp = sp
+	_g_.syscallpc = pc
+	casgstatus(_g_, _Grunning, _Gsyscall)
+	if _g_.syscallsp < _g_.stack.lo || _g_.stack.hi < _g_.syscallsp {
+		systemstack(func() {
+			print("entersyscall inconsistent ", hex(_g_.syscallsp), " [", hex(_g_.stack.lo), ",", hex(_g_.stack.hi), "]\n")
+			throw("entersyscall")
+		})
+	}
+
+	if trace.enabled {
+		systemstack(traceGoSysCall)
+		// systemstack itself clobbers g.sched.{pc,sp} and we might
+		// need them later when the G is genuinely blocked in a
+		// syscall
+		save(pc, sp)
+	}
+
+	if atomic.Load(&sched.sysmonwait) != 0 {
+		systemstack(entersyscall_sysmon)
+		save(pc, sp)
+	}
+
+	if _g_.m.p.ptr().runSafePointFn != 0 {
+		// runSafePointFn may stack split if run on this stack
+		systemstack(runSafePointFn)
+		save(pc, sp)
+	}
+
+	_g_.m.syscalltick = _g_.m.p.ptr().syscalltick
+	_g_.sysblocktraced = true
+	pp := _g_.m.p.ptr()
+	pp.m = 0
+	_g_.m.oldp.set(pp)
+	_g_.m.p = 0
+	atomic.Store(&pp.status, _Psyscall)
+	if sched.gcwaiting != 0 {
+		systemstack(entersyscall_gcwait)
+		save(pc, sp)
+	}
+
+	_g_.m.locks--
+}
+
+func entersyscall_gcwait() {
+	_g_ := getg()
+	_p_ := _g_.m.oldp.ptr()
+
+	lock(&sched.lock)
+	if sched.stopwait > 0 && atomic.Cas(&_p_.status, _Psyscall, _Pgcstop) {
+		if trace.enabled {
+			traceGoSysBlock(_p_)
+			traceProcStop(_p_)
+		}
+		_p_.syscalltick++
+		if sched.stopwait--; sched.stopwait == 0 {
+			notewakeup(&sched.stopnote)
+		}
+	}
+	unlock(&sched.lock)
+}
+
+// runSafePointFn runs the safe point function, if any, for this P.
+// This should be called like
+//
+//     if getg().m.p.runSafePointFn != 0 {
+//         runSafePointFn()
+//     }
+//
+// runSafePointFn must be checked on any transition in to _Pidle or
+// _Psyscall to avoid a race where forEachP sees that the P is running
+// just before the P goes into _Pidle/_Psyscall and neither forEachP
+// nor the P run the safe-point function.
+func runSafePointFn() {
+	p := getg().m.p.ptr()
+	// Resolve the race between forEachP running the safe-point
+	// function on this P's behalf and this P running the
+	// safe-point function directly.
+	if !atomic.Cas(&p.runSafePointFn, 1, 0) {
+		return
+	}
+	sched.safePointFn(p)
+	lock(&sched.lock)
+	sched.safePointWait--
+	if sched.safePointWait == 0 {
+		notewakeup(&sched.safePointNote)
+	}
+	unlock(&sched.lock)
+}
+
+
+// save updates getg().sched to refer to pc and sp so that a following
+// gogo will restore pc and sp.
+//
+// save must not have write barriers because invoking a write barrier
+// can clobber getg().sched.
+//
+//go:nosplit
+//go:nowritebarrierrec
+func save(pc, sp uintptr) {
+	_g_ := getg()
+
+	_g_.sched.pc = pc
+	_g_.sched.sp = sp
+	_g_.sched.lr = 0
+	_g_.sched.ret = 0
+	_g_.sched.g = guintptr(unsafe.Pointer(_g_))
+	// We need to ensure ctxt is zero, but can't have a write
+	// barrier here. However, it should always already be zero.
+	// Assert that.
+	if _g_.sched.ctxt != nil {
+		badctxt()
+	}
+}
+
+// The goroutine g exited its system call.
+// Arrange for it to run on a cpu again.
+// This is called only from the go syscall library, not
+// from the low-level system calls used by the runtime.
+//
+// Write barriers are not allowed because our P may have been stolen.
+//
+// This is exported via linkname to assembly in the syscall package.
+//
+//go:nosplit
+//go:nowritebarrierrec
+//go:linkname exitsyscall
+func exitsyscall() {
+	_g_ := getg()
+
+	_g_.m.locks++ // see comment in entersyscall
+	if getcallersp() > _g_.syscallsp {
+		throw("exitsyscall: syscall frame is no longer valid")
+	}
+
+	_g_.waitsince = 0
+	oldp := _g_.m.oldp.ptr()
+	_g_.m.oldp = 0
+	if exitsyscallfast(oldp) {
+		if trace.enabled {
+			if oldp != _g_.m.p.ptr() || _g_.m.syscalltick != _g_.m.p.ptr().syscalltick {
+				systemstack(traceGoStart)
+			}
+		}
+		// There's a cpu for us, so we can run.
+		_g_.m.p.ptr().syscalltick++
+		// We need to cas the status and scan before resuming...
+		casgstatus(_g_, _Gsyscall, _Grunning)
+
+		// Garbage collector isn't running (since we are),
+		// so okay to clear syscallsp.
+		_g_.syscallsp = 0
+		_g_.m.locks--
+		if _g_.preempt {
+			// restore the preemption request in case we've cleared it in newstack
+			_g_.stackguard0 = stackPreempt
+		} else {
+			// otherwise restore the real _StackGuard, we've spoiled it in entersyscall/entersyscallblock
+			_g_.stackguard0 = _g_.stack.lo + _StackGuard
+		}
+		_g_.throwsplit = false
+
+		if sched.disable.user && !schedEnabled(_g_) {
+			// Scheduling of this goroutine is disabled.
+			Gosched()
+		}
+
+		return
+	}
+
+	_g_.sysexitticks = 0
+	if trace.enabled {
+		// Wait till traceGoSysBlock event is emitted.
+		// This ensures consistency of the trace (the goroutine is started after it is blocked).
+		for oldp != nil && oldp.syscalltick == _g_.m.syscalltick {
+			osyield()
+		}
+		// We can't trace syscall exit right now because we don't have a P.
+		// Tracing code can invoke write barriers that cannot run without a P.
+		// So instead we remember the syscall exit time and emit the event
+		// in execute when we have a P.
+		_g_.sysexitticks = cputicks()
+	}
+
+	_g_.m.locks--
+
+	// Call the scheduler.
+	mcall(exitsyscall0)
+
+	// Scheduler returned, so we're allowed to run now.
+	// Delete the syscallsp information that we left for
+	// the garbage collector during the system call.
+	// Must wait until now because until gosched returns
+	// we don't know for sure that the garbage collector
+	// is not running.
+	_g_.syscallsp = 0
+	_g_.m.p.ptr().syscalltick++
+	_g_.throwsplit = false
+}
+
+// exitsyscall slow path on g0.
+// Failed to acquire P, enqueue gp as runnable.
+//
+//go:nowritebarrierrec
+func exitsyscall0(gp *g) {
+	_g_ := getg()
+
+	casgstatus(gp, _Gsyscall, _Grunnable)
+	dropg()
+	lock(&sched.lock)
+	var _p_ *p
+	if schedEnabled(_g_) {
+		_p_ = pidleget()
+	}
+	if _p_ == nil {
+		globrunqput(gp)
+	} else if atomic.Load(&sched.sysmonwait) != 0 {
+		atomic.Store(&sched.sysmonwait, 0)
+		notewakeup(&sched.sysmonnote)
+	}
+	unlock(&sched.lock)
+	if _p_ != nil {
+		acquirep(_p_)
+		execute(gp, false) // Never returns.
+	}
+	if _g_.m.lockedg != 0 {
+		// Wait until another thread schedules gp and so m again.
+		stoplockedm()
+		execute(gp, false) // Never returns.
+	}
+	stopm()
+	schedule() // Never returns.
+}
+
+// Put gp on the global runnable queue.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func globrunqput(gp *g) {
+	sched.runq.pushBack(gp)
+	sched.runqsize++
+}
+
+
+// dropg removes the association between m and the current goroutine m->curg (gp for short).
+// Typically a caller sets gp's status away from Grunning and then
+// immediately calls dropg to finish the job. The caller is also responsible
+// for arranging that gp will be restarted using ready at an
+// appropriate time. After calling dropg and arranging for gp to be
+// readied later, the caller can do other work but eventually should
+// call schedule to restart the scheduling of goroutines on this m.
+func dropg() {
+	_g_ := getg()
+
+	setMNoWB(&_g_.m.curg.m, nil)
+	setGNoWB(&_g_.m.curg, nil)
+}
+
+//go:nosplit
+
+// Gosched yields the processor, allowing other goroutines to run. It does not
+// suspend the current goroutine, so execution resumes automatically.
+func Gosched() {
+	checkTimeouts()
+	mcall(gosched_m)
+}
+
+// schedEnabled reports whether gp should be scheduled. It returns
+// false is scheduling of gp is disabled.
+func schedEnabled(gp *g) bool {
+	if sched.disable.user {
+		return isSystemGoroutine(gp, true)
+	}
+	return true
+}
+
+//go:nosplit
+func exitsyscallfast(oldp *p) bool {
+	_g_ := getg()
+
+	// Freezetheworld sets stopwait but does not retake P's.
+	if sched.stopwait == freezeStopWait {
+		return false
+	}
+
+	// Try to re-acquire the last P.
+	if oldp != nil && oldp.status == _Psyscall && atomic.Cas(&oldp.status, _Psyscall, _Pidle) {
+		// There's a cpu for us, so we can run.
+		wirep(oldp)
+		exitsyscallfast_reacquired()
+		return true
+	}
+
+	// Try to get any other idle P.
+	if sched.pidle != 0 {
+		var ok bool
+		systemstack(func() {
+			ok = exitsyscallfast_pidle()
+			if ok && trace.enabled {
+				if oldp != nil {
+					// Wait till traceGoSysBlock event is emitted.
+					// This ensures consistency of the trace (the goroutine is started after it is blocked).
+					for oldp.syscalltick == _g_.m.syscalltick {
+						osyield()
+					}
+				}
+				traceGoSysExit(0)
+			}
+		})
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
 // Try to get an m from midle list.
 // Sched must be locked.
 // May run during STW, so write barriers are not allowed.
@@ -1208,6 +1682,89 @@ func (l *gList)pop()*g{
 		l.head =gp.schedlink
 	}
 	return gp
+}
+
+var starttime int64
+
+func schedtrace(detailed bool) {
+	now := nanotime()
+	if starttime == 0 {
+		starttime = now
+	}
+
+	lock(&sched.lock)
+	print("SCHED ", (now-starttime)/1e6, "ms: gomaxprocs=", gomaxprocs, " idleprocs=", sched.npidle, " threads=", mcount(), " spinningthreads=", sched.nmspinning, " idlethreads=", sched.nmidle, " runqueue=", sched.runqsize)
+	if detailed {
+		print(" gcwaiting=", sched.gcwaiting, " nmidlelocked=", sched.nmidlelocked, " stopwait=", sched.stopwait, " sysmonwait=", sched.sysmonwait, "\n")
+	}
+	// We must be careful while reading data from P's, M's and G's.
+	// Even if we hold schedlock, most data can be changed concurrently.
+	// E.g. (p->m ? p->m->id : -1) can crash if p->m changes from non-nil to nil.
+	for i, _p_ := range allp {
+		mp := _p_.m.ptr()
+		h := atomic.Load(&_p_.runqhead)
+		t := atomic.Load(&_p_.runqtail)
+		if detailed {
+			id := int64(-1)
+			if mp != nil {
+				id = mp.id
+			}
+			print("  P", i, ": status=", _p_.status, " schedtick=", _p_.schedtick, " syscalltick=", _p_.syscalltick, " m=", id, " runqsize=", t-h, " gfreecnt=", _p_.gFree.n, " timerslen=", len(_p_.timers), "\n")
+		} else {
+			// In non-detailed mode format lengths of per-P run queues as:
+			// [len1 len2 len3 len4]
+			print(" ")
+			if i == 0 {
+				print("[")
+			}
+			print(t - h)
+			if i == len(allp)-1 {
+				print("]\n")
+			}
+		}
+	}
+
+	if !detailed {
+		unlock(&sched.lock)
+		return
+	}
+
+	for mp := allm; mp != nil; mp = mp.alllink {
+		_p_ := mp.p.ptr()
+		gp := mp.curg
+		lockedg := mp.lockedg.ptr()
+		id1 := int32(-1)
+		if _p_ != nil {
+			id1 = _p_.id
+		}
+		id2 := int64(-1)
+		if gp != nil {
+			id2 = gp.goid
+		}
+		id3 := int64(-1)
+		if lockedg != nil {
+			id3 = lockedg.goid
+		}
+		print("  M", mp.id, ": p=", id1, " curg=", id2, " mallocing=", mp.mallocing, " throwing=", mp.throwing, " preemptoff=", mp.preemptoff, ""+" locks=", mp.locks, " dying=", mp.dying, " spinning=", mp.spinning, " blocked=", mp.blocked, " lockedg=", id3, "\n")
+	}
+
+	lock(&allglock)
+	for gi := 0; gi < len(allgs); gi++ {
+		gp := allgs[gi]
+		mp := gp.m
+		lockedm := gp.lockedm.ptr()
+		id1 := int64(-1)
+		if mp != nil {
+			id1 = mp.id
+		}
+		id2 := int64(-1)
+		if lockedm != nil {
+			id2 = lockedm.id
+		}
+		print("  G", gp.goid, ": status=", readgstatus(gp), "(", gp.waitreason.String(), ") m=", id1, " lockedm=", id2, "\n")
+	}
+	unlock(&allglock)
+	unlock(&sched.lock)
 }
 
 // An initTask represents the set of initializations that need to be done for a package.

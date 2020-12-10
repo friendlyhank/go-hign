@@ -4,13 +4,17 @@
 
 package sys
 
-const (
-	ArchFamily          = AMD64
-	BigEndian           = false
-	DefaultPhysPageSize = 4096
-	PCQuantum           = 1
-	Int64Align          = 8
-	MinFrameSize        = 0
-)
+type ArchFamilyType int
 
-type Uintreg uint64
+const (
+	AMD64 ArchFamilyType = iota
+	ARM
+	ARM64
+	I386
+	MIPS
+	MIPS64
+	PPC64
+	RISCV64
+	S390X
+	WASM
+)
