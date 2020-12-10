@@ -224,6 +224,93 @@ func (list *mSpanList) init() {
 	list.last =  nil
 }
 
+//链表操作,删除某个mspan节点
+func (list *mSpanList)remove(span *mspan){
+	if span.list != list {
+		print("runtime: failed mSpanList.remove span.npages=", span.npages,
+			" span=", span, " prev=", span.prev, " span.list=", span.list, " list=", list, "\n")
+		throw("mSpanList.remove")
+	}
+	if list.first ==span{
+		list.first = span.next
+	}else{
+		span.prev.next = span.next
+	}
+	if list.last == span{
+		list.last  = span.prev
+	}else{
+		span.next.prev = span.prev
+	}
+	span.next = nil
+	span.prev = nil
+	span.list = nil
+}
+
+func (list *mSpanList)isEmpty()bool{
+	return list.first == nil
+}
+
+//链表操作,插入某个mspan节点
+func (list *mSpanList)insert(span *mspan){
+	if span.next != nil || span.prev != nil || span.list != nil {
+		println("runtime: failed mSpanList.insert", span, span.next, span.prev, span.list)
+		throw("mSpanList.insert")
+	}
+	span.next  = list.first
+	if list.first != nil{
+		// The list contains at least one span; link it in.
+		// The last span in the list doesn't change.
+		list.first.prev = span
+	}else{
+		// The list contains no spans, so this is also the last span.
+		list.last = span
+	}
+	list.first  = span
+	span.list  = list
+}
+
+func (list *mSpanList) insertBack(span *mspan) {
+	if span.next != nil || span.prev != nil || span.list != nil {
+		println("runtime: failed mSpanList.insertBack", span, span.next, span.prev, span.list)
+		throw("mSpanList.insertBack")
+	}
+	span.prev = list.last
+	if list.last != nil {
+		// The list contains at least one span.
+		list.last.next = span
+	} else {
+		// The list contains no spans, so this is also the first span.
+		list.first = span
+	}
+	list.last = span
+	span.list = list
+}
+
+// takeAll removes all spans from other and inserts them at the front
+// of list.
+func (list *mSpanList) takeAll(other *mSpanList) {
+	if other.isEmpty() {
+		return
+	}
+
+	// Reparent everything in other to list.
+	for s := other.first; s != nil; s = s.next {
+		s.list = list
+	}
+
+	// Concatenate the lists.
+	if list.isEmpty() {
+		*list = *other
+	} else {
+		// Neither list is empty. Put other before list.
+		other.last.next = list.first
+		list.first.prev = other.last
+		list.first = other.first
+	}
+
+	other.first, other.last = nil, nil
+}
+
 // A spanClass represents the size class and noscan-ness of a span.
 //
 // Each size class has a noscan spanClass and a scan spanClass. The

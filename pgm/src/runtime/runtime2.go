@@ -495,7 +495,17 @@ type _defer struct{
 // _panic values only live on the stack, regular stack pointer
 // adjustment takes care of them.
 type _painc struct{
-	link *_painc
+	argp      unsafe.Pointer //指向defer调用时参数得指针 pointer to arguments of deferred call run during panic; cannot move - known to liblink
+	link *_painc //指向更早调用的runimt.painc结构 link to earlier panic
+	recovered bool           //表示当前runtime.painc是否被recover恢复 whether this panic is over
+	aborted   bool           //表示当前painc是否被强行终止 the panic was aborted
+
+	//pc、sp、goexit三个字段是为了修复runtime.Goexit问题引入的
+	//该函数能够只结束调用该函数的Groutine而不影响其他的Groutine
+	//但是该函数会被defer中的painc和recover取消,引入这三个字段的目的就是为了解决这个问题
+	pc        uintptr        // where to return to in runtime if this panic is bypassed
+	sp        unsafe.Pointer // where to return to in runtime if this panic is bypassed
+	goexit    bool
 }
 
 var(

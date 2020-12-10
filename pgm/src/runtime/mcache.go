@@ -10,9 +10,21 @@ import "runtime/internal/atomic"
 //线程的缓存
 //go:notinheap
 type mcache struct{
-	stackcache [_NumStackOrders]stackfreelist //栈缓存 与全局栈缓存stackpool相比减少了锁竞争影响
+	// Allocator cache for tiny objects w/o pointers.
+	// See "Tiny allocator" comment in malloc.go.
+
+	// tiny points to the beginning of the current tiny block, or
+	// nil if there is no current tiny block.
+	//
+	// tiny is a heap pointer. Since mcache is in non-GC'd memory,
+	// we handle it by clearing it in releaseAll during mark
+	// termination.
+	tiny             uintptr
+	tinyoffset       uintptr
 
 	alloc [numSpanClasses]*mspan //每个缓存可以持有67(spanclasses)*2个runtime.span spans to allocate from, indexed by spanClass
+
+	stackcache [_NumStackOrders]stackfreelist //栈缓存 与全局栈缓存stackpool相比减少了锁竞争影响
 
 	// flushGen indicates the sweepgen during which this mcache
 	// was last flushed. If flushGen != mheap_.sweepgen, the spans
@@ -88,10 +100,14 @@ func (c *mcache)releaseAll(){
 	for i := range c.alloc {
 		s := c.alloc[i]
 		if s != &emptymspan{
+			//不是空的emptyspan,进行回收
+			mheap_.central[i].mcentral.uncacheSpan(s)
 			c.alloc[i] = &emptymspan
 		}
 	}
 	// Clear tinyalloc pool.
+	c.tiny = 0
+	c.tinyoffset = 0
 }
 
 // prepareForSweep flushes c if the system has entered a new sweep phase
@@ -112,4 +128,5 @@ func (c *mcache)prepareForSweep(){
 		println("bad flushGen", c.flushGen, "in prepareForSweep; sweepgen", sg)
 		throw("bad flushGen")
 	}
+	c.releaseAll()
 }
