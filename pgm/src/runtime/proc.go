@@ -2121,6 +2121,7 @@ func (l *gList)pop()*g{
 
 var starttime int64
 
+//schedt相关调试信息
 func schedtrace(detailed bool) {
 	now := nanotime()
 	if starttime == 0 {
