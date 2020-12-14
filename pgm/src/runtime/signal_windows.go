@@ -1,5 +1,17 @@
 package runtime
 
+var (
+	badsignalmsg [100]byte
+	badsignallen int32
+)
+
+func setBadSignalMsg() {
+	const msg = "runtime: signal received on thread not created by Go.\n"
+	for i, c := range msg {
+		badsignalmsg[i] = byte(c)
+		badsignallen++
+	}
+}
 
 // Following are not implemented.
 

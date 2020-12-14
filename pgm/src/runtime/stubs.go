@@ -175,8 +175,6 @@ type neverCallThisFunction struct{}
 // prematurely and if there is leftover state it may panic.
 func goexit(neverCallThisFunction)
 
-var switchtothreadAddr unsafe.Pointer
-
 func systemstack_switch()
 
 // alignUp rounds n up to a multiple of a. a must be a power of 2.

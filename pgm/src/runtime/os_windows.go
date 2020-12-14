@@ -171,9 +171,22 @@ type mOS struct{
 	preemptExtLock uint32 //线程抢占的锁
 }
 
-var asmstdcallAddr unsafe.Pointer
+// Call a Windows function with stdcall conventions,
+// and switch to os stack during the call.
+//TODO HANK return
+//runtime/sys_windows_amd64.s
+func asmstdcall(fn unsafe.Pointer)
+
+var asmstdcallAddr unsafe.Pointer //asmstdcall的调用地址,osinit中初始化
 
 func osinit() {
+	//返回方法的地址
+	asmstdcallAddr = unsafe.Pointer(funcPC(asmstdcall))
+	usleep2Addr = unsafe.Pointer(funcPC(usleep2))
+	switchtothreadAddr = unsafe.Pointer(funcPC(switchtothread))
+
+	setBadSignalMsg()
+
 	//获取cpu核数
 	ncpu =getproccount()
 }
@@ -436,8 +449,11 @@ func stdcall7(fn stdFunction, a0, a1, a2, a3, a4, a5, a6 uintptr) uintptr {
 
 // in sys_windows_386.s and sys_windows_amd64.s
 func onosstack(fn unsafe.Pointer, arg uint32)
+func usleep2(usec uint32)
+func switchtothread()
 
 var usleep2Addr unsafe.Pointer
+var switchtothreadAddr unsafe.Pointer
 
 //go:nosplit
 func osyield() {

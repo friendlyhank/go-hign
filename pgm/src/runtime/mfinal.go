@@ -1,5 +1,8 @@
 package runtime
 
+
+var finlock mutex  // protects the following variables
+
 var (
 	fingCreate  uint32
 	fingRunning bool

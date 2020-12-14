@@ -173,6 +173,12 @@ func funcPC(f interface{}) uintptr {
 	return *(*uintptr)(efaceOf(&f).data)
 }
 
+//runtime/asm_amd64.s
+//go:nosplit
+func badctxt() {
+	throw("ctxt != 0")
+}
+
 var (
 	allgs []*g //所有的g
 	allglock mutex//操作所有g的锁
@@ -198,12 +204,6 @@ func readgstatus(gp *g)uint32{
 
 //runtime/asm_amd64.s
 //go:nosplit
-func badctxt() {
-	throw("ctxt != 0")
-}
-
-//runtime/asm_amd64.s
-//go:nosplit
 //go:nowritebarrierrec
 func badmorestackg0() {
 }
@@ -225,6 +225,21 @@ func badmorestackgsignal() {
 //调度器的初始化
 func schedinit(){
 	lockInit(&sched.lock,lockRankSched)
+	lockInit(&sched.sysmonlock, lockRankSysmon)
+	lockInit(&sched.deferlock,lockRankDefer)
+	lockInit(&sched.sudoglock, lockRankSudog)
+	lockInit(&deadlock, lockRankDeadlock)
+	lockInit(&paniclk, lockRankPanic)
+	lockInit(&allglock, lockRankAllg)
+	lockInit(&allpLock, lockRankAllp)
+	lockInit(&reflectOffs.lock,lockRankReflectOffs)
+	lockInit(&finlock,lockRankFin)
+	lockInit(&trace.bufLock, lockRankTraceBuf)
+	lockInit(&trace.stringsLock, lockRankTraceStrings)
+	lockInit(&trace.lock, lockRankTrace)
+	lockInit(&cpuprof.lock, lockRankCpuprof)
+	lockInit(&trace.stackTab.lock, lockRankTraceStackTab)
+
 
 	// raceinit must be the first call to race detector.
 	// In particular, it must be done before mallocinit below calls racemapshadow.
@@ -232,6 +247,11 @@ func schedinit(){
 
 	//最大的线程数量限制
 	sched.maxmcount =10000
+
+	tracebackinit()
+	//校验moduledata数据
+	moduledataverify()
+
 
 	//栈、内存分配器、调取器相关初始化
 	stackinit()

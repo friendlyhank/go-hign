@@ -458,7 +458,7 @@ type schedt struct{
 	lastpoll  uint64 // time of last network poll, 0 if currently polling
 	pollUntil uint64 // time to which current poll is sleeping
 
-	lock mutex
+	lock mutex //操作schedt的锁
 
 	// When increasing nmidle, nmidlelocked, nmsys, or nmfreed, be
 	// sure to call checkdead().
@@ -500,6 +500,12 @@ type schedt struct{
 		n int32
 	}
 
+	// Central cache of sudog structs.
+	sudoglock mutex
+
+	// Central pool of available defer structs of different sizes.
+	deferlock mutex //defer的锁
+
 	gcwaiting  uint32 //gc正在等待运行 gc is waiting to run
 	stopwait int32
 	stopnote   note
@@ -514,6 +520,12 @@ type schedt struct{
 
 	procresizetime int64 // nanotime() of last change to gomaxprocs 最后一次调整p数量的时间(毫秒)
 	totaltime int64 // ∫gomaxprocs dt up to procresizetime 最后一次和最新调整p数量的总时间
+
+	// sysmonlock protects sysmon's actions on the runtime.
+	//
+	// Acquire and hold this mutex to block sysmon from interacting
+	// with the rest of the runtime.
+	sysmonlock mutex //sysmon监控的锁
 }
 
 type gobuf struct {

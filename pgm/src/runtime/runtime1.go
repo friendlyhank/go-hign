@@ -24,8 +24,16 @@ const (
 var traceback_cache uint32 = 2 << tracebackShift
 var traceback_env uint32
 
+var (
+	argc int32
+	argv **byte
+)
+
 //asm_amd64.s_rt0_go
 func args(c int32,v **byte){
+	argc = c
+	argv = v
+	sysargs(c,v)
 }
 
 func environ()[]string{

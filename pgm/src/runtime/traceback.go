@@ -1,3 +1,7 @@
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package runtime
 
 import (
@@ -6,7 +10,44 @@ import (
 	"unsafe"
 )
 
+// The code in this file implements stack trace walking for all architectures.
+// The most important fact about a given architecture is whether it uses a link register.
+// On systems with link registers, the prologue for a non-leaf function stores the
+// incoming value of LR at the bottom of the newly allocated stack frame.
+// On systems without link registers, the architecture pushes a return PC during
+// the call instruction, so the return PC ends up above the stack frame.
+// In this file, the return PC is always called LR, no matter how it was found.
+//
+// To date, the opposite of a link register architecture is an x86 architecture.
+// This code may need to change if some other kind of non-link-register
+// architecture comes along.
+//
+// The other important fact is the size of a pointer: on 32-bit systems the LR
+// takes up only 4 bytes on the stack, while on 64-bit systems it takes up 8 bytes.
+// Typically this is ptrSize.
+//
+// As an exception, amd64p32 had ptrSize == 4 but the CALL instruction still
+// stored an 8-byte return PC onto the stack. To accommodate this, we used regSize
+// as the size of the architecture-pushed return PC.
+//
+// usesLR is defined below in terms of minFrameSize, which is defined in
+// arch_$GOARCH.go. ptrSize and regSize are defined in stubs.go.
+
 const usesLR = sys.MinFrameSize > 0
+
+var skipPC uintptr
+
+//traceback初始化
+func tracebackinit() {
+	// Go variable initialization happens late during runtime startup.
+	// Instead of initializing the variables above in the declarations,
+	// schedinit calls this function so that the variables are
+	// initialized and available earlier in the startup sequence.
+	skipPC = funcPC(skipPleaseUseCallersFrames)
+}
+
+// This function is defined in asm.s to be sizeofSkipFunction bytes long.
+func skipPleaseUseCallersFrames()
 
 var gStatusStrings = [...]string{
 	_Gidle:      "idle",
