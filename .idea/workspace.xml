@@ -2,27 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/os/file.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/cpuprof.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/debug_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/testing/benchmark.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/testing/example.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/testing/internal/testdeps/deps.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/testing/testing.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/lockrank.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/lockrank.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/lockrank_on.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/lockrank_on.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mfinal.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mfinal.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mem_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mem_windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mgc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mgc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/proc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/proc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime1.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/signal_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/signal_windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/sizeclasses.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/sizeclasses.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stack.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stack.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/symtab.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/symtab.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/traceback.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/traceback.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/type.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/type.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,41 +93,41 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2685" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607628300819" />
-    <state x="2660" y="275" key="FileChooserDialogImpl" timestamp="1607933600666">
+    <state x="2660" y="275" key="FileChooserDialogImpl" timestamp="1607938860680">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607933600666" />
-    <state width="1877" height="316" key="GridCell.Tab.0.bottom" timestamp="1607928364464">
+    <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607938860680" />
+    <state width="1877" height="72" key="GridCell.Tab.0.bottom" timestamp="1607938687761">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="316" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607928364464" />
-    <state width="1877" height="316" key="GridCell.Tab.0.center" timestamp="1607928364464">
+    <state width="1877" height="72" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607938687761" />
+    <state width="1877" height="72" key="GridCell.Tab.0.center" timestamp="1607938687761">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="316" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607928364464" />
-    <state width="1877" height="316" key="GridCell.Tab.0.left" timestamp="1607928364464">
+    <state width="1877" height="72" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607938687761" />
+    <state width="1877" height="72" key="GridCell.Tab.0.left" timestamp="1607938687761">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="316" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607928364464" />
-    <state width="1877" height="316" key="GridCell.Tab.0.right" timestamp="1607928364464">
+    <state width="1877" height="72" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607938687761" />
+    <state width="1877" height="72" key="GridCell.Tab.0.right" timestamp="1607938687761">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="316" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607928364464" />
+    <state width="1877" height="72" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607938687761" />
     <state x="2381" y="164" key="SettingsEditor" timestamp="1607933731602">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2381" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607933731602" />
-    <state x="2601" y="261" width="648" height="524" key="StructurePopup" timestamp="1607917239441">
+    <state x="2601" y="261" width="648" height="524" key="StructurePopup" timestamp="1607936605187">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2601" y="261" width="648" height="524" key="StructurePopup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607917239441" />
+    <state x="2601" y="261" width="648" height="524" key="StructurePopup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607936605187" />
     <state x="2582" y="254" width="596" height="532" key="find.popup" timestamp="1607927119901">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2582" y="254" width="596" height="532" key="find.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607927119901" />
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1607935007808">
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1607941338857">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607935007808" />
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607941338857" />
   </component>
 </project>

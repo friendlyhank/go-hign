@@ -132,6 +132,23 @@ func getcallerpc() uintptr
 //go:noescape
 func getcallersp() uintptr // implemented as an intrinsic on all platforms
 
+// alignUp rounds n up to a multiple of a. a must be a power of 2.
+func alignUp(n, a uintptr) uintptr {
+	return (n + a - 1) &^ (a - 1)
+}
+
+// alignDown rounds n down to a multiple of a. a must be a power of 2.
+func alignDown(n, a uintptr) uintptr {
+	return n &^ (a - 1)
+}
+
+// divRoundUp returns ceil(n / a).
+func divRoundUp(n, a uintptr) uintptr {
+	// a is generally a power of two. This will get inlined and
+	// the compiler will optimize the division.
+	return (n + a - 1) / a
+}
+
 // noescape hides a pointer from escape analysis.  noescape is
 // the identity function but escape analysis doesn't think the
 // output depends on the input.  noescape is inlined and currently
@@ -176,21 +193,3 @@ type neverCallThisFunction struct{}
 func goexit(neverCallThisFunction)
 
 func systemstack_switch()
-
-// alignUp rounds n up to a multiple of a. a must be a power of 2.
-func alignUp(n, a uintptr) uintptr {
-	return (n + a - 1) &^ (a - 1)
-}
-
-// alignDown rounds n down to a multiple of a. a must be a power of 2.
-func alignDown(n, a uintptr) uintptr {
-	return n &^ (a - 1)
-}
-
-// divRoundUp returns ceil(n / a).
-func divRoundUp(n, a uintptr) uintptr {
-	// a is generally a power of two. This will get inlined and
-	// the compiler will optimize the division.
-	return (n + a - 1) / a
-}
-

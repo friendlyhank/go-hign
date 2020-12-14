@@ -73,6 +73,7 @@ package runtime
 //    66      32768       32768        1           0     12.50%
 
 const (
+	_MaxSmallSize   = 32768
 	_PageShift      = 13
 	_NumSizeClasses = 67 //span的sizeclass
 )

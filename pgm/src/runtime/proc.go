@@ -251,11 +251,11 @@ func schedinit(){
 	tracebackinit()
 	//校验moduledata数据
 	moduledataverify()
-
-
-	//栈、内存分配器、调取器相关初始化
+	//栈相关的初始化
 	stackinit()
+	//内存分配器初始化
 	mallocinit()
+	//初始化m
 	mcommoninit(_g_.m,-1)
 
 	//初始化参数和环境变量

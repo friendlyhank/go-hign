@@ -17,6 +17,7 @@ const (
 
 // Don't split the stack as this function may be invoked without a valid G,
 // which prevents us from allocating more stack.
+//直接向系统申请内存
 //go:nosplit
 func sysAlloc(n uintptr, sysStat *uint64) unsafe.Pointer {
 	mSysStatInc(sysStat, n)

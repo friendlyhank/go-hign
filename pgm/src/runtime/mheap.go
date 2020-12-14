@@ -319,6 +319,49 @@ func (list *mSpanList) takeAll(other *mSpanList) {
 // collector.
 type spanClass uint8
 
+// allocManual allocates a manually-managed span of npage pages.
+// allocManual returns nil if allocation fails.
+//
+// allocManual adds the bytes used to *stat, which should be a
+// memstats in-use field. Unlike allocations in the GC'd heap, the
+// allocation does *not* count toward heap_inuse or heap_sys.
+//
+// The memory backing the returned span may not be zeroed if
+// span.needzero is set.
+//
+// allocManual must be called on the system stack because it may
+// acquire the heap lock via allocSpan. See mheap for details.
+//在systemstack中调用
+//go:systemstack
+func (h *mheap) allocManual(npages uintptr, stat *uint64) *mspan {
+
+}
+
+// allocSpan allocates an mspan which owns npages worth of memory.
+//
+// If manual == false, allocSpan allocates a heap span of class spanclass
+// and updates heap accounting. If manual == true, allocSpan allocates a
+// manually-managed span (spanclass is ignored), and the caller is
+// responsible for any accounting related to its use of the span. Either
+// way, allocSpan will atomically add the bytes in the newly allocated
+// span to *sysStat.
+//
+// The returned span is fully initialized.
+//
+// h must not be locked.
+//
+// allocSpan must be called on the system stack both because it acquires
+// the heap lock and because it must block GC transitions.
+//
+//go:systemstack
+func (h *mheap) allocSpan(npages uintptr, manual bool, spanclass spanClass, sysStat *uint64) (s *mspan) {
+	// Function-global state.
+	gp := getg()
+	base, scav := uintptr(0), uintptr(0)
+
+
+}
+
 const (
 	numSpanClasses = _NumSizeClasses << 1
 )

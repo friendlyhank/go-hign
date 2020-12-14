@@ -110,6 +110,7 @@ const(
 	//            == 3: logging of per-word updates
 	//            == 4: logging of per-word reads
 	stackDebug       = 0
+	stackFromSystem  = 0 //直接从系统中分配内存,而不是从heap中申请 allocate stacks from system memory instead of the heap
 	stackNoCache     = 0 // disable per-P small stack caches
 )
 
@@ -164,12 +165,25 @@ func stackinit(){
 	}
 }
 
+// Allocates a stack from the free pool. Must be called with
+// stackpool[order].item.mu held.
+//从stackpool中分配一块栈空间,如果不够会向mheap中申请
+func stackpoolalloc(order uint8) gclinkptr {
+	list := &stackpool[order].item.span
+	s :=list.first
+	lockWithRankMayAcquire(&mheap_.lock, lockRankMheap)
+	//nil说明还没向mheap中申请内存
+	if s == nil{
+
+	}
+}
+
 // stackalloc allocates an n byte stack.
 //
 // stackalloc must run on the system stack because it uses per-P
 // resources and must not split the stack.
 //
-//给g分配栈空间
+//分配栈空间
 //go:systemstack
 func stackalloc(n uint32)stack{
 	// Stackalloc must be called on scheduler stack, so that we
@@ -184,19 +198,54 @@ func stackalloc(n uint32)stack{
 		print("stackalloc ", n, "\n")
 	}
 
+	if debug.efence != 0 || stackFromSystem != 0{
+		n = uint32(alignUp(uintptr(n),physPageSize))
+		v :=sysAlloc(uintptr(n),&memstats.stacks_sys)
+		if v == nil{
+			throw("out of memory (stackalloc)")
+		}
+		return stack{uintptr(v),uintptr(v)+uintptr(n)}
+	}
+
 	// Small stacks are allocated with a fixed-size free-list allocator.
 	// If we need a stack of a bigger size, we fall back on allocating
 	// a dedicated span.
-	//var v unsafe.Pointer
+	var v unsafe.Pointer
+	//内存小于32KB
 	if n < _FixedStack<<_NumStackOrders && n < _StackCacheSize{
-		//var x gclinkptr
-		if stackNoCache != 0{
-
+		order := uint8(0)
+		n2 := n
+		for n2 > _FixedStack{
+			order++
+			n2 >>= 1
+		}
+		var x gclinkptr
+		if stackNoCache != 0 || thisg.m.p == 0 || thisg.m.preemptoff != ""{
+			// thisg.m.p == 0 can happen in the guts of exitsyscall
+			// or procresize. Just get a stack from the global pool.
+			// Also don't touch stackcache during gc
+			// as it's flushed concurrently.
+			lock(&stackpool[order].item.mu)
+			x = stackpoolalloc(order)
+			unlock(&stackpool[order].item.mu)
 		}else{
 
 		}
+		v = unsafe.Pointer(x)
+	}else{
+		//内存大于32KB
 	}
-	return stack{}
+
+	if raceenabled{
+		racemalloc(v,uintptr(n))
+	}
+	if msanenabled{
+		msanmalloc(v, uintptr(n))
+	}
+	if stackDebug >= 1 {
+		print("  allocated ", v, "\n")
+	}
+	return stack{uintptr(v),uintptr(v)+uintptr(n)}
 }
 
 // round x up to a power of 2.
