@@ -157,3 +157,44 @@ func notewakeup(n *note) {
 		semawakeup((*m)(unsafe.Pointer(v)))
 	}
 }
+
+// One-time notifications.
+func noteclear(n *note) {
+	if GOOS == "aix" {
+		// On AIX, semaphores might not synchronize the memory in some
+		// rare cases. See issue #30189.
+		atomic.Storeuintptr(&n.key, 0)
+	} else {
+		n.key = 0
+	}
+}
+
+func notesleep(n *note) {
+	gp := getg()
+	if gp != gp.m.g0 {
+		throw("notesleep not on g0")
+	}
+	semacreate(gp.m)
+	if !atomic.Casuintptr(&n.key, 0, uintptr(unsafe.Pointer(gp.m))) {
+		// Must be locked (got wakeup).
+		if n.key != locked {
+			throw("notesleep - waitm out of sync")
+		}
+		return
+	}
+	// Queued. Sleep.
+	gp.m.blocked = true
+	if *cgo_yield == nil {
+		semasleep(-1)
+	} else {
+		// Sleep for an arbitrary-but-moderate interval to poll libc interceptors.
+		const ns = 10e6
+		for atomic.Loaduintptr(&n.key) == 0 {
+			semasleep(ns)
+			asmcgocall(*cgo_yield, nil)
+		}
+	}
+	gp.m.blocked = false
+}
+
+func checkTimeouts() {}

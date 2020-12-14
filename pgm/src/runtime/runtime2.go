@@ -312,6 +312,7 @@ type g struct{
 	sysblocktraced bool     // StartTrace has emitted EvGoInSyscall about this goroutine
 	sysexitticks   int64    // cputicks when syscall has returned (for tracing)
 	traceseq       uint64   // trace event sequencer
+	tracelastp     puintptr // last P emitted an event for this goroutine
 	lockedm        muintptr
 	sig uint32
 	writebuf []byte
@@ -353,6 +354,7 @@ type m struct{
 	ncgo int32 // number of cgo calls currently in progress
 	cgoCallersUse uint32      // if non-zero, cgoCallers in use temporarily
 	cgoCallers    *cgoCallers // cgo traceback if crashing in cgo call
+	park          note
 	alllink *m // on allm 等于allm
 	schedlink     muintptr//和sched.midle形成链表，记录空闲的m
 	lockedg guintptr
@@ -408,10 +410,21 @@ type p struct{
 
 	tracebuf traceBufPtr
 
+	// The when field of the first entry on the timer heap.
+	// This is updated using atomic functions.
+	// This is 0 if the timer heap is empty.
+	timer0When uint64
+
 	// Per-P GC state
 	gcAssistTime         int64    // Nanoseconds in assistAlloc
 	gcFractionalMarkTime int64    // Nanoseconds in fractional mark worker (atomic)
 	gcBgMarkWorker       guintptr // (atomic)
+	gcMarkWorkerMode     gcMarkWorkerMode
+
+	// gcw is this P's GC work buffer cache. The work buffer is
+	// filled by write barriers, drained by mutator assists, and
+	// disposed on certain GC state transitions.
+	gcw gcWork
 
 	// wbBuf is this P's GC write barrier buffer.
 	//
@@ -420,10 +433,20 @@ type p struct{
 
 	runSafePointFn uint32 // if 1, run sched.safePointFn at next safe point
 
+	// Lock for timers. We normally access the timers while running
+	// on this P, but the scheduler can also do it from a different P.
+	timersLock mutex
+
 	// Actions to take at some time. This is used to implement the
 	// standard library's time package.
 	// Must hold timersLock to access.
 	timers []*timer
+
+	// Number of timerModifiedEarlier timers on P's heap.
+	// This should only be modified while holding timersLock,
+	// or while the timer status is in a transient state
+	// such as timerModifying.
+	adjustTimers uint32
 
 	// preempt is set to indicate that this P should be enter the
 	// scheduler ASAP (regardless of what G is running on it).
@@ -431,6 +454,9 @@ type p struct{
 }
 
 type schedt struct{
+
+	lastpoll  uint64 // time of last network poll, 0 if currently polling
+	pollUntil uint64 // time to which current poll is sleeping
 
 	lock mutex
 
@@ -442,6 +468,7 @@ type schedt struct{
 	nmidlelocked int32
 	mnext int64 //number of m's that have been created and next M ID 下一个m的id
 	maxmcount    int32 //maximum number of m's allowed (or die) 设置m的最大数量
+	nmsys        int32    // number of system m's not counted for deadlock
 	nmfreed int64 //cumulative number of freed m's 累计释放的m的数量
 
 
@@ -542,6 +569,13 @@ type note struct {
 type funcval struct{
 	fn uintptr
 	//variable-size, fn-specific data here
+}
+
+// Lock-free stack node.
+// Also known to export_test.go.
+type lfnode struct {
+	next    uint64
+	pushcnt uintptr
 }
 
 type sudog struct {}
@@ -761,3 +795,26 @@ type stkframe struct {
 	arglen   uintptr    // number of bytes at argp
 	argmap   *bitvector // force use of this argmap
 }
+
+// setMNoWB performs *mp = new without a write barrier.
+// For times when it's impractical to use an muintptr.
+//go:nosplit
+//go:nowritebarrier
+func setMNoWB(mp **m, new *m) {
+	(*muintptr)(unsafe.Pointer(mp)).set(new)
+}
+
+// setGNoWB performs *gp = new without a write barrier.
+// For times when it's impractical to use a guintptr.
+//go:nosplit
+//go:nowritebarrier
+func setGNoWB(gp **g, new *g) {
+	(*guintptr)(unsafe.Pointer(gp)).set(new)
+}
+
+
+// Set by the linker so the runtime can determine the buildmode.
+var (
+	islibrary bool // -buildmode=c-shared
+	isarchive bool // -buildmode=c-archive
+)

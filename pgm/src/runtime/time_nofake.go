@@ -2,11 +2,16 @@ package runtime
 
 import "unsafe"
 
+// faketime is the simulated time in nanoseconds since 1970 for the
+// playground.
+//
+// Zero means not to use faketime.
+var faketime int64
+
 //go:nosplit
 func nanotime() int64 {
 	return nanotime1()
 }
-
 
 // write must be nosplit on Windows (see write1)
 //

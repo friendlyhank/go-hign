@@ -489,6 +489,12 @@ func traceGoSysBlock(pp *p) {
 	releasem(mp)
 }
 
+func traceGoSched() {
+	_g_ := getg()
+	_g_.tracelastp = _g_.m.p
+	traceEvent(traceEvGoSched, 1)
+}
+
 func traceGoStart() {
 	_g_ := getg().m.curg
 	_p_ := _g_.m.p

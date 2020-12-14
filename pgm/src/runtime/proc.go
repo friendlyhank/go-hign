@@ -1461,6 +1461,350 @@ func exitsyscall0(gp *g) {
 	schedule() // Never returns.
 }
 
+// Stops execution of the current m until new work is available.
+// Returns with acquired P.
+func stopm() {
+	_g_ := getg()
+
+	if _g_.m.locks != 0 {
+		throw("stopm holding locks")
+	}
+	if _g_.m.p != 0 {
+		throw("stopm holding p")
+	}
+	if _g_.m.spinning {
+		throw("stopm spinning")
+	}
+
+	lock(&sched.lock)
+	mput(_g_.m)
+	unlock(&sched.lock)
+	notesleep(&_g_.m.park)
+	noteclear(&_g_.m.park)
+	acquirep(_g_.m.nextp.ptr())
+	_g_.m.nextp = 0
+}
+
+// Put mp on midle list.
+// Sched must be locked.
+// May run during STW, so write barriers are not allowed.
+//go:nowritebarrierrec
+func mput(mp *m) {
+	mp.schedlink = sched.midle
+	sched.midle.set(mp)
+	sched.nmidle++
+	checkdead()
+}
+
+// Check for deadlock situation.
+// The check is based on number of running M's, if 0 -> deadlock.
+// sched.lock must be held.
+func checkdead() {
+	// For -buildmode=c-shared or -buildmode=c-archive it's OK if
+	// there are no running goroutines. The calling program is
+	// assumed to be running.
+	if islibrary || isarchive {
+		return
+	}
+
+	// If we are dying because of a signal caught on an already idle thread,
+	// freezetheworld will cause all running threads to block.
+	// And runtime will essentially enter into deadlock state,
+	// except that there is a thread that will call exit soon.
+	if panicking > 0 {
+		return
+	}
+
+	// If we are not running under cgo, but we have an extra M then account
+	// for it. (It is possible to have an extra M on Windows without cgo to
+	// accommodate callbacks created by syscall.NewCallback. See issue #6751
+	// for details.)
+	var run0 int32
+	if !iscgo && cgoHasExtraM {
+		mp := lockextra(true)
+		haveExtraM := extraMCount > 0
+		unlockextra(mp)
+		if haveExtraM {
+			run0 = 1
+		}
+	}
+
+	run := mcount() - sched.nmidle - sched.nmidlelocked - sched.nmsys
+	if run > run0 {
+		return
+	}
+	if run < 0 {
+		print("runtime: checkdead: nmidle=", sched.nmidle, " nmidlelocked=", sched.nmidlelocked, " mcount=", mcount(), " nmsys=", sched.nmsys, "\n")
+		throw("checkdead: inconsistent counts")
+	}
+
+	grunning := 0
+	lock(&allglock)
+	for i := 0; i < len(allgs); i++ {
+		gp := allgs[i]
+		if isSystemGoroutine(gp, false) {
+			continue
+		}
+		s := readgstatus(gp)
+		switch s &^ _Gscan {
+		case _Gwaiting,
+			_Gpreempted:
+			grunning++
+		case _Grunnable,
+			_Grunning,
+			_Gsyscall:
+			unlock(&allglock)
+			print("runtime: checkdead: find g ", gp.goid, " in status ", s, "\n")
+			throw("checkdead: runnable g")
+		}
+	}
+	unlock(&allglock)
+	if grunning == 0 { // possible if main goroutine calls runtime·Goexit()
+		unlock(&sched.lock) // unlock so that GODEBUG=scheddetail=1 doesn't hang
+		throw("no goroutines (main called runtime.Goexit) - deadlock!")
+	}
+
+	// Maybe jump time forward for playground.
+	if faketime != 0 {
+		when, _p_ := timeSleepUntil()
+		if _p_ != nil {
+			faketime = when
+			for pp := &sched.pidle; *pp != 0; pp = &(*pp).ptr().link {
+				if (*pp).ptr() == _p_ {
+					*pp = _p_.link
+					break
+				}
+			}
+			mp := mget()
+			if mp == nil {
+				// There should always be a free M since
+				// nothing is running.
+				throw("checkdead: no m for timer")
+			}
+			mp.nextp.set(_p_)
+			notewakeup(&mp.park)
+			return
+		}
+	}
+
+	// There are no goroutines running, so we can look at the P's.
+	for _, _p_ := range allp {
+		if len(_p_.timers) > 0 {
+			return
+		}
+	}
+
+	getg().m.throwing = -1 // do not dump full stacks
+	unlock(&sched.lock)    // unlock so that GODEBUG=scheddetail=1 doesn't hang
+	throw("all goroutines are asleep - deadlock!")
+}
+
+// Stops execution of the current m that is locked to a g until the g is runnable again.
+// Returns with acquired P.
+func stoplockedm() {
+	_g_ := getg()
+
+	if _g_.m.lockedg == 0 || _g_.m.lockedg.ptr().lockedm.ptr() != _g_.m {
+		throw("stoplockedm: inconsistent locking")
+	}
+	if _g_.m.p != 0 {
+		// Schedule another M to run this p.
+		_p_ := releasep()
+		handoffp(_p_)
+	}
+	incidlelocked(1)
+	// Wait until another thread schedules lockedg again.
+	notesleep(&_g_.m.park)
+	noteclear(&_g_.m.park)
+	status := readgstatus(_g_.m.lockedg.ptr())
+	if status&^_Gscan != _Grunnable {
+		print("runtime:stoplockedm: g is not Grunnable or Gscanrunnable\n")
+		dumpgstatus(_g_)
+		throw("stoplockedm: not runnable")
+	}
+	acquirep(_g_.m.nextp.ptr())
+	_g_.m.nextp = 0
+}
+
+func dumpgstatus(gp *g) {
+	_g_ := getg()
+	print("runtime: gp: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(gp), "\n")
+	print("runtime:  g:  g=", _g_, ", goid=", _g_.goid, ",  g->atomicstatus=", readgstatus(_g_), "\n")
+}
+
+func incidlelocked(v int32) {
+	lock(&sched.lock)
+	sched.nmidlelocked += v
+	if v > 0 {
+		checkdead()
+	}
+	unlock(&sched.lock)
+}
+
+func mspinning() {
+	// startm's caller incremented nmspinning. Set the new M's spinning.
+	getg().m.spinning = true
+}
+
+// Schedules some M to run the p (creates an M if necessary).
+// If p==nil, tries to get an idle P, if no idle P's does nothing.
+// May run with m.p==nil, so write barriers are not allowed.
+// If spinning is set, the caller has incremented nmspinning and startm will
+// either decrement nmspinning or set m.spinning in the newly started M.
+//go:nowritebarrierrec
+func startm(_p_ *p, spinning bool) {
+	lock(&sched.lock)
+	if _p_ == nil {
+		_p_ = pidleget()
+		if _p_ == nil {
+			unlock(&sched.lock)
+			if spinning {
+				// The caller incremented nmspinning, but there are no idle Ps,
+				// so it's okay to just undo the increment and give up.
+				if int32(atomic.Xadd(&sched.nmspinning, -1)) < 0 {
+					throw("startm: negative nmspinning")
+				}
+			}
+			return
+		}
+	}
+	mp := mget()
+	if mp == nil {
+		// No M is available, we must drop sched.lock and call newm.
+		// However, we already own a P to assign to the M.
+		//
+		// Once sched.lock is released, another G (e.g., in a syscall),
+		// could find no idle P while checkdead finds a runnable G but
+		// no running M's because this new M hasn't started yet, thus
+		// throwing in an apparent deadlock.
+		//
+		// Avoid this situation by pre-allocating the ID for the new M,
+		// thus marking it as 'running' before we drop sched.lock. This
+		// new M will eventually run the scheduler to execute any
+		// queued G's.
+		id := mReserveID()
+		unlock(&sched.lock)
+
+		var fn func()
+		if spinning {
+			// The caller incremented nmspinning, so set m.spinning in the new M.
+			fn = mspinning
+		}
+		newm(fn, _p_, id)
+		return
+	}
+	unlock(&sched.lock)
+	if mp.spinning {
+		throw("startm: m is spinning")
+	}
+	if mp.nextp != 0 {
+		throw("startm: m has p")
+	}
+	if spinning && !runqempty(_p_) {
+		throw("startm: p has runnable gs")
+	}
+	// The caller incremented nmspinning, so set m.spinning in the new M.
+	mp.spinning = spinning
+	mp.nextp.set(_p_)
+	notewakeup(&mp.park)
+}
+
+// Hands off P from syscall or locked M.
+// Always runs without a P, so write barriers are not allowed.
+//go:nowritebarrierrec
+func handoffp(_p_ *p) {
+	// handoffp must start an M in any situation where
+	// findrunnable would return a G to run on _p_.
+
+	// if it has local work, start it straight away
+	if !runqempty(_p_) || sched.runqsize != 0 {
+		startm(_p_, false)
+		return
+	}
+	// if it has GC work, start it straight away
+	if gcBlackenEnabled != 0 && gcMarkWorkAvailable(_p_) {
+		startm(_p_, false)
+		return
+	}
+	// no local work, check that there are no spinning/idle M's,
+	// otherwise our help is not required
+	if atomic.Load(&sched.nmspinning)+atomic.Load(&sched.npidle) == 0 && atomic.Cas(&sched.nmspinning, 0, 1) { // TODO: fast atomic
+		startm(_p_, true)
+		return
+	}
+	lock(&sched.lock)
+	if sched.gcwaiting != 0 {
+		_p_.status = _Pgcstop
+		sched.stopwait--
+		if sched.stopwait == 0 {
+			notewakeup(&sched.stopnote)
+		}
+		unlock(&sched.lock)
+		return
+	}
+	if _p_.runSafePointFn != 0 && atomic.Cas(&_p_.runSafePointFn, 1, 0) {
+		sched.safePointFn(_p_)
+		sched.safePointWait--
+		if sched.safePointWait == 0 {
+			notewakeup(&sched.safePointNote)
+		}
+	}
+	if sched.runqsize != 0 {
+		unlock(&sched.lock)
+		startm(_p_, false)
+		return
+	}
+	// If this is the last running P and nobody is polling network,
+	// need to wakeup another M to poll network.
+	if sched.npidle == uint32(gomaxprocs-1) && atomic.Load64(&sched.lastpoll) != 0 {
+		unlock(&sched.lock)
+		startm(_p_, false)
+		return
+	}
+	if when := nobarrierWakeTime(_p_); when != 0 {
+		wakeNetPoller(when)
+	}
+	pidleput(_p_)
+	unlock(&sched.lock)
+}
+
+// wakeNetPoller wakes up the thread sleeping in the network poller,
+// if there is one, and if it isn't going to wake up anyhow before
+// the when argument.
+func wakeNetPoller(when int64) {
+	if atomic.Load64(&sched.lastpoll) == 0 {
+		// In findrunnable we ensure that when polling the pollUntil
+		// field is either zero or the time to which the current
+		// poll is expected to run. This can have a spurious wakeup
+		// but should never miss a wakeup.
+		pollerPollUntil := int64(atomic.Load64(&sched.pollUntil))
+		if pollerPollUntil == 0 || pollerPollUntil > when {
+			netpollBreak()
+		}
+	}
+}
+
+// Disassociate p and the current m.
+func releasep() *p {
+	_g_ := getg()
+
+	if _g_.m.p == 0 {
+		throw("releasep: invalid arg")
+	}
+	_p_ := _g_.m.p.ptr()
+	if _p_.m.ptr() != _g_.m || _p_.status != _Prunning {
+		print("releasep: m=", _g_.m, " m->p=", _g_.m.p.ptr(), " p->m=", hex(_p_.m), " p->status=", _p_.status, "\n")
+		throw("releasep: invalid p state")
+	}
+	if trace.enabled {
+		traceProcStop(_g_.m.p.ptr())
+	}
+	_g_.m.p = 0
+	_p_.m = 0
+	_p_.status = _Pidle
+	return _p_
+}
+
 // Put gp on the global runnable queue.
 // Sched must be locked.
 // May run during STW, so write barriers are not allowed.
@@ -1468,6 +1812,17 @@ func exitsyscall0(gp *g) {
 func globrunqput(gp *g) {
 	sched.runq.pushBack(gp)
 	sched.runqsize++
+}
+
+// pushBack adds gp to the tail of q.
+func (q *gQueue) pushBack(gp *g) {
+	gp.schedlink = 0
+	if q.tail != 0 {
+		q.tail.ptr().schedlink.set(gp)
+	} else {
+		q.head.set(gp)
+	}
+	q.tail.set(gp)
 }
 
 
@@ -1492,6 +1847,29 @@ func dropg() {
 func Gosched() {
 	checkTimeouts()
 	mcall(gosched_m)
+}
+
+// Gosched continuation on g0.
+func gosched_m(gp *g) {
+	if trace.enabled {
+		traceGoSched()
+	}
+	goschedImpl(gp)
+}
+
+func goschedImpl(gp *g) {
+	status := readgstatus(gp)
+	if status&^_Gscan != _Grunning {
+		dumpgstatus(gp)
+		throw("bad g status")
+	}
+	casgstatus(gp, _Grunning, _Grunnable)
+	dropg()
+	lock(&sched.lock)
+	globrunqput(gp)
+	unlock(&sched.lock)
+
+	schedule()
 }
 
 // schedEnabled reports whether gp should be scheduled. It returns
@@ -1541,6 +1919,63 @@ func exitsyscallfast(oldp *p) bool {
 		}
 	}
 	return false
+}
+
+func traceGoSysExit(ts int64) {
+	if ts != 0 && ts < trace.ticksStart {
+		// There is a race between the code that initializes sysexitticks
+		// (in exitsyscall, which runs without a P, and therefore is not
+		// stopped with the rest of the world) and the code that initializes
+		// a new trace. The recorded sysexitticks must therefore be treated
+		// as "best effort". If they are valid for this trace, then great,
+		// use them for greater accuracy. But if they're not valid for this
+		// trace, assume that the trace was started after the actual syscall
+		// exit (but before we actually managed to start the goroutine,
+		// aka right now), and assign a fresh time stamp to keep the log consistent.
+		ts = 0
+	}
+	_g_ := getg().m.curg
+	_g_.traceseq++
+	_g_.tracelastp = _g_.m.p
+	traceEvent(traceEvGoSysExit, -1, uint64(_g_.goid), _g_.traceseq, uint64(ts)/traceTickDiv)
+}
+
+func exitsyscallfast_pidle() bool {
+	lock(&sched.lock)
+	_p_ := pidleget()
+	if _p_ != nil && atomic.Load(&sched.sysmonwait) != 0 {
+		atomic.Store(&sched.sysmonwait, 0)
+		notewakeup(&sched.sysmonnote)
+	}
+	unlock(&sched.lock)
+	if _p_ != nil {
+		acquirep(_p_)
+		return true
+	}
+	return false
+}
+
+// exitsyscallfast_reacquired is the exitsyscall path on which this G
+// has successfully reacquired the P it was running on before the
+// syscall.
+//
+//go:nosplit
+func exitsyscallfast_reacquired() {
+	_g_ := getg()
+	if _g_.m.syscalltick != _g_.m.p.ptr().syscalltick {
+		if trace.enabled {
+			// The p was retaken and then enter into syscall again (since _g_.m.syscalltick has changed).
+			// traceGoSysBlock for this syscall was already emitted,
+			// but here we effectively retake the p from the new syscall running on the same p.
+			systemstack(func() {
+				// Denote blocking of the new syscall.
+				traceGoSysBlock(_g_.m.p.ptr())
+				// Denote completion of the current syscall.
+				traceGoSysExit(0)
+			})
+		}
+		_g_.m.p.ptr().syscalltick++
+	}
 }
 
 // Try to get an m from midle list.

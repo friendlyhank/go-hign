@@ -990,6 +990,69 @@ func goroutineheader(gp *g) {
 	print("]:\n")
 }
 
+func tracebackothers(me *g) {
+	level, _, _ := gotraceback()
+
+	// Show the current goroutine first, if we haven't already.
+	g := getg()
+	gp := g.m.curg
+	if gp != nil && gp != me {
+		print("\n")
+		goroutineheader(gp)
+		traceback(^uintptr(0), ^uintptr(0), 0, gp)
+	}
+
+	lock(&allglock)
+	for _, gp := range allgs {
+		if gp == me || gp == g.m.curg || readgstatus(gp) == _Gdead || isSystemGoroutine(gp, false) && level < 2 {
+			continue
+		}
+		print("\n")
+		goroutineheader(gp)
+		// Note: gp.m == g.m occurs when tracebackothers is
+		// called from a signal handler initiated during a
+		// systemstack call. The original G is still in the
+		// running state, and we want to print its stack.
+		if gp.m != g.m && readgstatus(gp)&^_Gscan == _Grunning {
+			print("\tgoroutine running on other thread; stack unavailable\n")
+			printcreatedby(gp)
+		} else {
+			traceback(^uintptr(0), ^uintptr(0), 0, gp)
+		}
+	}
+	unlock(&allglock)
+}
+
+// isSystemGoroutine reports whether the goroutine g must be omitted
+// in stack dumps and deadlock detector. This is any goroutine that
+// starts at a runtime.* entry point, except for runtime.main,
+// runtime.handleAsyncEvent (wasm only) and sometimes runtime.runfinq.
+//
+// If fixed is true, any goroutine that can vary between user and
+// system (that is, the finalizer goroutine) is considered a user
+// goroutine.
+func isSystemGoroutine(gp *g, fixed bool) bool {
+	// Keep this in sync with cmd/trace/trace.go:isSystemGoroutine.
+	f := findfunc(gp.startpc)
+	if !f.valid() {
+		return false
+	}
+	if f.funcID == funcID_runtime_main || f.funcID == funcID_handleAsyncEvent {
+		return false
+	}
+	if f.funcID == funcID_runfinq {
+		// We include the finalizer goroutine if it's calling
+		// back into user code.
+		if fixed {
+			// This goroutine can vary. In fixed mode,
+			// always consider it a user goroutine.
+			return false
+		}
+		return !fingRunning
+	}
+	return hasPrefix(funcname(f), "runtime.")
+}
+
 // cgoTraceback prints a traceback of callers.
 func printCgoTraceback(callers *cgoCallers) {
 	if cgoSymbolizer == nil {

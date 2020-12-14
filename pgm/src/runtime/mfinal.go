@@ -1,5 +1,10 @@
 package runtime
 
+var (
+	fingCreate  uint32
+	fingRunning bool
+)
+
 // Mark KeepAlive as noinline so that it is easily detectable as an intrinsic.
 //go:noinline
 
