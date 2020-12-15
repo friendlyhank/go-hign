@@ -387,6 +387,7 @@ type p struct{
 	syscalltick uint32 //系统调用统计
 	m muintptr //back-link to associated m (nil if idle)绑定的p
 	mcache *mcache
+	pcache pageCache //页缓存
 
 	// Queue of runnable goroutines. Accessed without lock.
 	runqhead uint32 //队列头部
@@ -406,6 +407,17 @@ type p struct{
 	gFree struct{
 		gList
 		n int32
+	}
+
+	//mspan缓存,会从mheap.spanalloc分配内存空间 Cache of mspan objects from the heap.
+	mspancache struct {
+		// We need an explicit length here because this field is used
+		// in allocation codepaths where write barriers are not allowed,
+		// and eliminating the write barrier/keeping it eliminated from
+		// slice updates is tricky, moreso than just managing the length
+		// ourselves.
+		len int
+		buf [128]*mspan
 	}
 
 	tracebuf traceBufPtr

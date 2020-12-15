@@ -44,9 +44,9 @@ type mstats struct {
 	stacks_inuse uint64 // bytes in manually-managed stack spans; updated atomically or during STW
 	stacks_sys   uint64 //系统栈分配情况统计 only counts newosproc0 stack in mstats; differs from MemStats.StackSys
 	mspan_inuse  uint64 // mspan structures
-	mspan_sys    uint64
+	mspan_sys    uint64 //mspan分配情况统计
 	mcache_inuse uint64 // mcache structures
-	mcache_sys   uint64
+	mcache_sys   uint64 //线程分配情况统计
 	buckhash_sys uint64 // profiling bucket hash table
 	gc_sys       uint64 // updated atomically or during STW
 	other_sys    uint64 // updated atomically or during STW

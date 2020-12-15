@@ -19,6 +19,12 @@ type mcentral struct {
 	nmalloc uint64 //已分配的数量
 }
 
+// Initialize a single central free list.
+//初始化中心缓存
+func (c *mcentral) init(spc spanClass) {
+
+}
+
 // Allocate a span to use in an mcache.
 //分配一个mspan给mcache线程缓存
 func(c *mcentral) cacheSpan() *mspan {

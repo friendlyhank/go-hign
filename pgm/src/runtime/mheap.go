@@ -29,6 +29,7 @@ type mheap struct{
 	// lock must only be acquired on the system stack, otherwise a g
 	// could self-deadlock if its stack grows with the lock held.
 	lock      mutex
+	pages     pageAlloc //全局的页分配器page allocation data structure
 	sweepgen uint32 // sweep generation, see comment in mspan; written during STW
 
 	// allspans is a slice of all mspans ever created. Each mspan
@@ -43,6 +44,42 @@ type mheap struct{
 	// must ensure that allocation cannot happen around the
 	// access (since that may free the backing store).
 	allspans []*mspan // all spans out there
+
+	// sweepSpans contains two mspan stacks: one of swept in-use
+	// spans, and one of unswept in-use spans. These two trade
+	// roles on each GC cycle. Since the sweepgen increases by 2
+	// on each cycle, this means the swept spans are in
+	// sweepSpans[sweepgen/2%2] and the unswept spans are in
+	// sweepSpans[1-sweepgen/2%2]. Sweeping pops spans from the
+	// unswept stack and pushes spans that are still in-use on the
+	// swept stack. Likewise, allocating an in-use span pushes it
+	// on the swept stack.
+	//
+	// For !go115NewMCentralImpl.
+	sweepSpans [2]gcSweepBuf
+
+	// arenas is the heap arena map. It points to the metadata for
+	// the heap for every arena frame of the entire usable virtual
+	// address space.
+	//
+	// Use arenaIndex to compute indexes into this array.
+	//
+	// For regions of the address space that are not backed by the
+	// Go heap, the arena map contains nil.
+	//
+	// Modifications are protected by mheap_.lock. Reads can be
+	// performed without locking; however, a given entry can
+	// transition from nil to non-nil at any time when the lock
+	// isn't held. (Entries never transitions back to nil.)
+	//
+	// In general, this is a two-level mapping consisting of an L1
+	// map and possibly many L2 maps. This saves space when there
+	// are a huge number of arena frames. However, on many
+	// platforms (even 64-bit), arenaL1Bits is 0, making this
+	// effectively a single-level map. In this case, arenas[0]
+	// will never be nil.
+	//二维矩阵管理的内存可以是不连续的
+	arenas [1 << arenaL1Bits]*[1 << arenaL2Bits]*heapArena
 
 	// _ uint32 // ensure 64-bit alignment of central
 
@@ -59,11 +96,30 @@ type mheap struct{
 
 	spanalloc             fixalloc //mspan固定缓存块 allocator for span*
 	cachealloc            fixalloc //mcache固定缓存分配 allocator for mcache*
+	specialfinalizeralloc fixalloc // allocator for specialfinalizer*
+	specialprofilealloc   fixalloc // allocator for specialprofile*
+	speciallock           mutex    // lock for special record allocators.
+	arenaHintAlloc        fixalloc // allocator for arenaHints
 }
 
 var mheap_ mheap
 
-// An mspan is a run of pages.
+// A heapArena stores metadata for a heap arena. heapArenas are stored
+// outside of the Go heap and accessed via the mheap_.arenas index.
+//
+//go:notinheap
+type heapArena struct{
+
+}
+
+// arenaHint is a hint for where to grow the heap arenas. See
+// mheap_.arenaHints.
+//
+//go:notinheap
+type arenaHint struct {
+}
+
+	// An mspan is a run of pages.
 //
 // When a mspan is in the heap free treap, state == mSpanFree
 // and heapmap(s->start) == span, heapmap(s->start+s->npages-1) == span.
@@ -218,6 +274,43 @@ type mspan struct {
 	state mSpanStateBox //当前的状态 mSpanInUse etc; accessed atomically (get/set methods)
 }
 
+// recordspan adds a newly allocated span to h.allspans.
+//
+// This only happens the first time a span is allocated from
+// mheap.spanalloc (it is not called when a span is reused).
+//
+// Write barriers are disallowed here because it can be called from
+// gcWork when allocating new workbufs. However, because it's an
+// indirect call from the fixalloc initializer, the compiler can't see
+// this.
+//
+//go:nowritebarrierrec
+func recordspan(vh unsafe.Pointer, p unsafe.Pointer) {
+
+}
+
+// Initialize the heap.
+func (h *mheap)init(){
+	lockInit(&h.lock, lockRankMheap)
+	lockInit(&h.sweepSpans[0].spineLock,lockRankSpine)
+	lockInit(&h.sweepSpans[1].spineLock, lockRankSpine)
+	lockInit(&h.speciallock,lockRankMheapSpecial)
+
+	h.spanalloc.init(unsafe.Sizeof(mspan{}),recordspan,unsafe.Pointer(h),&memstats.mspan_sys)
+	h.cachealloc.init(unsafe.Sizeof(mcache{}),nil,nil,&memstats.mcache_sys)//线程缓存的初始化
+	h.specialfinalizeralloc.init(unsafe.Sizeof(specialfinalizer{}),nil,nil,&memstats.other_sys)
+	h.specialprofilealloc.init(unsafe.Sizeof(specialprofile{}), nil, nil, &memstats.other_sys)
+	h.arenaHintAlloc.init(unsafe.Sizeof(arenaHint{}), nil, nil, &memstats.other_sys)
+
+	//中心缓存初始化
+	for i := range h.central {
+		h.central[i].mcentral.init(spanClass(i))
+	}
+
+	//初始化全局的页分配器
+	h.pages.init(&h.lock,&memstats.gc_sys)
+}
+
 // Initialize an empty doubly-linked list.
 func (list *mSpanList) init() {
 	list.first = nil
@@ -334,7 +427,26 @@ type spanClass uint8
 //在systemstack中调用
 //go:systemstack
 func (h *mheap) allocManual(npages uintptr, stat *uint64) *mspan {
+	return h.allocSpan(npages,true,0,stat)
+}
 
+// tryAllocMSpan attempts to allocate an mspan object from
+// the P-local cache, but may fail.
+//
+// h need not be locked.
+//
+// This caller must ensure that its P won't change underneath
+// it during this function. Currently to ensure that we enforce
+// that the function is run on the system stack, because that's
+// the only place it is used now. In the future, this requirement
+// may be relaxed if its use is necessary elsewhere.
+//
+//go:systemstack
+func (h *mheap)tryAllocMSpan()*mspan{
+	pp := getg().m.p.ptr()
+	// If we don't have a p or the cache is empty, we can't do
+	// anything here.
+	if pp == nil || pp.
 }
 
 // allocSpan allocates an mspan which owns npages worth of memory.
@@ -352,15 +464,45 @@ func (h *mheap) allocManual(npages uintptr, stat *uint64) *mspan {
 //
 // allocSpan must be called on the system stack both because it acquires
 // the heap lock and because it must block GC transitions.
-//
+//在systemstack中调用,manual==true会按照spanclasss去分配
 //go:systemstack
 func (h *mheap) allocSpan(npages uintptr, manual bool, spanclass spanClass, sysStat *uint64) (s *mspan) {
 	// Function-global state.
 	gp := getg()
 	base, scav := uintptr(0), uintptr(0)
 
+	// If the allocation is small enough, try the page cache!
+	//如果申请的内存比较小,获取申请的内存的处理器并通过页缓存去分配
+	pp := gp.m.p.ptr()
+	if pp != nil && npages < pageCachePages/4{
+		c :=&pp.pcache
 
+		// If the cache is empty, refill it.
+		//如何页缓存是空，则向全局分配器中申请一些
+		if c.empty(){
+			lock(&h.lock)
+			*c = h.pages.allocToCache()
+			unlock(&h.lock)
+		}
+
+		// Try to allocate from the cache.
+		base, scav = c.alloc(npages)
+	}
 }
+
+// The described object has a finalizer set for it.
+//
+// specialfinalizer is allocated from non-GC'd memory, so any heap
+// pointers must be specially handled.
+//
+//go:notinheap
+type specialfinalizer struct {
+}
+
+// The described object is being heap profiled.
+//
+//go:notinheap
+type specialprofile struct {}
 
 const (
 	numSpanClasses = _NumSizeClasses << 1
