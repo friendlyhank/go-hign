@@ -33,7 +33,7 @@ type fixalloc struct {
 	list   *mlink
 	chunk  uintptr // use uintptr instead of unsafe.Pointer to avoid write barriers
 	nchunk uint32
-	inuse  uintptr //未被使用的 in-use bytes now
+	inuse  uintptr //已经使用的情况 in-use bytes now
 	stat   *uint64 //统计相关
 	zero   bool // zero allocations
 }
@@ -64,5 +64,23 @@ func (f *fixalloc) init(size uintptr, first func(arg, p unsafe.Pointer), arg uns
 }
 
 func (f *fixalloc) alloc() unsafe.Pointer {
+	if f.size == 0{
+		print("runtime: use of FixAlloc_Alloc before FixAlloc_Init\n")
+		throw("runtime: internal error")
+	}
+	//如果链表不为nil,直接从链表里取
+	if f.list != nil{
+		v :=unsafe.Pointer(f.list)
+		f.list = f.list.next
+		f.inuse += f.size
+		return v
+	}
 	return nil
+}
+
+func (f *fixalloc)free(p unsafe.Pointer){
+	f.inuse -= f.size
+	v := (*mlink)(p)
+	v.next = f.list
+	f.list = v
 }

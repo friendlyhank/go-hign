@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/mgcsweepbuf.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/mpagealloc.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/mpagecache.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mcentral.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mcentral.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mfixalloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mfixalloc.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

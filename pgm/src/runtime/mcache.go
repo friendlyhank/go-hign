@@ -19,8 +19,9 @@ type mcache struct{
 	// tiny is a heap pointer. Since mcache is in non-GC'd memory,
 	// we handle it by clearing it in releaseAll during mark
 	// termination.
-	tiny             uintptr
-	tinyoffset       uintptr
+	tiny             uintptr//微小的对象
+	tinyoffset       uintptr//下一个空闲内存所在的偏移量
+	local_tinyallocs uintptr //记录内存分配器中分配的对象个数 number of tiny allocs not counted in other stats
 
 	alloc [numSpanClasses]*mspan //每个缓存可以持有67(spanclasses)*2个runtime.span spans to allocate from, indexed by spanClass
 
@@ -94,6 +95,16 @@ func (c *mcache) refill(spc spanClass) {
 	if s == nil {
 		throw("out of memory")
 	}
+
+	if uintptr(s.allocCount) == s.nelems{
+		throw("span has no free space")
+	}
+
+	// Indicate that this span is cached and prevent asynchronous
+	// sweeping in the next sweep phase.
+	s.sweepgen = mheap_.sweepgen + 3
+
+	c.alloc[spc] = s
 }
 
 func (c *mcache)releaseAll(){
