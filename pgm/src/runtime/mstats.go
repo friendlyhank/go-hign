@@ -152,6 +152,7 @@ var memstats mstats
 //
 // A side-effect of using xadduintptr() is that we need to check for
 // overflow errors.
+//相关统计的增加
 //go:nosplit
 func mSysStatInc(sysStat *uint64, n uintptr) {
 	if sysStat == nil {
@@ -163,6 +164,24 @@ func mSysStatInc(sysStat *uint64, n uintptr) {
 	}
 	if val := atomic.Xadduintptr((*uintptr)(unsafe.Pointer(sysStat)), n); val < n {
 		print("runtime: stat overflow: val ", val, ", n ", n, "\n")
+		exit(2)
+	}
+}
+
+// Atomically decreases a given *system* memory stat. Same comments as
+// mSysStatInc apply.
+//相关统计的减少
+//go:nosplit
+func mSysStatDec(sysStat *uint64, n uintptr) {
+	if sysStat == nil {
+		return
+	}
+	if sys.BigEndian {
+		atomic.Xadd64(sysStat, -int64(n))
+		return
+	}
+	if val := atomic.Xadduintptr((*uintptr)(unsafe.Pointer(sysStat)), uintptr(-int64(n))); val+n < n {
+		print("runtime: stat underflow: val ", val, ", n ", n, "\n")
 		exit(2)
 	}
 }

@@ -62,6 +62,22 @@ func badsystemstack() {
 
 }
 
+// memclrNoHeapPointers clears n bytes starting at ptr.
+//
+// Usually you should use typedmemclr. memclrNoHeapPointers should be
+// used only when the caller knows that *ptr contains no heap pointers
+// because either:
+//
+// *ptr is initialized memory and its type is pointer-free, or
+//
+// *ptr is uninitialized memory (e.g., memory that's being reused
+// for a new allocation) and hence contains only "junk".
+//
+// The (CPU-specific) implementations of this function are in memclr_*.s.
+//相当于会对字节清零
+//go:noescape
+func memclrNoHeapPointers(ptr unsafe.Pointer, n uintptr)
+
 // memmove copies n bytes from "from" to "to".
 //
 // memmove ensures that any pointer in "from" is written to "to" with

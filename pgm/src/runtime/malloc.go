@@ -1,13 +1,16 @@
 package runtime
 
-import "runtime/internal/sys"
+import (
+	"runtime/internal/sys"
+	"unsafe"
+)
 
 const (
 	debugMalloc = false
 
-	maxTinySize   = _TinySize
+	maxTinySize   = _TinySize //微小对象
 	tinySizeClass = _TinySizeClass
-	maxSmallSize  = _MaxSmallSize
+	maxSmallSize  = _MaxSmallSize //小对象
 
 	pageShift = _PageShift
 	pageSize  = _PageSize
@@ -296,3 +299,203 @@ func mallocinit(){
 	//mcache0缓存在这里设置
 	mcache0 =allocmcache()
 }
+
+//0字节的内存分配基础地址 base address for all 0-byte allocations
+var zerobase uintptr
+
+// Allocate an object of size bytes.
+// Small objects are allocated from the per-P cache's free lists.
+// Large objects (> 32 kB) are allocated straight from the heap.
+//分配指定大小的对象
+//如果是小对象直接在线程缓存分配
+//如果是大的对象在堆(heap)上分配
+func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
+
+	if size == 0{
+		return unsafe.Pointer(&zerobase)
+	}
+
+	// Set mp.mallocing to keep from being preempted by GC.
+	mp := acquirem()
+	//如果当前的m正在执行分配任务，则抛出异常
+	if mp.mallocing != 0{
+		throw("malloc deadlock")
+	}
+	mp.mallocing = 1
+
+	dataSize := size
+	var c *mcache
+	if mp.p != 0{
+		c =mp.p.ptr().mcache
+	}else{
+		// We will be called without a P while bootstrapping,
+		// in which case we use mcache0, which is set in mallocinit.
+		// mcache0 is cleared when bootstrapping is complete,
+		// by procresize.
+		c = mcache0
+		if c == nil{
+			throw("malloc called with no P")
+		}
+	}
+	var span *mspan
+	var x unsafe.Pointer
+	//是否需要gc扫描这个对象
+	noscan := typ == nil || typ.ptrdata == 0
+	//如果是小对象(小于32kb),在线程缓存中分配内存
+	if size <= maxSmallSize{
+		if noscan && size < maxTinySize{
+			// Tiny allocator.
+			//
+			// Tiny allocator combines several tiny allocation requests
+			// into a single memory block. The resulting memory block
+			// is freed when all subobjects are unreachable. The subobjects
+			// must be noscan (don't have pointers), this ensures that
+			// the amount of potentially wasted memory is bounded.
+			//
+			// Size of the memory block used for combining (maxTinySize) is tunable.
+			// Current setting is 16 bytes, which relates to 2x worst case memory
+			// wastage (when all but one subobjects are unreachable).
+			// 8 bytes would result in no wastage at all, but provides less
+			// opportunities for combining.
+			// 32 bytes provides more opportunities for combining,
+			// but can lead to 4x worst case wastage.
+			// The best case winning is 8x regardless of block size.
+			//
+			// Objects obtained from tiny allocator must not be freed explicitly.
+			// So when an object will be freed explicitly, we ensure that
+			// its size >= maxTinySize.
+			//
+			// SetFinalizer has a special case for objects potentially coming
+			// from tiny allocator, it such case it allows to set finalizers
+			// for an inner byte of a memory block.
+			//
+			// The main targets of tiny allocator are small strings and
+			// standalone escaping variables. On a json benchmark
+			// the allocator reduces number of allocations by ~12% and
+			// reduces heap size by ~20%.
+			off :=c.tinyoffset
+			// Align tiny pointer for required (conservative) alignment.
+			if size&7 == 0{
+				off = alignUp(off,8)
+			}else if size&3 == 0{
+				off = alignUp(off,4)
+			}else if size&1 == 0{
+				off = alignUp(off,2)
+			}
+			if off+size <= maxTinySize && c.tiny != 0{
+				// The object fits into existing tiny block.
+				x  = unsafe.Pointer(c.tiny + off)
+				c.tinyoffset  = off + size
+				c.local_tinyallocs++ //对象个数增加
+				mp.mallocing = 0
+				releasem(mp)
+				return x
+			}
+			//到了这里表示微小对象的分配已经满了,需要申请资源
+			// Allocate a new maxTinySize block.
+			//分配一块新的微小块
+			span = c.alloc[tinySizeClass]
+			v := nextFreeFast(span)
+			if v == 0{
+			}
+		}
+	}
+}
+
+// nextFreeFast returns the next free object if one is quickly available.
+// Otherwise it returns 0.
+//从mspan找到空闲的对象
+func nextFreeFast(s *mspan) gclinkptr {
+	theBit := sys.Ctz64(s.allocCache)// Is there a free object in the allocCache?
+	//是否还有空闲
+	if theBit < 64{
+		result := s.freeindex + uintptr(theBit)
+		if result < s.nelems{
+			freeidx := result + 1
+			if freeidx%64 == 0 && freeidx != s.nelems{
+				return 0
+			}
+			s.allocCache >>= uint(theBit + 1)
+			s.freeindex = freeidx
+			s.allocCount++
+			return gclinkptr(result*s.elemsize + s.base())
+		}
+	}
+	return 0
+}
+
+// nextFree returns the next free object from the cached span if one is available.
+// Otherwise it refills the cache with a span with an available object and
+// returns that object along with a flag indicating that this was a heavy
+// weight allocation. If it is a heavy weight allocation the caller must
+// determine whether a new GC cycle needs to be started or if the GC is active
+// whether this goroutine needs to assist the GC.
+//
+// Must run in a non-preemptible context since otherwise the owner of
+// c could change.
+//线程缓存获取下一个空闲的span
+func (c *mcache) nextFree(spc spanClass) (v gclinkptr, s *mspan, shouldhelpgc bool) {
+	s = c.alloc[spc]
+	shouldhelpgc = false
+}
+
+type persistentAlloc struct {
+	base *notInHeap
+	off uintptr
+}
+
+var globalAlloc struct{
+	mutex
+	persistentAlloc
+}
+
+// //在系统栈上向系统申请内存 -
+func persistentalloc(size,align uintptr,sysStat *uint64)unsafe.Pointer{
+	var p *notInHeap
+	systemstack(func() {
+		p = persistentalloc1(size,align,sysStat)
+	})
+	return unsafe.Pointer(p)
+}
+
+// Must run on system stack because stack growth can (re)invoke it.
+// See issue 9174.
+//在系统栈上向系统申请内存
+//go:systemstack
+func persistentalloc1(size,align uintptr,sysStat *uint64)*notInHeap{
+	const (
+		maxBlock = 64 << 10 //最大块64kb VM reservation granularity is 64K on windows
+	)
+
+	if size == 0{
+		throw("persistentalloc: size == 0")
+	}
+	if align != 0{
+
+	}else{
+		align = 8
+	}
+	if size >= maxBlock{
+		//直接从系统中分配
+		return (*notInHeap)(sysAlloc(size,sysStat))
+	}
+
+	mp := acquirem()
+	var persistent *persistentAlloc
+	if mp != nil && mp.p != 0{
+		persistent = &mp.p.ptr().
+	}
+}
+
+
+// notInHeap is off-heap memory allocated by a lower-level allocator
+// like sysAlloc or persistentAlloc.
+//
+// In general, it's better to use real types marked as go:notinheap,
+// but this serves as a generic type for situations where that isn't
+// possible (like in the allocators).
+//
+// TODO: Use this as the return type of sysAlloc, persistentAlloc, etc?
+//
+//go:notinheap
+type notInHeap struct{}

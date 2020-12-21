@@ -2,9 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="591f3da3-81d8-4ae5-a43a-7e882a0cf3fe" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/pgm/src/runtime/internal/sys/intrinsics.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mcache.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/malloc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mem_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mem_windows.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mfixalloc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mfixalloc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mheap.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/mstats.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/os_windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/runtime2.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/slice.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/slice.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/stubs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pgm/src/runtime/type.go" beforeDir="false" afterPath="$PROJECT_DIR$/pgm/src/runtime/type.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,10 +95,10 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2685" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607628300819" />
-    <state x="2660" y="275" key="FileChooserDialogImpl" timestamp="1607993404130">
+    <state x="2239" y="240" width="440" height="511" key="FileChooserDialogImpl" timestamp="1608508648762">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2660" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607993404130" />
+    <state x="2239" y="240" width="440" height="511" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608508648762" />
     <state width="1877" height="72" key="GridCell.Tab.0.bottom" timestamp="1607938687761">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
@@ -110,17 +119,17 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2381" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1607933731602" />
-    <state x="2601" y="261" width="648" height="524" key="StructurePopup" timestamp="1608015318219">
+    <state x="2601" y="261" width="648" height="524" key="StructurePopup" timestamp="1608521339055">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2601" y="261" width="648" height="524" key="StructurePopup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608015318219" />
-    <state x="2582" y="254" width="596" height="532" key="find.popup" timestamp="1608012661311">
+    <state x="2601" y="261" width="648" height="524" key="StructurePopup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608521339055" />
+    <state x="2582" y="254" width="596" height="532" key="find.popup" timestamp="1608508715075">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2582" y="254" width="596" height="532" key="find.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608012661311" />
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1608016294037">
+    <state x="2582" y="254" width="596" height="532" key="find.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608508715075" />
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1608523389082">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608016294037" />
+    <state x="2543" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1608523389082" />
   </component>
 </project>

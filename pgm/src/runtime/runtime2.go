@@ -339,7 +339,7 @@ type m struct{
 	nextp puintptr //下一个要绑定的p
 	oldp          puintptr // the p that was attached before executing a syscall
 	id int64
-	mallocing int32
+	mallocing int32 //分配内存的标志 1表示正在进行内存分配
 	throwing int32 //1、-1有异常 0无异常
 	preemptoff string // if != "", keep curg running on this m
 	locks int32 //统计锁的数量
@@ -421,6 +421,8 @@ type p struct{
 	}
 
 	tracebuf traceBufPtr
+
+	palloc persistentAlloc //mcache线程缓存初始化内存的时候会用到 per-P to avoid mutex
 
 	// The when field of the first entry on the timer heap.
 	// This is updated using atomic functions.

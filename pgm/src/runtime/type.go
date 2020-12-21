@@ -7,7 +7,7 @@
 package runtime
 
 type _type struct {
-
+	ptrdata uintptr //size of memory prefix holding all pointers
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.

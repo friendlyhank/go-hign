@@ -3,6 +3,7 @@ package runtime
 import (
 	"internal/cpu"
 	"runtime/internal/atomic"
+	"runtime/internal/sys"
 	"unsafe"
 )
 
@@ -272,6 +273,11 @@ type mspan struct {
 	allocCount  uint16        //已分配的数量 number of allocated objects
 	spanclass   spanClass     //sizeclasses.go size class and noscan (uint8)
 	state mSpanStateBox //当前的状态 mSpanInUse etc; accessed atomically (get/set methods)
+	elemsize    uintptr       //元素的大小(spanclass) computed from sizeclass or from npages
+}
+
+func (s *mspan)base()uintptr{
+	return s.startAddr
 }
 
 // recordspan adds a newly allocated span to h.allspans.
@@ -283,10 +289,37 @@ type mspan struct {
 // gcWork when allocating new workbufs. However, because it's an
 // indirect call from the fixalloc initializer, the compiler can't see
 // this.
-//
+//记录新分配的mspan到mheap.allspans
 //go:nowritebarrierrec
 func recordspan(vh unsafe.Pointer, p unsafe.Pointer) {
+	h :=(*mheap)(vh)
+	s :=(*mspan)(p) //向系统新申请的内存mspan
+	//实际上就是切片操作,需要扩容
+	if len(h.allspans) >= cap(h.allspans){
+		n := 64 * 1024 / sys.PtrSize
+		if n < cap(h.allspans)*3/2{
+			n = cap(h.allspans) *3 /2
+		}
+		var new []*mspan
+		sp := (*slice)(unsafe.Pointer(&new))
+		//向系统分配内存
+		sp.array = sysAlloc(uintptr(n)*sys.PtrSize,&memstats.other_sys)
+		if sp.array == nil{
+			throw("runtime: cannot allocate memory")
+		}
+		sp.len = len(h.allspans)
+		sp.cap = n
+		if len(h.allspans) > 0{
+			//复制切片
+			copy(new,h.allspans)
+		}
+		oldAllspans :=h.allspans
+		*(*notInHeapSlice)(unsafe.Pointer(&h.allspans)) = *(*notInHeapSlice)(unsafe.Pointer(&new))
+		//将旧的切片释放
+		if len(oldAllspans) != 0{
 
+		}
+	}
 }
 
 // Initialize the heap.
@@ -446,7 +479,7 @@ func (h *mheap)tryAllocMSpan()*mspan{
 	pp := getg().m.p.ptr()
 	// If we don't have a p or the cache is empty, we can't do
 	// anything here.
-	if pp == nil || pp.
+
 }
 
 // allocSpan allocates an mspan which owns npages worth of memory.

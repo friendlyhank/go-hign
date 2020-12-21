@@ -58,9 +58,9 @@ var (
 	// loader before the Go program starts.
 	_AddVectoredExceptionHandler,
 	_CloseHandle,
-	_CreateEventA,
+	_CreateEventA,//创建时间
 	_CreateIoCompletionPort,
-	_CreateThread,
+	_CreateThread,//创建线程
 	_CreateWaitableTimerA,
 	_DuplicateHandle,
 	_ExitProcess,
@@ -72,7 +72,7 @@ var (
 	_GetQueuedCompletionStatusEx,
 	_GetStdHandle,
 	_GetSystemDirectoryA,
-	_GetSystemInfo,
+	_GetSystemInfo,//获取系统信息
 	_GetSystemTimeAsFileTime,
 	_GetThreadContext,
 	_SetThreadContext,
@@ -95,8 +95,8 @@ var (
 	_SuspendThread,
 	_SwitchToThread,
 	_TlsAlloc,
-	_VirtualAlloc,
-	_VirtualFree,
+	_VirtualAlloc,//系统虚拟内存的分配
+	_VirtualFree,//系统虚拟内存的释放
 	_VirtualQuery,
 	_WaitForSingleObject,
 	_WaitForMultipleObjects,

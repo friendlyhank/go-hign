@@ -35,7 +35,7 @@ type fixalloc struct {
 	nchunk uint32
 	inuse  uintptr //已经使用的情况 in-use bytes now
 	stat   *uint64 //统计相关
-	zero   bool // zero allocations
+	zero   bool //是否需要清零 span zero allocations
 }
 
 // A generic linked list of blocks.  (Typically the block is bigger than sizeof(MLink).)
@@ -63,6 +63,7 @@ func (f *fixalloc) init(size uintptr, first func(arg, p unsafe.Pointer), arg uns
 	f.zero = true
 }
 
+//mheap上fixalloc的内存分配
 func (f *fixalloc) alloc() unsafe.Pointer {
 	if f.size == 0{
 		print("runtime: use of FixAlloc_Alloc before FixAlloc_Init\n")
@@ -73,14 +74,31 @@ func (f *fixalloc) alloc() unsafe.Pointer {
 		v :=unsafe.Pointer(f.list)
 		f.list = f.list.next
 		f.inuse += f.size
+		if f.zero{
+			//需要清零，对分配的span进行清零
+			memclrNoHeapPointers(v,f.size)
+		}
 		return v
 	}
-	return nil
+	//内存不足
+	if uintptr(f.nchunk) < f.size{
+		//向系统申请内存16kb的内存
+		f.chunk = uintptr(persistentalloc(_FixAllocChunk,0,f.stat))
+		f.nchunk = _FixAllocChunk //记录未使用的大小
+	}
+	v := unsafe.Pointer(f.chunk)
+	if f.first != nil{
+		f.first(f.arg,v)
+	}
+	f.chunk = f.chunk + f.size
+	f.nchunk -= uint32(f.size)
+	f.inuse += f.size
+	return v
 }
 
 func (f *fixalloc)free(p unsafe.Pointer){
 	f.inuse -= f.size
 	v := (*mlink)(p)
-	v.next = f.list
+	v.next = f.list //回收资源到链表中
 	f.list = v
 }
