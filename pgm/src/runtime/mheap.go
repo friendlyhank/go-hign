@@ -317,9 +317,11 @@ func recordspan(vh unsafe.Pointer, p unsafe.Pointer) {
 		*(*notInHeapSlice)(unsafe.Pointer(&h.allspans)) = *(*notInHeapSlice)(unsafe.Pointer(&new))
 		//将旧的切片释放
 		if len(oldAllspans) != 0{
-
+			sysFree(unsafe.Pointer(&oldAllspans[0]),uintptr(cap(oldAllspans))*unsafe.Sizeof(oldAllspans[0]),&memstats.other_sys)
 		}
 	}
+	h.allspans = h.allspans[:len(h.allspans)+1]
+	h.allspans[len(h.allspans)-1] =s
 }
 
 // Initialize the heap.

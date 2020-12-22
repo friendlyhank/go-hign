@@ -51,6 +51,7 @@ func allocmcache()*mcache{
 	var c *mcache
 	systemstack(func() {
 		lock(&mheap_.lock)
+		//初始化向mheap_.cachealloc申请内存
 		c = (*mcache)(mheap_.cachealloc.alloc())
 		c.flushGen  = mheap_.sweepgen
 		unlock(&mheap_.lock)

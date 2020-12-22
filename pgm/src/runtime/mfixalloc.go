@@ -80,7 +80,7 @@ func (f *fixalloc) alloc() unsafe.Pointer {
 		}
 		return v
 	}
-	//内存不足
+	//fixalloc内存不足
 	if uintptr(f.nchunk) < f.size{
 		//向系统申请内存16kb的内存
 		f.chunk = uintptr(persistentalloc(_FixAllocChunk,0,f.stat))

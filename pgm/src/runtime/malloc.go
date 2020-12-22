@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"runtime/internal/atomic"
 	"runtime/internal/sys"
 	"unsafe"
 )
@@ -440,14 +441,24 @@ func (c *mcache) nextFree(spc spanClass) (v gclinkptr, s *mspan, shouldhelpgc bo
 }
 
 type persistentAlloc struct {
-	base *notInHeap
-	off uintptr
+	base *notInHeap//base基础地址
+	off uintptr //内存的偏移量
 }
 
 var globalAlloc struct{
 	mutex
 	persistentAlloc
 }
+
+// persistentChunkSize is the number of bytes we allocate when we grow
+// a persistentAlloc.
+//设置persistentAlloc最大值为256kb
+const persistentChunkSize = 256 << 10
+
+// persistentChunks is a list of all the persistent chunks we have
+// allocated. The list is maintained through the first word in the
+// persistent chunk. This is updated atomically.
+var persistentChunks *notInHeap
 
 // //在系统栈上向系统申请内存 -
 func persistentalloc(size,align uintptr,sysStat *uint64)unsafe.Pointer{
@@ -483,8 +494,46 @@ func persistentalloc1(size,align uintptr,sysStat *uint64)*notInHeap{
 	mp := acquirem()
 	var persistent *persistentAlloc
 	if mp != nil && mp.p != 0{
-		persistent = &mp.p.ptr().
+		persistent = &mp.p.ptr().palloc
+	}else{
+		lock(&globalAlloc.mutex)
+		persistent = &globalAlloc.persistentAlloc
 	}
+	persistent.off = alignUp(persistent.off,align)
+	//如果persistent内存不足,则向系统申请内存
+	if persistent.off+size > persistentChunkSize || persistent.base == nil{
+		persistent.base = (*notInHeap)(sysAlloc(persistentChunkSize,&memstats.other_sys))
+		if persistent.base == nil{
+			if persistent == &globalAlloc.persistentAlloc{
+				unlock(&globalAlloc.mutex)
+			}
+			throw("runtime: cannot allocate memory")
+		}
+
+		// Add the new chunk to the persistentChunks list.
+		for{
+			chunks := uintptr(unsafe.Pointer(persistentChunks))
+			*(*uintptr)(unsafe.Pointer(persistent.base)) = chunks
+			if atomic.Casuintptr((*uintptr)(unsafe.Pointer(&persistentChunks)), chunks, uintptr(unsafe.Pointer(persistent.base))) {
+				break
+			}
+		}
+		persistent.off =alignUp(sys.PtrSize,align)
+	}
+	//更新偏移量
+	p := persistent.base.add(persistent.off)
+	persistent.off += size
+	releasem(mp)
+	if persistent == &globalAlloc.persistentAlloc{
+		unlock(&globalAlloc.mutex)
+	}
+
+	//统计相关信息
+	if sysStat != &memstats.other_sys{
+		mSysStatInc(sysStat, size)
+		mSysStatDec(&memstats.other_sys, size)
+	}
+	return p
 }
 
 
@@ -499,3 +548,7 @@ func persistentalloc1(size,align uintptr,sysStat *uint64)*notInHeap{
 //
 //go:notinheap
 type notInHeap struct{}
+
+func (p *notInHeap)add(bytes uintptr)*notInHeap{
+	return (*notInHeap)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + bytes))
+}
