@@ -15,6 +15,7 @@ const (
 	// The definition of this flag helps ensure that if there's a problem with
 	// the new markroot spans implementation and it gets turned off, that the new
 	// mcentral implementation also gets turned off so the runtime isn't broken.
+	//表示大于1.15的新版本
 	go115NewMCentralImpl = true && go115NewMarkrootSpans
 )
 
@@ -80,6 +81,8 @@ type mheap struct{
 	// effectively a single-level map. In this case, arenas[0]
 	// will never be nil.
 	//二维矩阵管理的内存可以是不连续的
+	//对于任意一个地址,我们可以根据area的基址计算该地址所在的页数并通过spans数组
+	//获得管理该片内存的管理单元
 	arenas [1 << arenaL1Bits]*[1 << arenaL2Bits]*heapArena
 
 	// _ uint32 // ensure 64-bit alignment of central
@@ -107,10 +110,40 @@ var mheap_ mheap
 
 // A heapArena stores metadata for a heap arena. heapArenas are stored
 // outside of the Go heap and accessed via the mheap_.arenas index.
-//
+////稀疏的内存管理，管理着所有的内存
 //go:notinheap
 type heapArena struct{
+	// bitmap stores the pointer/scalar bitmap for the words in
+	// this arena. See mbitmap.go for a description. Use the
+	// heapBits type to access this.
+	//用于表示arena区域那些地址保存了对象
+	bitmap [heapArenaBitmapBytes]byte
 
+	// spans maps from virtual address page ID within this arena to *mspan.
+	// For allocated spans, their pages map to the span itself.
+	// For free spans, only the lowest and highest pages map to the span itself.
+	// Internal pages map to an arbitrary span.
+	// For pages that have never been allocated, spans entries are nil.
+	//
+	// Modifications are protected by mheap.lock. Reads can be
+	// performed without locking, but ONLY from indexes that are
+	// known to contain in-use or stack spans. This means there
+	// must not be a safe-point between establishing that an
+	// address is live and looking it up in the spans array.
+	//内存管理的单元,每个内存单元会管理几页的内存空间
+	spans [pagesPerArena]*mspan
+
+	// zeroedBase marks the first byte of the first page in this
+	// arena which hasn't been used yet and is therefore already
+	// zero. zeroedBase is relative to the arena base.
+	// Increases monotonically until it hits heapArenaBytes.
+	//
+	// This field is sufficient to determine if an allocation
+	// needs to be zeroed because the page allocator follows an
+	// address-ordered first-fit policy.
+	//
+	// Read atomically and written with an atomic CAS.
+	zeroedBase uintptr //指向的是基地址
 }
 
 // arenaHint is a hint for where to grow the heap arenas. See
@@ -261,13 +294,13 @@ type mspan struct {
 	gcmarkBits *gcBits
 
 	// sweep generation:
-	// if sweepgen == h->sweepgen - 2, the span needs sweeping
-	// if sweepgen == h->sweepgen - 1, the span is currently being swept
-	// if sweepgen == h->sweepgen, the span is swept and ready to use
-	// if sweepgen == h->sweepgen + 1, the span was cached before sweep began and is still cached, and needs sweeping
-	// if sweepgen == h->sweepgen + 3, the span was swept and then cached and is still cached
+	// if sweepgen == h->sweepgen - 2, the span needs sweeping 这个span等待扫描
+	// if sweepgen == h->sweepgen - 1, the span is currently being swept 这个span正在被扫描
+	// if sweepgen == h->sweepgen, the span is swept and ready to use 这个span被扫描过了,等待使用
+	// if sweepgen == h->sweepgen + 1, the span was cached before sweep began and is still cached, and needs sweeping 这个span在扫描前已经缓存了对象，需要扫描
+	// if sweepgen == h->sweepgen + 3, the span was swept and then cached and is still cached 这个span已经扫描而且缓存了对象
 	// h->sweepgen is incremented by 2 after every GC
-	//if sweepgen == h->sweepgen + 3
+
 	sweepgen    uint32
 
 	allocCount  uint16        //已分配的数量 number of allocated objects

@@ -702,6 +702,10 @@ func (pp *p)destroy(){
 		globrunqputhead(pp.runnext.ptr())
 		pp.runnext = 0
 	}
+	//释放线程缓存
+	freemcache(pp.mcache)
+	pp.mcache = nil
+	pp.status = _Pdead
 }
 
 

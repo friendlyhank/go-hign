@@ -1,6 +1,9 @@
 package runtime
 
-import "runtime/internal/atomic"
+import (
+	"runtime/internal/atomic"
+	"unsafe"
+)
 
 // Per-thread (in Go, per-P) cache for small objects.
 // No locking needed because it is per-thread (per-P).
@@ -34,9 +37,26 @@ type mcache struct{
 	flushGen uint32
 }
 
+// A gclink is a node in a linked list of blocks, like mlink,
+// but it is opaque to the garbage collector.
+// The GC does not trace the pointers during collection,
+// and the compiler does not emit write barriers for assignments
+// of gclinkptr values. Code should store references to gclinks
+// as gclinkptr, not as *gclink.
+type gclink struct{
+	next gclinkptr
+}
+
 // A gclinkptr is a pointer to a gclink, but it is opaque
 // to the garbage collector.
 type gclinkptr uintptr
+
+// ptr returns the *gclink form of p.
+// The result should be used for accessing fields, not stored
+// in other data structures.
+func (p gclinkptr)ptr()*gclink{
+	return (*gclink)(unsafe.Pointer(p))
+}
 
 type stackfreelist struct{
 	list gclinkptr// linked list of free stacks
@@ -62,6 +82,22 @@ func allocmcache()*mcache{
 	return c
 }
 
+//释放mcache线程缓存(p销毁的时候需要释放)
+func freemcache(c *mcache){
+	systemstack(func() {
+		c.releaseAll()
+		stackcache_clear(c)
+
+		// NOTE(rsc,rlh): If gcworkbuffree comes back, we need to coordinate
+		// with the stealing of gcworkbufs during garbage collection to avoid
+		// a race where the workbuf is double-freed.
+		// gcworkbuffree(c.gcworkbuf)
+		lock(&mheap_.lock)
+		mheap_.cachealloc.free(unsafe.Pointer(c))
+		unlock(&mheap_.lock)
+	})
+}
+
 // refill acquires a new span of span class spc for c. This span will
 // have at least one free object. The current span in c must be full.
 //
@@ -82,7 +118,7 @@ func (c *mcache) refill(spc spanClass) {
 		if s.sweepgen != mheap_.sweepgen+3 {
 			throw("bad sweepgen in refill")
 		}
-		//版本兼容
+		//版本兼容 表示大于1.15版本
 		if go115NewMCentralImpl {
 			mheap_.central[spc].mcentral.uncacheSpan(s)
 		} else {
@@ -118,6 +154,7 @@ func (c *mcache)releaseAll(){
 		}
 	}
 	// Clear tinyalloc pool.
+	//微小对象清零
 	c.tiny = 0
 	c.tinyoffset = 0
 }
@@ -141,4 +178,5 @@ func (c *mcache)prepareForSweep(){
 		throw("bad flushGen")
 	}
 	c.releaseAll()
+	stackcache_clear(c)
 }

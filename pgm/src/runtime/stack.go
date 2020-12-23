@@ -174,7 +174,34 @@ func stackpoolalloc(order uint8) gclinkptr {
 	lockWithRankMayAcquire(&mheap_.lock, lockRankMheap)
 	//nil说明还没向mheap中申请内存
 	if s == nil{
+	}
+}
 
+
+// Adds stack x to the free pool. Must be called with stackpool[order].item.mu held.
+//将栈x放回空闲池子
+func stackpoolfree(x gclinkptr, order uint8) {
+
+}
+
+//清楚栈的缓存
+//go:systemstack
+func stackcache_clear(c *mcache) {
+	if stackDebug  >= 1{
+		print("stackcache clear\n")
+	}
+	for order := uint8(0);order < _NumStackOrders;order++{
+		lock(&stackpool[order].item.mu)
+		x := c.stackcache[order].list
+		for x.ptr() != nil{
+			y := x.ptr().next
+			//将栈x放回空闲池子
+			stackpoolfree(x,order)
+			x = y
+		}
+		c.stackcache[order].list = 0
+		c.stackcache[order].size = 0
+		unlock(&stackpool[order].item.mu)
 	}
 }
 
