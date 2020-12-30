@@ -55,6 +55,10 @@ type Value struct{
 
 type flag uintptr
 
+const (
+	flagMethod      flag = 1 << 9
+)
+
 //
 func unpackEface(i interface{}) Value {
 	e := (*emptyInterface)(unsafe.Pointer(&i))
@@ -67,6 +71,15 @@ func unpackEface(i interface{}) Value {
 	return Value{t,e.word,f}
 }
 
+// A ValueError occurs when a Value method is invoked on
+// a Value that does not support it. Such cases are documented
+// in the description of each method.
+//反射Value的错误
+type ValueError struct {
+	Method string
+	Kind   Kind
+}
+
 // emptyInterface is the header for an interface{} value.
 type emptyInterface struct{
 	typ *rtype
@@ -75,6 +88,17 @@ type emptyInterface struct{
 
 //Type returns v's type.
 func (v Value)Type()Type{
+	f :=v.flag
+	if f == 0{
+		panic(&ValueError{"reflect.Value.Type", Invalid})
+	}
+
+	//如果Value不是方法,则直接返回Value.rtype
+	if f&flagMethod == 0{
+		return v.typ
+	}
+
+	//如果Value是方法
 	return nil
 }
 

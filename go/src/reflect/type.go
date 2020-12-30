@@ -15,6 +15,8 @@
 // https://golang.org/doc/articles/laws_of_reflection.html
 package reflect
 
+import "unsafe"
+
 // Type is the representation of a Go type.
 //
 // Not all methods apply to all kinds of types. Restrictions,
@@ -80,18 +82,71 @@ const(
 	UnsafePointer
 )
 
+// tflag is used by an rtype to signal what extra type information is
+// available in the memory directly following the rtype value.
+//
+// tflag values must be kept in sync with copies in:
+//	cmd/compile/internal/gc/reflect.go
+//	cmd/link/internal/ld/decodesym.go
+//	runtime/type.go
+type tflag uint8
+
 // rtype is the common implementation of most values.
 // It is embedded in other struct types.
 //
 // rtype must be kept in sync with ../runtime/type.go:/^type._type.
 type rtype struct {
 	size uintptr
+	ptrdata    uintptr // number of bytes in the type that can contain pointers
 	hash       uint32  // hash of type; avoids computation in hash tables
+	tflag      tflag   // extra type information flags
+	align      uint8   // alignment of variable with this type
+	fieldAlign uint8   // alignment of struct field with this type
 	kind uint8 // enumeration for C 对应go的所有数据类型
+	// function for comparing objects of this type
+	// (ptr to object A, ptr to object B) -> ==?
+	equal     func(unsafe.Pointer, unsafe.Pointer) bool
+	gcdata    *byte   // garbage collection data
+	str       nameOff // string form
+	ptrToThis typeOff // type for pointer to this type, may be zero
 }
 
 const(
 	kindMask        = (1 << 5) - 1
 )
+
+var kindNames = []string{
+	Invalid:       "invalid",
+	Bool:          "bool",
+	Int:           "int",
+	Int8:          "int8",
+	Int16:         "int16",
+	Int32:         "int32",
+	Int64:         "int64",
+	Uint:          "uint",
+	Uint8:         "uint8",
+	Uint16:        "uint16",
+	Uint32:        "uint32",
+	Uint64:        "uint64",
+	Uintptr:       "uintptr",
+	Float32:       "float32",
+	Float64:       "float64",
+	Complex64:     "complex64",
+	Complex128:    "complex128",
+	Array:         "array",
+	Chan:          "chan",
+	Func:          "func",
+	Interface:     "interface",
+	Map:           "map",
+	Ptr:           "ptr",
+	Slice:         "slice",
+	String:        "string",
+	Struct:        "struct",
+	UnsafePointer: "unsafe.Pointer",
+}
+
+type nameOff int32 // offset to a name
+type typeOff int32 // offset to an *rtype
+type textOff int32 // offset from top of text section
 
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}

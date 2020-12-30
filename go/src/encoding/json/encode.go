@@ -148,11 +148,11 @@ import (
 func Marshal(v interface{}) ([]byte, error) {
 	e := newEncodeState()
 
-	err :=e.marshal(v,encOpts{})
-	if err != nil{
-		return nil,err
+	err := e.marshal(v, encOpts{})
+	if err != nil {
+		return nil, err
 	}
-	return nil,nil
+	return nil, nil
 }
 
 // An encodeState encodes JSON into a bytes.Buffer.
@@ -160,48 +160,57 @@ type encodeState struct {
 	bytes.Buffer // accumulated output
 }
 
-func newEncodeState() *encodeState{
+func newEncodeState() *encodeState {
 	return &encodeState{}
 }
 
-func (e *encodeState)marshal(v interface{},opts encOpts)(err error){
-	e.reflectValue(reflect.ValueOf(v),opts)
+func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
+	e.reflectValue(reflect.ValueOf(v), opts)
 	return nil
 }
 
 //用反射去序列化
-func (e *encodeState)reflectValue(v reflect.Value,opts encOpts){
+func (e *encodeState) reflectValue(v reflect.Value, opts encOpts) {
+	valueEncoder(v)(e, v, opts)
 }
 
-type encOpts struct{
-
+type encOpts struct {
 }
 
-//解析的方法
+//编码的方法
 type encoderFunc func(e *encodeState, v reflect.Value, opts encOpts)
 
-//根据反射去获取解析的方法
-func valueEncoder(v reflect.Value)encoderFunc{
+//根据反射去获取编码的方法
+func valueEncoder(v reflect.Value) encoderFunc {
 	return typeEncoder(v.Type())
 }
 
-func typeEncoder(r reflect.Type)encoderFunc{
+//根据反射reflect.Type去获得编码的方法
+func typeEncoder(t reflect.Type) encoderFunc {
 
 	// To deal with recursive types, populate the map with an
 	// indirect func before we build it. This type waits on the
 	// real func (f) to be ready and then calls it. This indirect
 	// func is only used for recursive types.
-	var(
+	var (
 		f encoderFunc
 	)
+
+	// Compute the real encoder and replace the indirect func with it.
+	f = newTypeEncoder(t, true)
+
 	return f
 }
 
 // newTypeEncoder constructs an encoderFunc for a type.
 // The returned encoder only checks CanAddr when allowAddr is true.
-func newTypeEncoder(t reflect.Type,allowAddr bool)encoderFunc{
+//根据反射类型kind去获取编码方法
+func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	switch t.Kind() {
-	
+	case reflect.Ptr:
+
 	}
 	return nil
 }
+
+type pt
