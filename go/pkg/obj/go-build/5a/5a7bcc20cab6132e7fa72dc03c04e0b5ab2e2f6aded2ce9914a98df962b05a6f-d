@@ -1,0 +1,43 @@
+# test log
+open DOES NOT EXIST
+open testdata/file1.tmpl
+open testdata/file2.tmpl
+stat DOES NOT EXIST
+stat .
+open .
+stat testdata
+open testdata
+open testdata\file1.tmpl
+open testdata\file2.tmpl
+open testdata/tmpl1.tmpl
+open testdata/tmpl2.tmpl
+stat testdata
+open testdata
+open testdata\tmpl1.tmpl
+open testdata\tmpl2.tmpl
+open C:\Users\sas\AppData\Local\Temp\template883169979\T0.tmpl
+open C:\Users\sas\AppData\Local\Temp\template883169979\T1.tmpl
+open C:\Users\sas\AppData\Local\Temp\template883169979\T2.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template883169979
+open C:\Users\sas\AppData\Local\Temp\template883169979
+open C:\Users\sas\AppData\Local\Temp\template883169979\T0.tmpl
+open C:\Users\sas\AppData\Local\Temp\template883169979\T1.tmpl
+open C:\Users\sas\AppData\Local\Temp\template883169979\T2.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template883169979
+open C:\Users\sas\AppData\Local\Temp\template883169979
+open C:\Users\sas\AppData\Local\Temp\template260962014\T1.tmpl
+open C:\Users\sas\AppData\Local\Temp\template260962014\T2.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template260962014
+open C:\Users\sas\AppData\Local\Temp\template260962014
+open C:\Users\sas\AppData\Local\Temp\template260962014\T1.tmpl
+open C:\Users\sas\AppData\Local\Temp\template260962014\T2.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template260962014
+open C:\Users\sas\AppData\Local\Temp\template260962014
+open C:\Users\sas\AppData\Local\Temp\template206343845\T0.tmpl
+open C:\Users\sas\AppData\Local\Temp\template206343845\T1.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template206343845
+open C:\Users\sas\AppData\Local\Temp\template206343845
+open C:\Users\sas\AppData\Local\Temp\template206343845\T0.tmpl
+open C:\Users\sas\AppData\Local\Temp\template206343845\T1.tmpl
+stat C:\Users\sas\AppData\Local\Temp\template206343845
+open C:\Users\sas\AppData\Local\Temp\template206343845

@@ -6,6 +6,8 @@ package runtime
 
 import "unsafe"
 
+//gc扫描相关
+
 // A gcSweepBuf is a set of *mspans.
 //
 // gcSweepBuf is safe for concurrent push operations *or* concurrent

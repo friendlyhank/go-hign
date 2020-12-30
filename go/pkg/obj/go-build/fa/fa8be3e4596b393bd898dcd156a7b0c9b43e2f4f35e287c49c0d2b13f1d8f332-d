@@ -1,0 +1,7 @@
+./exec.go
+./exec_windows.go
+./lp_windows.go
+./bench_test.go
+./env_test.go
+./internal_test.go
+./lp_test.go

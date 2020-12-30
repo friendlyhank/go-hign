@@ -1,0 +1,15 @@
+./cert_pool.go
+./pem_decrypt.go
+./pkcs1.go
+./pkcs8.go
+./root.go
+./root_windows.go
+./sec1.go
+./verify.go
+./x509.go
+./name_constraints_test.go
+./pem_decrypt_test.go
+./pkcs8_test.go
+./sec1_test.go
+./verify_test.go
+./x509_test.go

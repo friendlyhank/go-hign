@@ -1,0 +1,11 @@
+# test log
+getenv XXNOTDEFINEDXX
+getenv XXNOTDEFINEDXX
+getenv XXNOTDEFINED
+getenv XXNOTDEFINED
+getenv _X
+getenv _X
+getenv _X
+getenv _X
+getenv _Z
+getenv _Z

@@ -1,0 +1,589 @@
+# test log
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+stat testdata/hosts
+open testdata/hosts
+stat testdata/singleline-hosts
+open testdata/singleline-hosts
+stat testdata/ipv4-hosts
+open testdata/ipv4-hosts
+stat testdata/ipv6-hosts
+open testdata/ipv6-hosts
+stat testdata/case-hosts
+open testdata/case-hosts
+stat testdata/hosts
+open testdata/hosts
+stat testdata/singleline-hosts
+open testdata/singleline-hosts
+stat testdata/ipv4-hosts
+open testdata/ipv4-hosts
+stat testdata/ipv6-hosts
+open testdata/ipv6-hosts
+stat testdata/case-hosts
+open testdata/case-hosts
+stat testdata/ipv4-hosts
+open testdata/ipv4-hosts
+stat testdata/ipv6-hosts
+open testdata/ipv6-hosts
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GOTEST_DIAL_ADDR
+getenv PATHEXT
+stat C:\Users\sas\AppData\Local\Temp\go-build644637418\b774\net.test.exe
+open NUL
+open NUL
+open C:\Users\sas\AppData\Local\Temp\go-build644637418\b774\net.test.exe
+open C:\Users\sas\AppData\Local\Temp\netcmd199439987
+getenv PATHEXT
+stat powershell.com
+stat powershell.exe
+stat powershell.bat
+stat powershell.cmd
+stat powershell.vbs
+stat powershell.vbe
+stat powershell.js
+stat powershell.jse
+stat powershell.wsf
+stat powershell.wsh
+stat powershell.msc
+getenv path
+stat E:\go\bin\powershell.com
+stat E:\go\bin\powershell.exe
+stat E:\go\bin\powershell.bat
+stat E:\go\bin\powershell.cmd
+stat E:\go\bin\powershell.vbs
+stat E:\go\bin\powershell.vbe
+stat E:\go\bin\powershell.js
+stat E:\go\bin\powershell.jse
+stat E:\go\bin\powershell.wsf
+stat E:\go\bin\powershell.wsh
+stat E:\go\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\local\bin\powershell.com
+stat C:\Program Files\Git\usr\local\bin\powershell.exe
+stat C:\Program Files\Git\usr\local\bin\powershell.bat
+stat C:\Program Files\Git\usr\local\bin\powershell.cmd
+stat C:\Program Files\Git\usr\local\bin\powershell.vbs
+stat C:\Program Files\Git\usr\local\bin\powershell.vbe
+stat C:\Program Files\Git\usr\local\bin\powershell.js
+stat C:\Program Files\Git\usr\local\bin\powershell.jse
+stat C:\Program Files\Git\usr\local\bin\powershell.wsf
+stat C:\Program Files\Git\usr\local\bin\powershell.wsh
+stat C:\Program Files\Git\usr\local\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\VanDyke Software\Clients\powershell.com
+stat C:\Program Files\VanDyke Software\Clients\powershell.exe
+stat C:\Program Files\VanDyke Software\Clients\powershell.bat
+stat C:\Program Files\VanDyke Software\Clients\powershell.cmd
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbs
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbe
+stat C:\Program Files\VanDyke Software\Clients\powershell.js
+stat C:\Program Files\VanDyke Software\Clients\powershell.jse
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsf
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsh
+stat C:\Program Files\VanDyke Software\Clients\powershell.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.msc
+stat C:\WINDOWS\system32\powershell.com
+stat C:\WINDOWS\system32\powershell.exe
+stat C:\WINDOWS\system32\powershell.bat
+stat C:\WINDOWS\system32\powershell.cmd
+stat C:\WINDOWS\system32\powershell.vbs
+stat C:\WINDOWS\system32\powershell.vbe
+stat C:\WINDOWS\system32\powershell.js
+stat C:\WINDOWS\system32\powershell.jse
+stat C:\WINDOWS\system32\powershell.wsf
+stat C:\WINDOWS\system32\powershell.wsh
+stat C:\WINDOWS\system32\powershell.msc
+stat C:\WINDOWS\powershell.com
+stat C:\WINDOWS\powershell.exe
+stat C:\WINDOWS\powershell.bat
+stat C:\WINDOWS\powershell.cmd
+stat C:\WINDOWS\powershell.vbs
+stat C:\WINDOWS\powershell.vbe
+stat C:\WINDOWS\powershell.js
+stat C:\WINDOWS\powershell.jse
+stat C:\WINDOWS\powershell.wsf
+stat C:\WINDOWS\powershell.wsh
+stat C:\WINDOWS\powershell.msc
+stat C:\WINDOWS\System32\Wbem\powershell.com
+stat C:\WINDOWS\System32\Wbem\powershell.exe
+stat C:\WINDOWS\System32\Wbem\powershell.bat
+stat C:\WINDOWS\System32\Wbem\powershell.cmd
+stat C:\WINDOWS\System32\Wbem\powershell.vbs
+stat C:\WINDOWS\System32\Wbem\powershell.vbe
+stat C:\WINDOWS\System32\Wbem\powershell.js
+stat C:\WINDOWS\System32\Wbem\powershell.jse
+stat C:\WINDOWS\System32\Wbem\powershell.wsf
+stat C:\WINDOWS\System32\Wbem\powershell.wsh
+stat C:\WINDOWS\System32\Wbem\powershell.msc
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.com
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+getenv PATHEXT
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open NUL
+open C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open C:\Users\sas\AppData\Local\Temp\netcmd199439987
+open C:\Users\sas\AppData\Local\Temp\netcmd951055670
+getenv PATHEXT
+stat powershell.com
+stat powershell.exe
+stat powershell.bat
+stat powershell.cmd
+stat powershell.vbs
+stat powershell.vbe
+stat powershell.js
+stat powershell.jse
+stat powershell.wsf
+stat powershell.wsh
+stat powershell.msc
+getenv path
+stat E:\go\bin\powershell.com
+stat E:\go\bin\powershell.exe
+stat E:\go\bin\powershell.bat
+stat E:\go\bin\powershell.cmd
+stat E:\go\bin\powershell.vbs
+stat E:\go\bin\powershell.vbe
+stat E:\go\bin\powershell.js
+stat E:\go\bin\powershell.jse
+stat E:\go\bin\powershell.wsf
+stat E:\go\bin\powershell.wsh
+stat E:\go\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\local\bin\powershell.com
+stat C:\Program Files\Git\usr\local\bin\powershell.exe
+stat C:\Program Files\Git\usr\local\bin\powershell.bat
+stat C:\Program Files\Git\usr\local\bin\powershell.cmd
+stat C:\Program Files\Git\usr\local\bin\powershell.vbs
+stat C:\Program Files\Git\usr\local\bin\powershell.vbe
+stat C:\Program Files\Git\usr\local\bin\powershell.js
+stat C:\Program Files\Git\usr\local\bin\powershell.jse
+stat C:\Program Files\Git\usr\local\bin\powershell.wsf
+stat C:\Program Files\Git\usr\local\bin\powershell.wsh
+stat C:\Program Files\Git\usr\local\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\VanDyke Software\Clients\powershell.com
+stat C:\Program Files\VanDyke Software\Clients\powershell.exe
+stat C:\Program Files\VanDyke Software\Clients\powershell.bat
+stat C:\Program Files\VanDyke Software\Clients\powershell.cmd
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbs
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbe
+stat C:\Program Files\VanDyke Software\Clients\powershell.js
+stat C:\Program Files\VanDyke Software\Clients\powershell.jse
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsf
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsh
+stat C:\Program Files\VanDyke Software\Clients\powershell.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.msc
+stat C:\WINDOWS\system32\powershell.com
+stat C:\WINDOWS\system32\powershell.exe
+stat C:\WINDOWS\system32\powershell.bat
+stat C:\WINDOWS\system32\powershell.cmd
+stat C:\WINDOWS\system32\powershell.vbs
+stat C:\WINDOWS\system32\powershell.vbe
+stat C:\WINDOWS\system32\powershell.js
+stat C:\WINDOWS\system32\powershell.jse
+stat C:\WINDOWS\system32\powershell.wsf
+stat C:\WINDOWS\system32\powershell.wsh
+stat C:\WINDOWS\system32\powershell.msc
+stat C:\WINDOWS\powershell.com
+stat C:\WINDOWS\powershell.exe
+stat C:\WINDOWS\powershell.bat
+stat C:\WINDOWS\powershell.cmd
+stat C:\WINDOWS\powershell.vbs
+stat C:\WINDOWS\powershell.vbe
+stat C:\WINDOWS\powershell.js
+stat C:\WINDOWS\powershell.jse
+stat C:\WINDOWS\powershell.wsf
+stat C:\WINDOWS\powershell.wsh
+stat C:\WINDOWS\powershell.msc
+stat C:\WINDOWS\System32\Wbem\powershell.com
+stat C:\WINDOWS\System32\Wbem\powershell.exe
+stat C:\WINDOWS\System32\Wbem\powershell.bat
+stat C:\WINDOWS\System32\Wbem\powershell.cmd
+stat C:\WINDOWS\System32\Wbem\powershell.vbs
+stat C:\WINDOWS\System32\Wbem\powershell.vbe
+stat C:\WINDOWS\System32\Wbem\powershell.js
+stat C:\WINDOWS\System32\Wbem\powershell.jse
+stat C:\WINDOWS\System32\Wbem\powershell.wsf
+stat C:\WINDOWS\System32\Wbem\powershell.wsh
+stat C:\WINDOWS\System32\Wbem\powershell.msc
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.com
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+getenv PATHEXT
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open NUL
+open C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open C:\Users\sas\AppData\Local\Temp\netcmd951055670
+open C:\Users\sas\AppData\Local\Temp\netcmd101216029
+getenv PATHEXT
+stat powershell.com
+stat powershell.exe
+stat powershell.bat
+stat powershell.cmd
+stat powershell.vbs
+stat powershell.vbe
+stat powershell.js
+stat powershell.jse
+stat powershell.wsf
+stat powershell.wsh
+stat powershell.msc
+getenv path
+stat E:\go\bin\powershell.com
+stat E:\go\bin\powershell.exe
+stat E:\go\bin\powershell.bat
+stat E:\go\bin\powershell.cmd
+stat E:\go\bin\powershell.vbs
+stat E:\go\bin\powershell.vbe
+stat E:\go\bin\powershell.js
+stat E:\go\bin\powershell.jse
+stat E:\go\bin\powershell.wsf
+stat E:\go\bin\powershell.wsh
+stat E:\go\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\local\bin\powershell.com
+stat C:\Program Files\Git\usr\local\bin\powershell.exe
+stat C:\Program Files\Git\usr\local\bin\powershell.bat
+stat C:\Program Files\Git\usr\local\bin\powershell.cmd
+stat C:\Program Files\Git\usr\local\bin\powershell.vbs
+stat C:\Program Files\Git\usr\local\bin\powershell.vbe
+stat C:\Program Files\Git\usr\local\bin\powershell.js
+stat C:\Program Files\Git\usr\local\bin\powershell.jse
+stat C:\Program Files\Git\usr\local\bin\powershell.wsf
+stat C:\Program Files\Git\usr\local\bin\powershell.wsh
+stat C:\Program Files\Git\usr\local\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Program Files\Git\mingw64\bin\powershell.com
+stat C:\Program Files\Git\mingw64\bin\powershell.exe
+stat C:\Program Files\Git\mingw64\bin\powershell.bat
+stat C:\Program Files\Git\mingw64\bin\powershell.cmd
+stat C:\Program Files\Git\mingw64\bin\powershell.vbs
+stat C:\Program Files\Git\mingw64\bin\powershell.vbe
+stat C:\Program Files\Git\mingw64\bin\powershell.js
+stat C:\Program Files\Git\mingw64\bin\powershell.jse
+stat C:\Program Files\Git\mingw64\bin\powershell.wsf
+stat C:\Program Files\Git\mingw64\bin\powershell.wsh
+stat C:\Program Files\Git\mingw64\bin\powershell.msc
+stat C:\Program Files\Git\usr\bin\powershell.com
+stat C:\Program Files\Git\usr\bin\powershell.exe
+stat C:\Program Files\Git\usr\bin\powershell.bat
+stat C:\Program Files\Git\usr\bin\powershell.cmd
+stat C:\Program Files\Git\usr\bin\powershell.vbs
+stat C:\Program Files\Git\usr\bin\powershell.vbe
+stat C:\Program Files\Git\usr\bin\powershell.js
+stat C:\Program Files\Git\usr\bin\powershell.jse
+stat C:\Program Files\Git\usr\bin\powershell.wsf
+stat C:\Program Files\Git\usr\bin\powershell.wsh
+stat C:\Program Files\Git\usr\bin\powershell.msc
+stat C:\Users\sas\bin\powershell.com
+stat C:\Users\sas\bin\powershell.exe
+stat C:\Users\sas\bin\powershell.bat
+stat C:\Users\sas\bin\powershell.cmd
+stat C:\Users\sas\bin\powershell.vbs
+stat C:\Users\sas\bin\powershell.vbe
+stat C:\Users\sas\bin\powershell.js
+stat C:\Users\sas\bin\powershell.jse
+stat C:\Users\sas\bin\powershell.wsf
+stat C:\Users\sas\bin\powershell.wsh
+stat C:\Users\sas\bin\powershell.msc
+stat C:\Program Files\VanDyke Software\Clients\powershell.com
+stat C:\Program Files\VanDyke Software\Clients\powershell.exe
+stat C:\Program Files\VanDyke Software\Clients\powershell.bat
+stat C:\Program Files\VanDyke Software\Clients\powershell.cmd
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbs
+stat C:\Program Files\VanDyke Software\Clients\powershell.vbe
+stat C:\Program Files\VanDyke Software\Clients\powershell.js
+stat C:\Program Files\VanDyke Software\Clients\powershell.jse
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsf
+stat C:\Program Files\VanDyke Software\Clients\powershell.wsh
+stat C:\Program Files\VanDyke Software\Clients\powershell.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\powershell.msc
+stat C:\WINDOWS\system32\powershell.com
+stat C:\WINDOWS\system32\powershell.exe
+stat C:\WINDOWS\system32\powershell.bat
+stat C:\WINDOWS\system32\powershell.cmd
+stat C:\WINDOWS\system32\powershell.vbs
+stat C:\WINDOWS\system32\powershell.vbe
+stat C:\WINDOWS\system32\powershell.js
+stat C:\WINDOWS\system32\powershell.jse
+stat C:\WINDOWS\system32\powershell.wsf
+stat C:\WINDOWS\system32\powershell.wsh
+stat C:\WINDOWS\system32\powershell.msc
+stat C:\WINDOWS\powershell.com
+stat C:\WINDOWS\powershell.exe
+stat C:\WINDOWS\powershell.bat
+stat C:\WINDOWS\powershell.cmd
+stat C:\WINDOWS\powershell.vbs
+stat C:\WINDOWS\powershell.vbe
+stat C:\WINDOWS\powershell.js
+stat C:\WINDOWS\powershell.jse
+stat C:\WINDOWS\powershell.wsf
+stat C:\WINDOWS\powershell.wsh
+stat C:\WINDOWS\powershell.msc
+stat C:\WINDOWS\System32\Wbem\powershell.com
+stat C:\WINDOWS\System32\Wbem\powershell.exe
+stat C:\WINDOWS\System32\Wbem\powershell.bat
+stat C:\WINDOWS\System32\Wbem\powershell.cmd
+stat C:\WINDOWS\System32\Wbem\powershell.vbs
+stat C:\WINDOWS\System32\Wbem\powershell.vbe
+stat C:\WINDOWS\System32\Wbem\powershell.js
+stat C:\WINDOWS\System32\Wbem\powershell.jse
+stat C:\WINDOWS\System32\Wbem\powershell.wsf
+stat C:\WINDOWS\System32\Wbem\powershell.wsh
+stat C:\WINDOWS\System32\Wbem\powershell.msc
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.com
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+getenv PATHEXT
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open NUL
+open C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+open C:\Users\sas\AppData\Local\Temp\netcmd101216029
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+getenv GODEBUG
+open ../testdata/Isaac.Newton-Opticks.txt
+open ../testdata/Isaac.Newton-Opticks.txt
+open ../testdata/Isaac.Newton-Opticks.txt
+open C:\Users\sas\AppData\Local\Temp\go-nettest237422552
+open C:\Users\sas\AppData\Local\Temp\go-nettest875032407
+open C:\Users\sas\AppData\Local\Temp\go-nettest726779082
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME
+getenv GO_BUILDER_NAME

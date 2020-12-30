@@ -1,0 +1,22 @@
+# test log
+stat E:\go\src\reflect
+open E:\go\src\reflect
+open .
+open E:\go\src\reflect\all_test.go
+open all_test.go
+open export_test.go
+open reflect_mirror_test.go
+open set_test.go
+open swapper.go
+open tostring_test.go
+open type.go
+open value.go
+open E:\go\src\reflect\deepequal.go
+open E:\go\src\reflect\example_test.go
+open E:\go\src\reflect\export_test.go
+open E:\go\src\reflect\makefunc.go
+open E:\go\src\reflect\set_test.go
+open E:\go\src\reflect\swapper.go
+open E:\go\src\reflect\tostring_test.go
+open E:\go\src\reflect\type.go
+open E:\go\src\reflect\value.go

@@ -1,0 +1,306 @@
+# test log
+stat testdata
+open testdata
+open testdata\comments.input
+open testdata\comments.input
+open testdata\comments.golden
+open testdata\comments.golden
+open testdata\comments.golden
+open testdata\comments.golden
+open testdata\composites.input
+open testdata\composites.input
+open testdata\composites.golden
+open testdata\composites.golden
+open testdata\composites.golden
+open testdata\composites.golden
+open testdata\crlf.input
+open testdata\crlf.input
+open testdata\crlf.golden
+open testdata\crlf.golden
+open testdata\crlf.golden
+open testdata\crlf.golden
+open testdata\emptydecl.input
+open testdata\emptydecl.input
+open testdata\emptydecl.golden
+open testdata\emptydecl.golden
+open testdata\emptydecl.golden
+open testdata\emptydecl.golden
+open testdata\go2numbers.input
+open testdata\go2numbers.input
+open testdata\go2numbers.golden
+open testdata\go2numbers.golden
+open testdata\go2numbers.golden
+open testdata\go2numbers.golden
+open testdata\import.input
+open testdata\import.input
+open testdata\import.golden
+open testdata\import.golden
+open testdata\import.golden
+open testdata\import.golden
+open testdata\issue28082.input
+open testdata\issue28082.input
+open testdata\issue28082.golden
+open testdata\issue28082.golden
+open testdata\issue28082.golden
+open testdata\issue28082.golden
+open testdata\ranges.input
+open testdata\ranges.input
+open testdata\ranges.golden
+open testdata\ranges.golden
+open testdata\ranges.golden
+open testdata\ranges.golden
+open testdata\rewrite1.input
+open testdata\rewrite1.input
+open testdata\rewrite1.golden
+open testdata\rewrite1.golden
+open testdata\rewrite1.golden
+open testdata\rewrite1.golden
+open testdata\rewrite10.input
+open testdata\rewrite10.input
+open testdata\rewrite10.golden
+open testdata\rewrite10.golden
+open testdata\rewrite10.golden
+open testdata\rewrite10.golden
+open testdata\rewrite2.input
+open testdata\rewrite2.input
+open testdata\rewrite2.golden
+open testdata\rewrite2.golden
+open testdata\rewrite2.golden
+open testdata\rewrite2.golden
+open testdata\rewrite3.input
+open testdata\rewrite3.input
+open testdata\rewrite3.golden
+open testdata\rewrite3.golden
+open testdata\rewrite3.golden
+open testdata\rewrite3.golden
+open testdata\rewrite4.input
+open testdata\rewrite4.input
+open testdata\rewrite4.golden
+open testdata\rewrite4.golden
+open testdata\rewrite4.golden
+open testdata\rewrite4.golden
+open testdata\rewrite5.input
+open testdata\rewrite5.input
+open testdata\rewrite5.golden
+open testdata\rewrite5.golden
+open testdata\rewrite5.golden
+open testdata\rewrite5.golden
+open testdata\rewrite6.input
+open testdata\rewrite6.input
+open testdata\rewrite6.golden
+open testdata\rewrite6.golden
+open testdata\rewrite6.golden
+open testdata\rewrite6.golden
+open testdata\rewrite7.input
+open testdata\rewrite7.input
+open testdata\rewrite7.golden
+open testdata\rewrite7.golden
+open testdata\rewrite7.golden
+open testdata\rewrite7.golden
+open testdata\rewrite8.input
+open testdata\rewrite8.input
+open testdata\rewrite8.golden
+open testdata\rewrite8.golden
+open testdata\rewrite8.golden
+open testdata\rewrite8.golden
+open testdata\rewrite9.input
+open testdata\rewrite9.input
+open testdata\rewrite9.golden
+open testdata\rewrite9.golden
+open testdata\rewrite9.golden
+open testdata\rewrite9.golden
+open testdata\slices1.input
+open testdata\slices1.input
+open testdata\slices1.golden
+open testdata\slices1.golden
+open testdata\slices1.golden
+open testdata\slices1.golden
+open testdata\stdin1.input
+open testdata\stdin1.input
+open testdata\stdin1.golden
+open testdata\stdin1.golden
+open testdata\stdin1.golden
+open testdata\stdin1.golden
+open testdata\stdin2.input
+open testdata\stdin2.input
+open testdata\stdin2.golden
+open testdata\stdin2.golden
+open testdata\stdin2.golden
+open testdata\stdin2.golden
+open testdata\stdin3.input
+open testdata\stdin3.input
+open testdata\stdin3.golden
+open testdata\stdin3.golden
+open testdata\stdin3.golden
+open testdata\stdin3.golden
+open testdata\stdin4.input
+open testdata\stdin4.input
+open testdata\stdin4.golden
+open testdata\stdin4.golden
+open testdata\stdin4.golden
+open testdata\stdin4.golden
+open testdata\stdin5.input
+open testdata\stdin5.input
+open testdata\stdin5.golden
+open testdata\stdin5.golden
+open testdata\stdin5.golden
+open testdata\stdin5.golden
+open testdata\stdin6.input
+open testdata\stdin6.input
+open testdata\stdin6.golden
+open testdata\stdin6.golden
+open testdata\stdin6.golden
+open testdata\stdin6.golden
+open testdata\stdin7.input
+open testdata\stdin7.input
+open testdata\stdin7.golden
+open testdata\stdin7.golden
+open testdata\stdin7.golden
+open testdata\stdin7.golden
+open testdata\typealias.input
+open testdata\typealias.input
+open testdata\typealias.golden
+open testdata\typealias.golden
+open testdata\typealias.golden
+open testdata\typealias.golden
+open testdata\typeswitch.input
+open testdata\typeswitch.input
+open testdata\typeswitch.golden
+open testdata\typeswitch.golden
+open testdata\typeswitch.golden
+open testdata\typeswitch.golden
+open gofmt.go
+open gofmt.go
+open gofmt.go
+open gofmt_test.go
+open gofmt_test.go
+open gofmt_test.go
+open testdata/crlf.input
+open testdata/crlf.golden
+open C:\Users\sas\AppData\Local\Temp\gofmt_test488702763\foo.go599059598
+stat C:\Users\sas\AppData\Local\Temp\gofmt_test488702763
+open C:\Users\sas\AppData\Local\Temp\gofmt_test488702763
+getenv PATHEXT
+stat diff.com
+stat diff.exe
+stat diff.bat
+stat diff.cmd
+stat diff.vbs
+stat diff.vbe
+stat diff.js
+stat diff.jse
+stat diff.wsf
+stat diff.wsh
+stat diff.msc
+getenv path
+stat E:\go\bin\diff.com
+stat E:\go\bin\diff.exe
+stat E:\go\bin\diff.bat
+stat E:\go\bin\diff.cmd
+stat E:\go\bin\diff.vbs
+stat E:\go\bin\diff.vbe
+stat E:\go\bin\diff.js
+stat E:\go\bin\diff.jse
+stat E:\go\bin\diff.wsf
+stat E:\go\bin\diff.wsh
+stat E:\go\bin\diff.msc
+stat C:\Users\sas\bin\diff.com
+stat C:\Users\sas\bin\diff.exe
+stat C:\Users\sas\bin\diff.bat
+stat C:\Users\sas\bin\diff.cmd
+stat C:\Users\sas\bin\diff.vbs
+stat C:\Users\sas\bin\diff.vbe
+stat C:\Users\sas\bin\diff.js
+stat C:\Users\sas\bin\diff.jse
+stat C:\Users\sas\bin\diff.wsf
+stat C:\Users\sas\bin\diff.wsh
+stat C:\Users\sas\bin\diff.msc
+stat C:\Program Files\Git\mingw64\bin\diff.com
+stat C:\Program Files\Git\mingw64\bin\diff.exe
+stat C:\Program Files\Git\mingw64\bin\diff.bat
+stat C:\Program Files\Git\mingw64\bin\diff.cmd
+stat C:\Program Files\Git\mingw64\bin\diff.vbs
+stat C:\Program Files\Git\mingw64\bin\diff.vbe
+stat C:\Program Files\Git\mingw64\bin\diff.js
+stat C:\Program Files\Git\mingw64\bin\diff.jse
+stat C:\Program Files\Git\mingw64\bin\diff.wsf
+stat C:\Program Files\Git\mingw64\bin\diff.wsh
+stat C:\Program Files\Git\mingw64\bin\diff.msc
+stat C:\Program Files\Git\usr\local\bin\diff.com
+stat C:\Program Files\Git\usr\local\bin\diff.exe
+stat C:\Program Files\Git\usr\local\bin\diff.bat
+stat C:\Program Files\Git\usr\local\bin\diff.cmd
+stat C:\Program Files\Git\usr\local\bin\diff.vbs
+stat C:\Program Files\Git\usr\local\bin\diff.vbe
+stat C:\Program Files\Git\usr\local\bin\diff.js
+stat C:\Program Files\Git\usr\local\bin\diff.jse
+stat C:\Program Files\Git\usr\local\bin\diff.wsf
+stat C:\Program Files\Git\usr\local\bin\diff.wsh
+stat C:\Program Files\Git\usr\local\bin\diff.msc
+stat C:\Program Files\Git\usr\bin\diff.com
+stat C:\Program Files\Git\usr\bin\diff.exe
+open C:\Users\sas\AppData\Local\Temp\gofmt393088661
+open C:\Users\sas\AppData\Local\Temp\gofmt009548016
+getenv PATHEXT
+stat diff.com
+stat diff.exe
+stat diff.bat
+stat diff.cmd
+stat diff.vbs
+stat diff.vbe
+stat diff.js
+stat diff.jse
+stat diff.wsf
+stat diff.wsh
+stat diff.msc
+getenv path
+stat E:\go\bin\diff.com
+stat E:\go\bin\diff.exe
+stat E:\go\bin\diff.bat
+stat E:\go\bin\diff.cmd
+stat E:\go\bin\diff.vbs
+stat E:\go\bin\diff.vbe
+stat E:\go\bin\diff.js
+stat E:\go\bin\diff.jse
+stat E:\go\bin\diff.wsf
+stat E:\go\bin\diff.wsh
+stat E:\go\bin\diff.msc
+stat C:\Users\sas\bin\diff.com
+stat C:\Users\sas\bin\diff.exe
+stat C:\Users\sas\bin\diff.bat
+stat C:\Users\sas\bin\diff.cmd
+stat C:\Users\sas\bin\diff.vbs
+stat C:\Users\sas\bin\diff.vbe
+stat C:\Users\sas\bin\diff.js
+stat C:\Users\sas\bin\diff.jse
+stat C:\Users\sas\bin\diff.wsf
+stat C:\Users\sas\bin\diff.wsh
+stat C:\Users\sas\bin\diff.msc
+stat C:\Program Files\Git\mingw64\bin\diff.com
+stat C:\Program Files\Git\mingw64\bin\diff.exe
+stat C:\Program Files\Git\mingw64\bin\diff.bat
+stat C:\Program Files\Git\mingw64\bin\diff.cmd
+stat C:\Program Files\Git\mingw64\bin\diff.vbs
+stat C:\Program Files\Git\mingw64\bin\diff.vbe
+stat C:\Program Files\Git\mingw64\bin\diff.js
+stat C:\Program Files\Git\mingw64\bin\diff.jse
+stat C:\Program Files\Git\mingw64\bin\diff.wsf
+stat C:\Program Files\Git\mingw64\bin\diff.wsh
+stat C:\Program Files\Git\mingw64\bin\diff.msc
+stat C:\Program Files\Git\usr\local\bin\diff.com
+stat C:\Program Files\Git\usr\local\bin\diff.exe
+stat C:\Program Files\Git\usr\local\bin\diff.bat
+stat C:\Program Files\Git\usr\local\bin\diff.cmd
+stat C:\Program Files\Git\usr\local\bin\diff.vbs
+stat C:\Program Files\Git\usr\local\bin\diff.vbe
+stat C:\Program Files\Git\usr\local\bin\diff.js
+stat C:\Program Files\Git\usr\local\bin\diff.jse
+stat C:\Program Files\Git\usr\local\bin\diff.wsf
+stat C:\Program Files\Git\usr\local\bin\diff.wsh
+stat C:\Program Files\Git\usr\local\bin\diff.msc
+stat C:\Program Files\Git\usr\bin\diff.com
+stat C:\Program Files\Git\usr\bin\diff.exe
+getenv PATHEXT
+stat C:\Program Files\Git\usr\bin\diff.exe
+open NUL
+open C:\Program Files\Git\usr\bin\diff.exe

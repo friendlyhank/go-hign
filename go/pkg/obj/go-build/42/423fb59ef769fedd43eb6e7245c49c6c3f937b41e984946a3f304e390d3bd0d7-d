@@ -1,0 +1,14 @@
+//line C:\Users\sas\AppData\Local\Temp\cmd-go-test-313477595\tmpdir234432382\script-test_empty\gopath\src\empty\pkg\pkg.go:1
+package p; import _cover_atomic_ "sync/atomic"
+
+var GoCover_0_366633386339303734383334 = struct {
+	Count     [0]uint32
+	Pos       [3 * 0]uint32
+	NumStmt   [0]uint16
+} {
+	Pos: [3 * 0]uint32{
+	},
+	NumStmt: [0]uint16{
+	},
+}
+var _ = _cover_atomic_.LoadUint32

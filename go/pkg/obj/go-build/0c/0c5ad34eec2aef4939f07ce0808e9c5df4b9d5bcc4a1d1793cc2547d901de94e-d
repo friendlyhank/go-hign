@@ -1,0 +1,2 @@
+# teststrictdup
+cmd/link: while reading object for 'main': duplicate symbol 'main.f', previous def at 'main', with mismatched payload: new length 2 != old length 1

@@ -1,0 +1,5 @@
+./doc.go
+./signal.go
+./signal_unix.go
+./signal_windows_test.go
+./sig.s

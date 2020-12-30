@@ -1,0 +1,7 @@
+./match.go
+./path.go
+./path_windows.go
+./symlink.go
+./symlink_windows.go
+./export_test.go
+./export_windows_test.go

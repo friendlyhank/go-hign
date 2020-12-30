@@ -1,0 +1,13 @@
+./env_test.go
+./error_test.go
+./error_windows_test.go
+./example_test.go
+./executable_test.go
+./os_test.go
+./os_windows_test.go
+./path_test.go
+./path_windows_test.go
+./pipe_test.go
+./rawconn_test.go
+./removeall_test.go
+./stat_test.go

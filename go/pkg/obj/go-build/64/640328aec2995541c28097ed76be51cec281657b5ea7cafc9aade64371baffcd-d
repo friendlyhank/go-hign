@@ -1,0 +1,12 @@
+# test log
+open testdata/gcc-386-darwin-exec.base64
+open testdata/gcc-amd64-darwin-exec.base64
+open testdata/gcc-amd64-darwin-exec-debug.base64
+open testdata/clang-386-darwin-exec-with-rpath.base64
+open testdata/clang-amd64-darwin-exec-with-rpath.base64
+open testdata/clang-386-darwin.obj.base64
+open testdata/clang-amd64-darwin.obj.base64
+open file.go
+open testdata/fat-gcc-386-amd64-darwin-exec.base64
+open file.go
+open testdata/gcc-386-darwin-exec.base64

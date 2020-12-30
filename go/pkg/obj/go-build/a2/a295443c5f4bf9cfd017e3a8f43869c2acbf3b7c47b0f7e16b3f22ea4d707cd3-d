@@ -1,0 +1,20 @@
+# test log
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+getenv GODEBUG
+getenv HTTP_PROXY
+getenv http_proxy
+getenv HTTPS_PROXY
+getenv https_proxy
+getenv NO_PROXY
+getenv no_proxy
+getenv REQUEST_METHOD
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps
+open /proc/self/maps

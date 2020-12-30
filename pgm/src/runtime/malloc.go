@@ -307,6 +307,71 @@ func mallocinit(){
 //0字节的内存分配基础地址 base address for all 0-byte allocations
 var zerobase uintptr
 
+// nextFreeFast returns the next free object if one is quickly available.
+// Otherwise it returns 0.
+//从mspan找到空闲的对象
+func nextFreeFast(s *mspan) gclinkptr {
+	theBit := sys.Ctz64(s.allocCache)// Is there a free object in the allocCache?
+	//是否还有空闲
+	if theBit < 64{
+		result := s.freeindex + uintptr(theBit)
+		if result < s.nelems{
+			freeidx := result + 1
+			if freeidx%64 == 0 && freeidx != s.nelems{
+				return 0
+			}
+			s.allocCache >>= uint(theBit + 1)
+			s.freeindex = freeidx
+			s.allocCount++
+			return gclinkptr(result*s.elemsize + s.base())
+		}
+	}
+	return 0
+}
+
+// nextFree returns the next free object from the cached span if one is available.
+// Otherwise it refills the cache with a span with an available object and
+// returns that object along with a flag indicating that this was a heavy
+// weight allocation. If it is a heavy weight allocation the caller must
+// determine whether a new GC cycle needs to be started or if the GC is active
+// whether this goroutine needs to assist the GC.
+//
+// Must run in a non-preemptible context since otherwise the owner of
+// c could change.
+//线程缓存获取下一个空闲的span
+func (c *mcache) nextFree(spc spanClass) (v gclinkptr, s *mspan, shouldhelpgc bool) {
+	s = c.alloc[spc]
+	shouldhelpgc = false
+	freeIndex :=s.nextFreeIndex()
+	//mspan已经满了
+	if freeIndex == s.nelems{
+		// The span is full.
+		if uintptr(s.allocCount) != s.nelems {
+			println("runtime: s.allocCount=", s.allocCount, "s.nelems=", s.nelems)
+			throw("s.allocCount != s.nelems && freeIndex == s.nelems")
+		}
+
+		//线程缓存向中心缓存申请缓存
+		c.refill(spc)
+		shouldhelpgc = true
+		s = c.alloc[spc]
+
+		freeIndex = s.nextFreeIndex()
+	}
+
+	if freeIndex >= s.nelems {
+		throw("freeIndex is not valid")
+	}
+
+	v = gclinkptr(freeIndex*s.elemsize + s.base())
+	s.allocCount++
+	if uintptr(s.allocCount) > s.nelems {
+		println("s.allocCount=", s.allocCount, "s.nelems=", s.nelems)
+		throw("s.allocCount > s.nelems")
+	}
+	return
+}
+
 // Allocate an object of size bytes.
 // Small objects are allocated from the per-P cache's free lists.
 // Large objects (> 32 kB) are allocated straight from the heap.
@@ -327,6 +392,7 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 	}
 	mp.mallocing = 1
 
+	shouldhelpgc := false
 	dataSize := size
 	var c *mcache
 	if mp.p != 0{
@@ -347,6 +413,7 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 	noscan := typ == nil || typ.ptrdata == 0
 	//如果是小对象(小于32kb),在线程缓存中分配内存
 	if size <= maxSmallSize{
+		//微小对象
 		if noscan && size < maxTinySize{
 			// Tiny allocator.
 			//
@@ -398,49 +465,50 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 			//到了这里表示微小对象的分配已经满了,需要申请资源
 			// Allocate a new maxTinySize block.
 			//分配一块新的微小块
-			span = c.alloc[tinySizeClass]
+			span = c.alloc[tinySpanClass]
 			v := nextFreeFast(span)
 			if v == 0{
+				v,span,shouldhelpgc =c.nextFree(tinySpanClass)
+			}
+			x = unsafe.Pointer(v)
+			if needzero && span.needzero != 0 {
+				memclrNoHeapPointers(unsafe.Pointer(v), size)
+			}
+		}else{
+			//小对象
+			var sizeclass uint8
+			if size <= smallSizeMax-8 {
+				sizeclass = size_to_class8[divRoundUp(size, smallSizeDiv)]
+			}else {
+				sizeclass = size_to_class128[divRoundUp(size-smallSizeMax, largeSizeDiv)]
+			}
+			size =uintptr(class_to_size[sizeclass])
+			spc := makeSpanClass(sizeclass, noscan)
+			span = c.alloc[spc]
+			v := nextFreeFast(span)
+			if v == 0 {
+				v, span, shouldhelpgc = c.nextFree(spc)
+			}
+			x = unsafe.Pointer(v)
+			if needzero && span.needzero != 0 {
+				memclrNoHeapPointers(unsafe.Pointer(v), size)
 			}
 		}
+	}else{
+		//大对象
+		systemstack(func() {
+			span = largeAlloc(size,needzero,noscan)
+		})
+		span.freeindex = 1
+		span.allocCount = 1
+		x = unsafe.Pointer(span.base())
+		size = span.elemsize
 	}
 }
 
-// nextFreeFast returns the next free object if one is quickly available.
-// Otherwise it returns 0.
-//从mspan找到空闲的对象
-func nextFreeFast(s *mspan) gclinkptr {
-	theBit := sys.Ctz64(s.allocCache)// Is there a free object in the allocCache?
-	//是否还有空闲
-	if theBit < 64{
-		result := s.freeindex + uintptr(theBit)
-		if result < s.nelems{
-			freeidx := result + 1
-			if freeidx%64 == 0 && freeidx != s.nelems{
-				return 0
-			}
-			s.allocCache >>= uint(theBit + 1)
-			s.freeindex = freeidx
-			s.allocCount++
-			return gclinkptr(result*s.elemsize + s.base())
-		}
-	}
-	return 0
-}
+// 大对象的分配
+func largeAlloc(size uintptr, needzero bool, noscan bool) *mspan {
 
-// nextFree returns the next free object from the cached span if one is available.
-// Otherwise it refills the cache with a span with an available object and
-// returns that object along with a flag indicating that this was a heavy
-// weight allocation. If it is a heavy weight allocation the caller must
-// determine whether a new GC cycle needs to be started or if the GC is active
-// whether this goroutine needs to assist the GC.
-//
-// Must run in a non-preemptible context since otherwise the owner of
-// c could change.
-//线程缓存获取下一个空闲的span
-func (c *mcache) nextFree(spc spanClass) (v gclinkptr, s *mspan, shouldhelpgc bool) {
-	s = c.alloc[spc]
-	shouldhelpgc = false
 }
 
 type persistentAlloc struct {

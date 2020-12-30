@@ -1,0 +1,8 @@
+# test log
+stat .
+open .
+getenv PATHEXT
+stat E:\go\bin\go.com
+stat E:\go\bin\go.exe
+open NUL
+open E:\go\bin\go.exe

@@ -1,0 +1,6 @@
+# test log
+open testdata/bigar-ppc64
+open testdata/bigar-empty
+open testdata/gcc-ppc32-aix-dwarf2-exec
+open testdata/gcc-ppc64-aix-dwarf2-exec
+open file.go

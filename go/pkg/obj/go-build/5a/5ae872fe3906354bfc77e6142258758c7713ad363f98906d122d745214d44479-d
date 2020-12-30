@@ -1,0 +1,16 @@
+# test log
+open C:\Users\sas\AppData\Local\Temp\TestLockNotDroppedByExecCommand375264535
+open C:\Users\sas\AppData\Local\Temp\TestLockNotDroppedByExecCommand375264535
+getenv PATHEXT
+stat C:\Users\sas\AppData\Local\Temp\go-build644637418\b1371\filelock.test.exe
+open NUL
+open NUL
+open NUL
+open C:\Users\sas\AppData\Local\Temp\go-build644637418\b1371\filelock.test.exe
+open C:\Users\sas\AppData\Local\Temp\TestLockExcludesLock479831946
+open C:\Users\sas\AppData\Local\Temp\TestRLockExcludesOnlyLock999956321
+open C:\Users\sas\AppData\Local\Temp\TestLockExcludesRLock532095308
+open C:\Users\sas\AppData\Local\Temp\TestLockExcludesLock479831946
+open C:\Users\sas\AppData\Local\Temp\TestRLockExcludesOnlyLock999956321
+open C:\Users\sas\AppData\Local\Temp\TestLockExcludesRLock532095308
+open C:\Users\sas\AppData\Local\Temp\TestRLockExcludesOnlyLock999956321

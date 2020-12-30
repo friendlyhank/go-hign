@@ -27,3 +27,9 @@ type spanSet struct {
 
 	spineLock mutex
 }
+
+// pop removes and returns a span from buffer b, or nil if b is empty.
+// pop is safe to call concurrently with other pop and push operations.
+func (b *spanSet)pop()*mspan{
+
+}

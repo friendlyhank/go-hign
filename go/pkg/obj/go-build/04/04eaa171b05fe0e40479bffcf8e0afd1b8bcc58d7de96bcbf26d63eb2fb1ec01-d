@@ -1,0 +1,6 @@
+./position.go
+./serialize.go
+./token.go
+./position_test.go
+./serialize_test.go
+./token_test.go

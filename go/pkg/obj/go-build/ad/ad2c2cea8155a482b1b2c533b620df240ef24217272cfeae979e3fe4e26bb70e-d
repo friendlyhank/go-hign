@@ -1,0 +1,27 @@
+# test log
+open rumpelstilzchen
+open ioutil_test.go
+stat ioutil_test.go
+open C:\Users\sas\AppData\Local\Temp\ioutil-test483371443
+open C:\Users\sas\AppData\Local\Temp\ioutil-test483371443
+open C:\Users\sas\AppData\Local\Temp\ioutil-test483371443
+open C:\Users\sas\AppData\Local\Temp\TestReadOnlyWriteFile886070134\blurp.txt
+open C:\Users\sas\AppData\Local\Temp\TestReadOnlyWriteFile886070134\blurp.txt
+open C:\Users\sas\AppData\Local\Temp\TestReadOnlyWriteFile886070134\blurp.txt
+stat C:\Users\sas\AppData\Local\Temp\TestReadOnlyWriteFile886070134
+open C:\Users\sas\AppData\Local\Temp\TestReadOnlyWriteFile886070134
+open rumpelstilzchen
+open ..
+open C:\Users\sas\AppData\Local\Temp\TestTempFile_BadDir263722077\_not_exists_\foo411168280
+open C:\Users\sas\AppData\Local\Temp\ioutil_test360055447
+open C:\Users\sas\AppData\Local\Temp\ioutil_test778872586
+open C:\Users\sas\AppData\Local\Temp\ioutil_test055483617xyz
+open C:\Users\sas\AppData\Local\Temp\TestTempFile_BadPattern868726476\ioutil455587259test
+open C:\Users\sas\AppData\Local\Temp\TestTempFile_BadPattern868726476\ioutil_test164574174foo
+stat C:\Users\sas\AppData\Local\Temp\TestTempFile_BadPattern868726476
+open C:\Users\sas\AppData\Local\Temp\TestTempFile_BadPattern868726476
+stat /_not_exists_
+stat C:\Users\sas\AppData\Local\Temp\TestTempDir_BadDir137684468\not-exist
+stat C:\Users\sas\AppData\Local\Temp\TestTempDir_BadPattern505903942
+open C:\Users\sas\AppData\Local\Temp\TestTempDir_BadPattern505903942
+open testdata/hello

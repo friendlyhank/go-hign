@@ -1,0 +1,5 @@
+# test log
+open /
+open C:\Users\sas\AppData\Local\Temp\go-build350690751\long_name.and_extension
+stat C:\Users\sas\AppData\Local\Temp\go-build350690751
+open C:\Users\sas\AppData\Local\Temp\go-build350690751

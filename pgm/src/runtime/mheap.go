@@ -32,7 +32,8 @@ type mheap struct{
 	// could self-deadlock if its stack grows with the lock held.
 	lock      mutex
 	pages     pageAlloc //全局的页分配器page allocation data structure
-	sweepgen uint32 // sweep generation, see comment in mspan; written during STW
+	sweepgen uint32 //gc扫描状态 sweep generation, see comment in mspan; written during STW
+	sweepdone uint32    //是否正在扫描 all spans are swept
 
 	// allspans is a slice of all mspans ever created. Each mspan
 	// appears exactly once.
@@ -306,6 +307,7 @@ type mspan struct {
 	allocCount  uint16        //已分配的数量 number of allocated objects
 	spanclass   spanClass     //sizeclasses.go size class and noscan (uint8)
 	state mSpanStateBox //当前的状态 mSpanInUse etc; accessed atomically (get/set methods)
+	needzero    uint8         // needs to be zeroed before allocation
 	elemsize    uintptr       //元素的大小(spanclass) computed from sizeclass or from npages
 }
 
@@ -377,6 +379,127 @@ func (h *mheap)init(){
 
 	//初始化全局的页分配器
 	h.pages.init(&h.lock,&memstats.gc_sys)
+}
+
+// reclaim sweeps and reclaims at least npage pages into the heap.
+// It is called before allocating npage pages to keep growth in check.
+//
+// reclaim implements the page-reclaimer half of the sweeper.
+//
+// h must NOT be locked.
+//回收一部分的内存
+func (h *mheap) reclaim(npage uintptr){
+
+}
+
+// alloc allocates a new span of npage pages from the GC'd heap.
+//
+// spanclass indicates the span's size class and scannability.
+//
+// If needzero is true, the memory for the returned span will be zeroed.
+//mheap分配新的内存管理单元
+func (h *mheap) alloc(npages uintptr, spanclass spanClass, needzero bool) *mspan {
+	// Don't do any operations that lock the heap on the G stack.
+	// It might trigger stack growth, and the stack growth code needs
+	// to be able to allocate heap.
+	var s *mspan
+	systemstack(func() {
+		// To prevent excessive heap growth, before allocating n pages
+		// we need to sweep and reclaim at least n pages.
+		//如果没有在扫描
+		if h.sweepdone == 0{
+			//回收一部分内存
+			h.reclaim(npages)
+		}
+		s = h.allocSpan(npages,false,spanclass,&memstats.heap_inuse)
+	})
+
+	if s != nil{
+		//是否需要清零操作
+		if needzero && s.needzero != 0 {
+			memclrNoHeapPointers(unsafe.Pointer(s.base()), s.npages<<_PageShift)
+		}
+		s.needzero = 0
+	}
+	return s
+}
+
+// allocManual allocates a manually-managed span of npage pages.
+// allocManual returns nil if allocation fails.
+//
+// allocManual adds the bytes used to *stat, which should be a
+// memstats in-use field. Unlike allocations in the GC'd heap, the
+// allocation does *not* count toward heap_inuse or heap_sys.
+//
+// The memory backing the returned span may not be zeroed if
+// span.needzero is set.
+//
+// allocManual must be called on the system stack because it may
+// acquire the heap lock via allocSpan. See mheap for details.
+//在systemstack中调用
+//go:systemstack
+func (h *mheap) allocManual(npages uintptr, stat *uint64) *mspan {
+	return h.allocSpan(npages,true,0,stat)
+}
+
+// tryAllocMSpan attempts to allocate an mspan object from
+// the P-local cache, but may fail.
+//
+// h need not be locked.
+//
+// This caller must ensure that its P won't change underneath
+// it during this function. Currently to ensure that we enforce
+// that the function is run on the system stack, because that's
+// the only place it is used now. In the future, this requirement
+// may be relaxed if its use is necessary elsewhere.
+//
+//go:systemstack
+func (h *mheap)tryAllocMSpan()*mspan{
+	pp := getg().m.p.ptr()
+	// If we don't have a p or the cache is empty, we can't do
+	// anything here.
+
+}
+
+// allocSpan allocates an mspan which owns npages worth of memory.
+//
+// If manual == false, allocSpan allocates a heap span of class spanclass
+// and updates heap accounting. If manual == true, allocSpan allocates a
+// manually-managed span (spanclass is ignored), and the caller is
+// responsible for any accounting related to its use of the span. Either
+// way, allocSpan will atomically add the bytes in the newly allocated
+// span to *sysStat.
+//
+// The returned span is fully initialized.
+//
+// h must not be locked.
+//
+// allocSpan must be called on the system stack both because it acquires
+// the heap lock and because it must block GC transitions.
+//在systemstack中调用,分配新的内存管理单元,manual==true会按照spanclasss去分配
+//go:systemstack
+func (h *mheap) allocSpan(npages uintptr, manual bool, spanclass spanClass, sysStat *uint64) (s *mspan) {
+	// Function-global state.
+	gp := getg()
+	base, scav := uintptr(0), uintptr(0)
+
+	// If the allocation is small enough, try the page cache!
+	//如果申请的内存比较小,获取申请的内存的处理器并通过页缓存去分配
+	pp := gp.m.p.ptr()
+	if pp != nil && npages < pageCachePages/4{
+		c :=&pp.pcache
+
+		// If the cache is empty, refill it.
+		//如何页缓存是空，则向全局分配器中申请一些
+		if c.empty(){
+			lock(&h.lock)
+			*c = h.pages.allocToCache()
+			unlock(&h.lock)
+		}
+
+		// Try to allocate from the cache.
+		base, scav = c.alloc(npages)
+	}
 }
 
 // Initialize an empty doubly-linked list.
@@ -480,82 +603,17 @@ func (list *mSpanList) takeAll(other *mSpanList) {
 // collector.
 type spanClass uint8
 
-// allocManual allocates a manually-managed span of npage pages.
-// allocManual returns nil if allocation fails.
-//
-// allocManual adds the bytes used to *stat, which should be a
-// memstats in-use field. Unlike allocations in the GC'd heap, the
-// allocation does *not* count toward heap_inuse or heap_sys.
-//
-// The memory backing the returned span may not be zeroed if
-// span.needzero is set.
-//
-// allocManual must be called on the system stack because it may
-// acquire the heap lock via allocSpan. See mheap for details.
-//在systemstack中调用
-//go:systemstack
-func (h *mheap) allocManual(npages uintptr, stat *uint64) *mspan {
-	return h.allocSpan(npages,true,0,stat)
+const (
+	numSpanClasses = _NumSizeClasses << 1
+	tinySpanClass  = spanClass(tinySizeClass<<1 | 1) //微小对象spanclass
+)
+
+func makeSpanClass(sizeclass uint8, noscan bool) spanClass {
+	return spanClass(sizeclass<<1) | spanClass(bool2int(noscan))
 }
 
-// tryAllocMSpan attempts to allocate an mspan object from
-// the P-local cache, but may fail.
-//
-// h need not be locked.
-//
-// This caller must ensure that its P won't change underneath
-// it during this function. Currently to ensure that we enforce
-// that the function is run on the system stack, because that's
-// the only place it is used now. In the future, this requirement
-// may be relaxed if its use is necessary elsewhere.
-//
-//go:systemstack
-func (h *mheap)tryAllocMSpan()*mspan{
-	pp := getg().m.p.ptr()
-	// If we don't have a p or the cache is empty, we can't do
-	// anything here.
-
-}
-
-// allocSpan allocates an mspan which owns npages worth of memory.
-//
-// If manual == false, allocSpan allocates a heap span of class spanclass
-// and updates heap accounting. If manual == true, allocSpan allocates a
-// manually-managed span (spanclass is ignored), and the caller is
-// responsible for any accounting related to its use of the span. Either
-// way, allocSpan will atomically add the bytes in the newly allocated
-// span to *sysStat.
-//
-// The returned span is fully initialized.
-//
-// h must not be locked.
-//
-// allocSpan must be called on the system stack both because it acquires
-// the heap lock and because it must block GC transitions.
-//在systemstack中调用,manual==true会按照spanclasss去分配
-//go:systemstack
-func (h *mheap) allocSpan(npages uintptr, manual bool, spanclass spanClass, sysStat *uint64) (s *mspan) {
-	// Function-global state.
-	gp := getg()
-	base, scav := uintptr(0), uintptr(0)
-
-	// If the allocation is small enough, try the page cache!
-	//如果申请的内存比较小,获取申请的内存的处理器并通过页缓存去分配
-	pp := gp.m.p.ptr()
-	if pp != nil && npages < pageCachePages/4{
-		c :=&pp.pcache
-
-		// If the cache is empty, refill it.
-		//如何页缓存是空，则向全局分配器中申请一些
-		if c.empty(){
-			lock(&h.lock)
-			*c = h.pages.allocToCache()
-			unlock(&h.lock)
-		}
-
-		// Try to allocate from the cache.
-		base, scav = c.alloc(npages)
-	}
+func (sc spanClass) sizeclass() int8{
+	return int8(sc >> 1)
 }
 
 // The described object has a finalizer set for it.
@@ -571,10 +629,6 @@ type specialfinalizer struct {
 //
 //go:notinheap
 type specialprofile struct {}
-
-const (
-	numSpanClasses = _NumSizeClasses << 1
-)
 
 // gcBits is an alloc/mark bitmap. This is always used as *gcBits.
 //

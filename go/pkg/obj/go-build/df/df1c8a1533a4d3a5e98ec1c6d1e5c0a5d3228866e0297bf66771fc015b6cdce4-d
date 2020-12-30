@@ -1,0 +1,20 @@
+# test log
+getenv GO_GCFLAGS
+getenv GO_GCFLAGS
+open testdata
+open testdata\issue20789.src
+open testdata\issue20789.src
+open testdata\issue20789.src
+open testdata\issue23385.src
+open testdata\issue23385.src
+open testdata\issue23385.src
+open testdata\issue23434.src
+open testdata\issue23434.src
+open testdata\issue23434.src
+open testdata\issue31092.src
+open testdata\issue31092.src
+open testdata\issue31092.src
+open testdata\sample.src
+open testdata\sample.src
+open testdata\sample.src
+open parser.go

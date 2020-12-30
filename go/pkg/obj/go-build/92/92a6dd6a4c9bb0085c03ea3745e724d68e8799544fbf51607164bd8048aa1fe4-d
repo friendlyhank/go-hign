@@ -1,0 +1,10 @@
+./attribute.go
+./compilation_unit.go
+./library.go
+./reloc.go
+./segment.go
+./symbol.go
+./symbols.go
+./symkind.go
+./symkind_string.go
+./sizeof_test.go

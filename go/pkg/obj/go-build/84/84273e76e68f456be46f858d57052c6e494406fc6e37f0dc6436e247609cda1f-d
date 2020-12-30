@@ -1,0 +1,4 @@
+./rand.go
+./rand_windows.go
+./util.go
+./rand_test.go

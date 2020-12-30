@@ -1,0 +1,1978 @@
+# test log
+stat match.go
+stat .
+open .
+stat .
+open .
+stat ..
+open ..
+stat ..\example_test.go
+stat ..\filepath
+open ..\filepath
+stat ..\match.go
+stat ..\match_test.go
+stat ..\path.go
+stat ..\path_test.go
+stat no_match
+stat ..
+open ..
+stat ..\example_test.go
+stat ..\filepath
+open ..\filepath
+stat ..\match.go
+stat ..\match_test.go
+stat ..\path.go
+stat ..\path_test.go
+stat .
+open .
+stat \\?\C:\
+open \\?\C:\
+stat C:\Users\sas\AppData\Local\Temp\symtest403336831\target
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\a
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\b
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin\git.exe
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\a
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\b
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\c
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+stat C:\
+open C:\
+stat C:\Users
+open C:\Users
+stat C:\Users\sas
+open C:\Users\sas
+stat C:\Users\sas\AppData
+open C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+open C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+open C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+chdir C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat a
+stat .\a
+stat C:a
+stat b
+stat .\b
+stat C:b
+stat c
+stat .\c
+stat C:c
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat .
+open .
+stat C:.
+open C:.
+stat .
+open .
+stat dir
+open dir
+stat dir\d
+open dir\d
+stat dir\d\bin
+open dir\d\bin
+stat .
+open .
+stat dir
+open dir
+stat dir\d
+open dir\d
+stat dir\d\bin
+open dir\d\bin
+stat C:.
+open C:.
+stat C:dir
+open C:dir
+stat C:dir\d
+open C:dir\d
+stat C:dir\d\bin
+open C:dir\d\bin
+chdir E:\go\src\path\filepath
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d
+stat C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+open C:\Users\sas\AppData\Local\Temp\TestWindowsGlob108651474\dir\d\bin
+chdir C:\Users\sas\AppData\Local\Temp\TestWalk460264713
+open testdata\a
+open testdata\c
+open testdata\d\x
+open testdata\d\z\u
+open testdata\d\z\v
+stat testdata
+open testdata
+stat testdata\a
+stat testdata\b
+open testdata\b
+stat testdata\c
+stat testdata\d
+open testdata\d
+stat testdata\d\x
+stat testdata\d\y
+open testdata\d\y
+stat testdata\d\z
+open testdata\d\z
+stat testdata\d\z\u
+stat testdata\d\z\v
+chdir E:\go\src\path\filepath
+stat C:\Users\sas\AppData\Local\Temp\TestWalk460264713
+open C:\Users\sas\AppData\Local\Temp\TestWalk460264713
+stat C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata
+open C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata
+stat C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata\d
+open C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata\d
+stat C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata\d\z
+open C:\Users\sas\AppData\Local\Temp\TestWalk460264713\testdata\d\z
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484
+open C:\Users\sas\AppData\Local\Temp\walktest962486484\dir\foo1
+open C:\Users\sas\AppData\Local\Temp\walktest962486484\dir\foo2
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484
+open C:\Users\sas\AppData\Local\Temp\walktest962486484
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+open C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir\foo1
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+open C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir\foo1
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484
+open C:\Users\sas\AppData\Local\Temp\walktest962486484
+stat C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+open C:\Users\sas\AppData\Local\Temp\walktest962486484\dir
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\foo
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\bar
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\dir
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\dir\baz
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\dir\stat-error
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179
+open C:\Users\sas\AppData\Local\Temp\walktest897734179
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\bar
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\dir
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\dir
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\dir\baz
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\foo
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179
+open C:\Users\sas\AppData\Local\Temp\walktest897734179
+stat C:\Users\sas\AppData\Local\Temp\walktest897734179\dir
+open C:\Users\sas\AppData\Local\Temp\walktest897734179\dir
+chdir C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+chdir C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat .
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat b/
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat ../a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat ../a/b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat ../a/b/./c/../../.././a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat ../a/b/./c/../../.././a/
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174/.
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174/a/../a/b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174/a/b/c/../../.././a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174/a/b/c/../../.././a/
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:.
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat C:b/
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat C:../a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:../a/b
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+stat C:../a/b/./c/../../.././a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:../a/b/./c/../../.././a/
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+chdir E:\go\src\path\filepath
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+open C:\Users\sas\AppData\Local\Temp\TestAbs271547174
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+open C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a
+stat C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+open C:\Users\sas\AppData\Local\Temp\TestAbs271547174\a\b
+chdir C:\Users\sas\AppData\Local\Temp\TestAbsEmptyString844943437
+stat C:\Users\sas\AppData\Local\Temp\TestAbsEmptyString844943437
+stat C:\Users\sas\AppData\Local\Temp\TestAbsEmptyString844943437
+chdir E:\go\src\path\filepath
+stat e:\go
+stat e:\go\src
+stat e:\go\src\path
+stat e:\go\src\path\filepath
+stat E:\GO
+stat E:\GO\SRC
+stat E:\GO\SRC\PATH
+stat E:\GO\SRC\PATH\FILEPATH
+stat E:\go
+stat E:\go\test
+stat E:\go\test
+open E:\go\test
+stat E:\go\test\235.go
+stat E:\go\test\64bit.go
+stat E:\go\test\README.md
+stat E:\go\test\alg.go
+stat E:\go\test\alias.go
+stat E:\go\test\alias1.go
+stat E:\go\test\alias2.go
+stat E:\go\test\alias3.dir
+open E:\go\test\alias3.dir
+stat E:\go\test\alias3.dir\a.go
+stat E:\go\test\alias3.dir\b.go
+stat E:\go\test\alias3.dir\c.go
+stat E:\go\test\alias3.go
+stat E:\go\test\align.go
+stat E:\go\test\append.go
+stat E:\go\test\append1.go
+stat E:\go\test\args.go
+stat E:\go\test\armimm.go
+stat E:\go\test\assign.go
+stat E:\go\test\assign1.go
+stat E:\go\test\atomicload.go
+stat E:\go\test\bench
+open E:\go\test\bench
+stat E:\go\test\bench\garbage
+open E:\go\test\bench\garbage
+stat E:\go\test\bench\garbage\Makefile
+stat E:\go\test\bench\garbage\parser.go
+stat E:\go\test\bench\garbage\peano.go
+stat E:\go\test\bench\garbage\stats.go
+stat E:\go\test\bench\garbage\tree.go
+stat E:\go\test\bench\garbage\tree2.go
+stat E:\go\test\bench\go1
+open E:\go\test\bench\go1
+stat E:\go\test\bench\go1\binarytree_test.go
+stat E:\go\test\bench\go1\fannkuch_test.go
+stat E:\go\test\bench\go1\fasta_test.go
+stat E:\go\test\bench\go1\fmt_test.go
+stat E:\go\test\bench\go1\go.mod
+stat E:\go\test\bench\go1\gob_test.go
+stat E:\go\test\bench\go1\gzip_test.go
+stat E:\go\test\bench\go1\http_test.go
+stat E:\go\test\bench\go1\json_test.go
+stat E:\go\test\bench\go1\jsondata_test.go
+stat E:\go\test\bench\go1\mandel_test.go
+stat E:\go\test\bench\go1\parser_test.go
+stat E:\go\test\bench\go1\parserdata_test.go
+stat E:\go\test\bench\go1\regexp_test.go
+stat E:\go\test\bench\go1\revcomp_test.go
+stat E:\go\test\bench\go1\template_test.go
+stat E:\go\test\bench\go1\time_test.go
+stat E:\go\test\bigalg.go
+stat E:\go\test\bigmap.go
+stat E:\go\test\blank.go
+stat E:\go\test\blank1.go
+stat E:\go\test\bom.go
+stat E:\go\test\bombad.go
+stat E:\go\test\bounds.go
+stat E:\go\test\chan
+open E:\go\test\chan
+stat E:\go\test\chan\doubleselect.go
+stat E:\go\test\chan\fifo.go
+stat E:\go\test\chan\goroutines.go
+stat E:\go\test\chan\nonblock.go
+stat E:\go\test\chan\perm.go
+stat E:\go\test\chan\powser1.go
+stat E:\go\test\chan\powser2.go
+stat E:\go\test\chan\select.go
+stat E:\go\test\chan\select2.go
+stat E:\go\test\chan\select3.go
+stat E:\go\test\chan\select4.go
+stat E:\go\test\chan\select5.go
+stat E:\go\test\chan\select6.go
+stat E:\go\test\chan\select7.go
+stat E:\go\test\chan\select8.go
+stat E:\go\test\chan\sendstmt.go
+stat E:\go\test\chan\sieve1.go
+stat E:\go\test\chan\sieve2.go
+stat E:\go\test\chan\zerosize.go
+stat E:\go\test\chancap.go
+stat E:\go\test\chanlinear.go
+stat E:\go\test\char_lit.go
+stat E:\go\test\char_lit1.go
+stat E:\go\test\checkbce.go
+stat E:\go\test\clearfat.go
+stat E:\go\test\closedchan.go
+stat E:\go\test\closure.go
+stat E:\go\test\closure1.go
+stat E:\go\test\closure2.go
+stat E:\go\test\closure3.dir
+open E:\go\test\closure3.dir
+stat E:\go\test\closure3.dir\main.go
+stat E:\go\test\closure3.go
+stat E:\go\test\closure4.go
+stat E:\go\test\cmp.go
+stat E:\go\test\cmp6.go
+stat E:\go\test\cmplx.go
+stat E:\go\test\cmplxdivide.c
+stat E:\go\test\cmplxdivide.go
+stat E:\go\test\cmplxdivide1.go
+stat E:\go\test\codegen
+open E:\go\test\codegen
+stat E:\go\test\codegen\README
+stat E:\go\test\codegen\addrcalc.go
+stat E:\go\test\codegen\alloc.go
+stat E:\go\test\codegen\arithmetic.go
+stat E:\go\test\codegen\bitfield.go
+stat E:\go\test\codegen\bits.go
+stat E:\go\test\codegen\bool.go
+stat E:\go\test\codegen\compare_and_branch.go
+stat E:\go\test\codegen\comparisons.go
+stat E:\go\test\codegen\condmove.go
+stat E:\go\test\codegen\copy.go
+stat E:\go\test\codegen\floats.go
+stat E:\go\test\codegen\fuse.go
+stat E:\go\test\codegen\issue22703.go
+stat E:\go\test\codegen\issue25378.go
+stat E:\go\test\codegen\issue31618.go
+stat E:\go\test\codegen\issue33580.go
+stat E:\go\test\codegen\issue38554.go
+stat E:\go\test\codegen\mapaccess.go
+stat E:\go\test\codegen\maps.go
+stat E:\go\test\codegen\math.go
+stat E:\go\test\codegen\mathbits.go
+stat E:\go\test\codegen\memcombine.go
+stat E:\go\test\codegen\memops.go
+stat E:\go\test\codegen\noextend.go
+stat E:\go\test\codegen\race.go
+stat E:\go\test\codegen\retpoline.go
+stat E:\go\test\codegen\rotate.go
+stat E:\go\test\codegen\shift.go
+stat E:\go\test\codegen\shortcircuit.go
+stat E:\go\test\codegen\slices.go
+stat E:\go\test\codegen\smallintiface.go
+stat E:\go\test\codegen\spectre.go
+stat E:\go\test\codegen\stack.go
+stat E:\go\test\codegen\strings.go
+stat E:\go\test\codegen\structs.go
+stat E:\go\test\codegen\switch.go
+stat E:\go\test\codegen\zerosize.go
+stat E:\go\test\complit.go
+stat E:\go\test\complit1.go
+stat E:\go\test\compos.go
+stat E:\go\test\const.go
+stat E:\go\test\const1.go
+stat E:\go\test\const2.go
+stat E:\go\test\const3.go
+stat E:\go\test\const4.go
+stat E:\go\test\const5.go
+stat E:\go\test\const6.go
+stat E:\go\test\convT2X.go
+stat E:\go\test\convert.go
+stat E:\go\test\convert1.go
+stat E:\go\test\convert2.go
+stat E:\go\test\convert3.go
+stat E:\go\test\convlit.go
+stat E:\go\test\convlit1.go
+stat E:\go\test\copy.go
+stat E:\go\test\copy1.go
+stat E:\go\test\crlf.go
+stat E:\go\test\ddd.go
+stat E:\go\test\ddd1.go
+stat E:\go\test\ddd2.dir
+open E:\go\test\ddd2.dir
+stat E:\go\test\ddd2.dir\ddd2.go
+stat E:\go\test\ddd2.dir\ddd3.go
+stat E:\go\test\ddd2.go
+stat E:\go\test\decl.go
+stat E:\go\test\declbad.go
+stat E:\go\test\defer.go
+stat E:\go\test\defererrcheck.go
+stat E:\go\test\deferfin.go
+stat E:\go\test\defernil.go
+stat E:\go\test\deferprint.go
+stat E:\go\test\deferprint.out
+stat E:\go\test\devirt.go
+stat E:\go\test\directive.go
+stat E:\go\test\divide.go
+stat E:\go\test\divmod.go
+stat E:\go\test\dwarf
+open E:\go\test\dwarf
+stat E:\go\test\dwarf\dwarf.dir
+open E:\go\test\dwarf\dwarf.dir
+stat E:\go\test\dwarf\dwarf.dir\main.go
+stat E:\go\test\dwarf\dwarf.dir\z1.go
+stat E:\go\test\dwarf\dwarf.dir\z10.go
+stat E:\go\test\dwarf\dwarf.dir\z11.go
+stat E:\go\test\dwarf\dwarf.dir\z12.go
+stat E:\go\test\dwarf\dwarf.dir\z13.go
+stat E:\go\test\dwarf\dwarf.dir\z14.go
+stat E:\go\test\dwarf\dwarf.dir\z15.go
+stat E:\go\test\dwarf\dwarf.dir\z16.go
+stat E:\go\test\dwarf\dwarf.dir\z17.go
+stat E:\go\test\dwarf\dwarf.dir\z18.go
+stat E:\go\test\dwarf\dwarf.dir\z19.go
+stat E:\go\test\dwarf\dwarf.dir\z2.go
+stat E:\go\test\dwarf\dwarf.dir\z20.go
+stat E:\go\test\dwarf\dwarf.dir\z3.go
+stat E:\go\test\dwarf\dwarf.dir\z4.go
+stat E:\go\test\dwarf\dwarf.dir\z5.go
+stat E:\go\test\dwarf\dwarf.dir\z6.go
+stat E:\go\test\dwarf\dwarf.dir\z7.go
+stat E:\go\test\dwarf\dwarf.dir\z8.go
+stat E:\go\test\dwarf\dwarf.dir\z9.go
+stat E:\go\test\dwarf\dwarf.go
+stat E:\go\test\dwarf\linedirectives.go
+stat E:\go\test\empty.go
+stat E:\go\test\env.go
+stat E:\go\test\eof.go
+stat E:\go\test\eof1.go
+stat E:\go\test\escape.go
+stat E:\go\test\escape2.go
+stat E:\go\test\escape2n.go
+stat E:\go\test\escape3.go
+stat E:\go\test\escape4.go
+stat E:\go\test\escape5.go
+stat E:\go\test\escape_array.go
+stat E:\go\test\escape_calls.go
+stat E:\go\test\escape_closure.go
+stat E:\go\test\escape_field.go
+stat E:\go\test\escape_goto.go
+stat E:\go\test\escape_hash_maphash.go
+stat E:\go\test\escape_iface.go
+stat E:\go\test\escape_indir.go
+stat E:\go\test\escape_level.go
+stat E:\go\test\escape_map.go
+stat E:\go\test\escape_param.go
+stat E:\go\test\escape_runtime_atomic.go
+stat E:\go\test\escape_selfassign.go
+stat E:\go\test\escape_slice.go
+stat E:\go\test\escape_struct_param1.go
+stat E:\go\test\escape_struct_param2.go
+stat E:\go\test\escape_struct_return.go
+stat E:\go\test\escape_sync_atomic.go
+stat E:\go\test\escape_unsafe.go
+stat E:\go\test\fibo.go
+stat E:\go\test\finprofiled.go
+stat E:\go\test\fixedbugs
+open E:\go\test\fixedbugs
+stat E:\go\test\float_lit.go
+stat E:\go\test\float_lit2.go
+stat E:\go\test\float_lit3.go
+stat E:\go\test\floatcmp.go
+stat E:\go\test\for.go
+stat E:\go\test\func.go
+stat E:\go\test\func1.go
+stat E:\go\test\func2.go
+stat E:\go\test\func3.go
+stat E:\go\test\func4.go
+stat E:\go\test\func5.go
+stat E:\go\test\func6.go
+stat E:\go\test\func7.go
+stat E:\go\test\func8.go
+stat E:\go\test\funcdup.go
+stat E:\go\test\funcdup2.go
+stat E:\go\test\gc.go
+stat E:\go\test\gc1.go
+stat E:\go\test\gc2.go
+stat E:\go\test\gcgort.go
+stat E:\go\test\gcstring.go
+stat E:\go\test\goprint.go
+stat E:\go\test\goprint.out
+stat E:\go\test\goto.go
+stat E:\go\test\heapsampling.go
+stat E:\go\test\helloworld.go
+stat E:\go\test\helloworld.out
+stat E:\go\test\if.go
+stat E:\go\test\import.go
+stat E:\go\test\import1.go
+stat E:\go\test\import2.dir
+open E:\go\test\import2.dir
+stat E:\go\test\import2.dir\import2.go
+stat E:\go\test\import2.dir\import3.go
+stat E:\go\test\import2.go
+stat E:\go\test\import4.dir
+open E:\go\test\import4.dir
+stat E:\go\test\import4.dir\empty.go
+stat E:\go\test\import4.dir\import4.go
+stat E:\go\test\import4.go
+stat E:\go\test\import5.go
+stat E:\go\test\import6.go
+stat E:\go\test\index.go
+stat E:\go\test\index0.go
+stat E:\go\test\index1.go
+stat E:\go\test\index2.go
+stat E:\go\test\indirect.go
+stat E:\go\test\indirect1.go
+stat E:\go\test\init.go
+stat E:\go\test\init1.go
+stat E:\go\test\initcomma.go
+stat E:\go\test\initempty.go
+stat E:\go\test\initialize.go
+stat E:\go\test\initializerr.go
+stat E:\go\test\initloop.go
+stat E:\go\test\inline.go
+stat E:\go\test\inline_big.go
+stat E:\go\test\inline_caller.go
+stat E:\go\test\inline_callers.go
+stat E:\go\test\inline_literal.go
+stat E:\go\test\inline_math_bits_rotate.go
+stat E:\go\test\inline_sync.go
+stat E:\go\test\inline_variadic.go
+stat E:\go\test\int_lit.go
+stat E:\go\test\intcvt.go
+stat E:\go\test\interface
+open E:\go\test\interface
+stat E:\go\test\interface\assertinline.go
+stat E:\go\test\interface\bigdata.go
+stat E:\go\test\interface\convert.go
+stat E:\go\test\interface\convert1.go
+stat E:\go\test\interface\convert2.go
+stat E:\go\test\interface\embed.go
+stat E:\go\test\interface\embed1.dir
+open E:\go\test\interface\embed1.dir
+stat E:\go\test\interface\embed1.dir\embed0.go
+stat E:\go\test\interface\embed1.dir\embed1.go
+stat E:\go\test\interface\embed1.go
+stat E:\go\test\interface\embed2.go
+stat E:\go\test\interface\embed3.dir
+open E:\go\test\interface\embed3.dir
+stat E:\go\test\interface\embed3.dir\embed0.go
+stat E:\go\test\interface\embed3.dir\embed1.go
+stat E:\go\test\interface\embed3.go
+stat E:\go\test\interface\explicit.go
+stat E:\go\test\interface\fail.go
+stat E:\go\test\interface\fake.go
+stat E:\go\test\interface\noeq.go
+stat E:\go\test\interface\pointer.go
+stat E:\go\test\interface\private.dir
+open E:\go\test\interface\private.dir
+stat E:\go\test\interface\private.dir\private1.go
+stat E:\go\test\interface\private.dir\prog.go
+stat E:\go\test\interface\private.go
+stat E:\go\test\interface\receiver.go
+stat E:\go\test\interface\receiver1.go
+stat E:\go\test\interface\recursive.go
+stat E:\go\test\interface\recursive1.dir
+open E:\go\test\interface\recursive1.dir
+stat E:\go\test\interface\recursive1.dir\recursive1.go
+stat E:\go\test\interface\recursive1.dir\recursive2.go
+stat E:\go\test\interface\recursive1.go
+stat E:\go\test\interface\returntype.go
+stat E:\go\test\interface\struct.go
+stat E:\go\test\intrinsic.dir
+open E:\go\test\intrinsic.dir
+stat E:\go\test\intrinsic.dir\main.go
+stat E:\go\test\intrinsic.go
+stat E:\go\test\intrinsic_atomic.go
+stat E:\go\test\iota.go
+stat E:\go\test\ken
+open E:\go\test\ken
+stat E:\go\test\ken\array.go
+stat E:\go\test\ken\chan.go
+stat E:\go\test\ken\chan1.go
+stat E:\go\test\ken\complit.go
+stat E:\go\test\ken\convert.go
+stat E:\go\test\ken\cplx0.go
+stat E:\go\test\ken\cplx0.out
+stat E:\go\test\ken\cplx1.go
+stat E:\go\test\ken\cplx2.go
+stat E:\go\test\ken\cplx3.go
+stat E:\go\test\ken\cplx4.go
+stat E:\go\test\ken\cplx5.go
+stat E:\go\test\ken\divconst.go
+stat E:\go\test\ken\divmod.go
+stat E:\go\test\ken\embed.go
+stat E:\go\test\ken\for.go
+stat E:\go\test\ken\interbasic.go
+stat E:\go\test\ken\interfun.go
+stat E:\go\test\ken\intervar.go
+stat E:\go\test\ken\label.go
+stat E:\go\test\ken\litfun.go
+stat E:\go\test\ken\mfunc.go
+stat E:\go\test\ken\modconst.go
+stat E:\go\test\ken\ptrfun.go
+stat E:\go\test\ken\ptrvar.go
+stat E:\go\test\ken\range.go
+stat E:\go\test\ken\rob1.go
+stat E:\go\test\ken\rob2.go
+stat E:\go\test\ken\robfor.go
+stat E:\go\test\ken\robfunc.go
+stat E:\go\test\ken\shift.go
+stat E:\go\test\ken\simparray.go
+stat E:\go\test\ken\simpbool.go
+stat E:\go\test\ken\simpconv.go
+stat E:\go\test\ken\simpfun.go
+stat E:\go\test\ken\simpswitch.go
+stat E:\go\test\ken\simpvar.go
+stat E:\go\test\ken\slicearray.go
+stat E:\go\test\ken\sliceslice.go
+stat E:\go\test\ken\string.go
+stat E:\go\test\ken\string.out
+stat E:\go\test\ken\strvar.go
+stat E:\go\test\label.go
+stat E:\go\test\label1.go
+stat E:\go\test\linkmain.go
+stat E:\go\test\linkmain_run.go
+stat E:\go\test\linkname.dir
+open E:\go\test\linkname.dir
+stat E:\go\test\linkname.dir\linkname1.go
+stat E:\go\test\linkname.dir\linkname2.go
+stat E:\go\test\linkname.dir\linkname3.go
+stat E:\go\test\linkname.go
+stat E:\go\test\linkobj.go
+stat E:\go\test\linkx.go
+stat E:\go\test\linkx_run.go
+stat E:\go\test\literal.go
+stat E:\go\test\literal2.go
+stat E:\go\test\live.go
+stat E:\go\test\live1.go
+stat E:\go\test\live2.go
+stat E:\go\test\live_syscall.go
+stat E:\go\test\locklinear.go
+stat E:\go\test\loopbce.go
+stat E:\go\test\makechan.go
+stat E:\go\test\makemap.go
+stat E:\go\test\makenew.go
+stat E:\go\test\makeslice.go
+stat E:\go\test\mallocfin.go
+stat E:\go\test\map.go
+stat E:\go\test\map1.go
+stat E:\go\test\mapclear.go
+stat E:\go\test\maplinear.go
+stat E:\go\test\mergemul.go
+stat E:\go\test\method.go
+stat E:\go\test\method1.go
+stat E:\go\test\method2.go
+stat E:\go\test\method3.go
+stat E:\go\test\method4.dir
+open E:\go\test\method4.dir
+stat E:\go\test\method4.dir\method4a.go
+stat E:\go\test\method4.dir\prog.go
+stat E:\go\test\method4.go
+stat E:\go\test\method5.go
+stat E:\go\test\method6.go
+stat E:\go\test\method7.go
+stat E:\go\test\named.go
+stat E:\go\test\named1.go
+stat E:\go\test\nil.go
+stat E:\go\test\nilcheck.go
+stat E:\go\test\nilptr.go
+stat E:\go\test\nilptr2.go
+stat E:\go\test\nilptr3.go
+stat E:\go\test\nilptr4.go
+stat E:\go\test\nilptr5.go
+stat E:\go\test\nilptr5_aix.go
+stat E:\go\test\nilptr5_wasm.go
+stat E:\go\test\nilptr_aix.go
+stat E:\go\test\nosplit.go
+stat E:\go\test\notinheap.go
+stat E:\go\test\notinheap2.go
+stat E:\go\test\notinheap3.go
+stat E:\go\test\nowritebarrier.go
+stat E:\go\test\nul1.go
+stat E:\go\test\oldescape_linkname.dir
+open E:\go\test\oldescape_linkname.dir
+stat E:\go\test\oldescape_linkname.dir\linkname1.go
+stat E:\go\test\oldescape_linkname.dir\linkname2.go
+stat E:\go\test\oldescape_linkname.dir\linkname3.go
+stat E:\go\test\opt_branchlikely.go
+stat E:\go\test\parentype.go
+stat E:\go\test\peano.go
+stat E:\go\test\phiopt.go
+stat E:\go\test\print.go
+stat E:\go\test\print.out
+stat E:\go\test\printbig.go
+stat E:\go\test\printbig.out
+stat E:\go\test\prove.go
+stat E:\go\test\range.go
+stat E:\go\test\recover.go
+stat E:\go\test\recover1.go
+stat E:\go\test\recover2.go
+stat E:\go\test\recover3.go
+stat E:\go\test\recover4.go
+stat E:\go\test\recover5.go
+stat E:\go\test\reflectmethod1.go
+stat E:\go\test\reflectmethod2.go
+stat E:\go\test\reflectmethod3.go
+stat E:\go\test\reflectmethod4.go
+stat E:\go\test\reflectmethod5.go
+stat E:\go\test\reflectmethod6.go
+stat E:\go\test\rename.go
+stat E:\go\test\rename1.go
+stat E:\go\test\reorder.go
+stat E:\go\test\reorder2.go
+stat E:\go\test\retjmp.dir
+open E:\go\test\retjmp.dir
+stat E:\go\test\retjmp.dir\a.s
+stat E:\go\test\retjmp.dir\main.go
+stat E:\go\test\retjmp.go
+stat E:\go\test\return.go
+stat E:\go\test\rotate.go
+stat E:\go\test\rotate0.go
+stat E:\go\test\rotate1.go
+stat E:\go\test\rotate2.go
+stat E:\go\test\rotate3.go
+stat E:\go\test\run.go
+stat E:\go\test\rune.go
+stat E:\go\test\runtime
+open E:\go\test\runtime
+stat E:\go\test\runtime\README
+stat E:\go\test\runtime\inlinegcpc.go
+stat E:\go\test\runtime.go
+stat E:\go\test\shift1.go
+stat E:\go\test\shift2.go
+stat E:\go\test\sieve.go
+stat E:\go\test\sigchld.go
+stat E:\go\test\sigchld.out
+stat E:\go\test\simassign.go
+stat E:\go\test\sinit.go
+stat E:\go\test\sinit_run.go
+stat E:\go\test\sizeof.go
+stat E:\go\test\slice3.go
+stat E:\go\test\slice3err.go
+stat E:\go\test\slicecap.go
+stat E:\go\test\sliceopt.go
+stat E:\go\test\solitaire.go
+stat E:\go\test\stack.go
+stat E:\go\test\stackobj.go
+stat E:\go\test\stackobj2.go
+stat E:\go\test\stackobj3.go
+stat E:\go\test\strcopy.go
+stat E:\go\test\strength.go
+stat E:\go\test\stress
+open E:\go\test\stress
+stat E:\go\test\stress\maps.go
+stat E:\go\test\stress\parsego.go
+stat E:\go\test\stress\runstress.go
+stat E:\go\test\string_lit.go
+stat E:\go\test\stringrange.go
+stat E:\go\test\struct0.go
+stat E:\go\test\switch.go
+stat E:\go\test\switch2.go
+stat E:\go\test\switch3.go
+stat E:\go\test\switch4.go
+stat E:\go\test\switch5.go
+stat E:\go\test\switch6.go
+stat E:\go\test\switch7.go
+stat E:\go\test\syntax
+open E:\go\test\syntax
+stat E:\go\test\syntax\chan.go
+stat E:\go\test\syntax\chan1.go
+stat E:\go\test\syntax\composite.go
+stat E:\go\test\syntax\ddd.go
+stat E:\go\test\syntax\else.go
+stat E:\go\test\syntax\if.go
+stat E:\go\test\syntax\import.go
+stat E:\go\test\syntax\initvar.go
+stat E:\go\test\syntax\interface.go
+stat E:\go\test\syntax\semi1.go
+stat E:\go\test\syntax\semi2.go
+stat E:\go\test\syntax\semi3.go
+stat E:\go\test\syntax\semi4.go
+stat E:\go\test\syntax\semi5.go
+stat E:\go\test\syntax\semi6.go
+stat E:\go\test\syntax\semi7.go
+stat E:\go\test\syntax\topexpr.go
+stat E:\go\test\syntax\typesw.go
+stat E:\go\test\syntax\vareq.go
+stat E:\go\test\syntax\vareq1.go
+stat E:\go\test\tinyfin.go
+stat E:\go\test\torture.go
+stat E:\go\test\turing.go
+stat E:\go\test\typecheck.go
+stat E:\go\test\typecheckloop.go
+stat E:\go\test\typeswitch.go
+stat E:\go\test\typeswitch1.go
+stat E:\go\test\typeswitch2.go
+stat E:\go\test\typeswitch2b.go
+stat E:\go\test\typeswitch3.go
+stat E:\go\test\uintptrescapes.dir
+open E:\go\test\uintptrescapes.dir
+stat E:\go\test\uintptrescapes.dir\a.go
+stat E:\go\test\uintptrescapes.dir\main.go
+stat E:\go\test\uintptrescapes.go
+stat E:\go\test\uintptrescapes2.go
+stat E:\go\test\uintptrescapes3.go
+stat E:\go\test\undef.go
+stat E:\go\test\utf.go
+stat E:\go\test\varerr.go
+stat E:\go\test\varinit.go
+stat E:\go\test\winbatch.go
+stat E:\go\test\writebarrier.go
+stat E:\go\test\zerodivide.go
+open C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096\file.txt
+stat C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+open C:\Users\sas\AppData\Local\Temp\TestIssue29372332129096
+getenv ComSpec
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311\a\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid266018311
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002\;\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid568707002
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689\a;b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid064500689
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836\;\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid725763836
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827\;
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827\;\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid690742827
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414\a;b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid641878414
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\a\printdir.cmd
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\ b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\ b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317\ b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid321447317
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088\a;b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid881967088
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\a\printdir.cmd
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255\b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid099546255
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242\a;b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid909230242
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\a\printdir.cmd
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097\b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid885043097
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380\a;b
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380\a;b\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid505977380
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\a\printdir.cmd
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\b;c
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\b;c
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491\b;c\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid285341491
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\a
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\a\printdir.cmd
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\b;c
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\b;c
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974\b;c\printdir.cmd
+getenv SystemRoot
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+stat C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+open C:\Users\sas\AppData\Local\Temp\testWinSplitListTestIsValid143817974
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\test
+stat C:\USERS
+stat C:\USERS\SAS
+stat C:\USERS\SAS\APPDATA
+stat C:\USERS\SAS\APPDATA\LOCAL
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949\TEST
+stat c:\users
+stat c:\users\sas
+stat c:\users\sas\appdata
+stat c:\users\sas\appdata\local
+stat c:\users\sas\appdata\local\temp
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949\test
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\test
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\test\dir
+stat C:\USERS
+stat C:\USERS\SAS
+stat C:\USERS\SAS\APPDATA
+stat C:\USERS\SAS\APPDATA\LOCAL
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949\TEST
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949\TEST\DIR
+stat c:\users
+stat c:\users\sas
+stat c:\users\sas\appdata
+stat c:\users\sas\appdata\local
+stat c:\users\sas\appdata\local\temp
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949\test
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949\test\dir
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\testing_long_dir
+stat C:\USERS
+stat C:\USERS\SAS
+stat C:\USERS\SAS\APPDATA
+stat C:\USERS\SAS\APPDATA\LOCAL
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949\TESTING_LONG_DIR
+stat c:\users
+stat c:\users\sas
+stat c:\users\sas\appdata
+stat c:\users\sas\appdata\local
+stat c:\users\sas\appdata\local\temp
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949\testing_long_dir
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\TEST2
+stat C:\USERS
+stat C:\USERS\SAS
+stat C:\USERS\SAS\APPDATA
+stat C:\USERS\SAS\APPDATA\LOCAL
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949
+stat C:\USERS\SAS\APPDATA\LOCAL\TEMP\EVALSYMLINKCANONICAL243433949\TEST2
+stat c:\users
+stat c:\users\sas
+stat c:\users\sas\appdata
+stat c:\users\sas\appdata\local
+stat c:\users\sas\appdata\local\temp
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949
+stat c:\users\sas\appdata\local\temp\evalsymlinkcanonical243433949\test2
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+open C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949
+stat C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\test
+open C:\Users\sas\AppData\Local\Temp\evalsymlinkcanonical243433949\test
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test\foo\bar
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test\foo
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+chdir E:\go\src\path\filepath
+chdir E:\go\src\path\filepath
+chdir E:\go\src\path\filepath
+chdir E:\go\src\path\filepath
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+chdir E:\go\src\path\filepath
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+open C:\Users\sas\AppData\Local\Temp\testToNorm182290840
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+open C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test
+stat C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test\foo
+open C:\Users\sas\AppData\Local\Temp\testToNorm182290840\test\foo
+stat \\?\c:\
+open \\?\c:\
+getenv PATHEXT
+stat cmd.com
+stat cmd.exe
+stat cmd.bat
+stat cmd.cmd
+stat cmd.vbs
+stat cmd.vbe
+stat cmd.js
+stat cmd.jse
+stat cmd.wsf
+stat cmd.wsh
+stat cmd.msc
+getenv path
+stat E:\go\bin\cmd.com
+stat E:\go\bin\cmd.exe
+stat E:\go\bin\cmd.bat
+stat E:\go\bin\cmd.cmd
+stat E:\go\bin\cmd.vbs
+stat E:\go\bin\cmd.vbe
+stat E:\go\bin\cmd.js
+stat E:\go\bin\cmd.jse
+stat E:\go\bin\cmd.wsf
+stat E:\go\bin\cmd.wsh
+stat E:\go\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\local\bin\cmd.com
+stat C:\Program Files\Git\usr\local\bin\cmd.exe
+stat C:\Program Files\Git\usr\local\bin\cmd.bat
+stat C:\Program Files\Git\usr\local\bin\cmd.cmd
+stat C:\Program Files\Git\usr\local\bin\cmd.vbs
+stat C:\Program Files\Git\usr\local\bin\cmd.vbe
+stat C:\Program Files\Git\usr\local\bin\cmd.js
+stat C:\Program Files\Git\usr\local\bin\cmd.jse
+stat C:\Program Files\Git\usr\local\bin\cmd.wsf
+stat C:\Program Files\Git\usr\local\bin\cmd.wsh
+stat C:\Program Files\Git\usr\local\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\VanDyke Software\Clients\cmd.com
+stat C:\Program Files\VanDyke Software\Clients\cmd.exe
+stat C:\Program Files\VanDyke Software\Clients\cmd.bat
+stat C:\Program Files\VanDyke Software\Clients\cmd.cmd
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbs
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbe
+stat C:\Program Files\VanDyke Software\Clients\cmd.js
+stat C:\Program Files\VanDyke Software\Clients\cmd.jse
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsf
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsh
+stat C:\Program Files\VanDyke Software\Clients\cmd.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.msc
+stat C:\WINDOWS\system32\cmd.com
+stat C:\WINDOWS\system32\cmd.exe
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestNTNamespaceSymlink493828631
+getenv PATHEXT
+stat cmd.com
+stat cmd.exe
+stat cmd.bat
+stat cmd.cmd
+stat cmd.vbs
+stat cmd.vbe
+stat cmd.js
+stat cmd.jse
+stat cmd.wsf
+stat cmd.wsh
+stat cmd.msc
+getenv path
+stat E:\go\bin\cmd.com
+stat E:\go\bin\cmd.exe
+stat E:\go\bin\cmd.bat
+stat E:\go\bin\cmd.cmd
+stat E:\go\bin\cmd.vbs
+stat E:\go\bin\cmd.vbe
+stat E:\go\bin\cmd.js
+stat E:\go\bin\cmd.jse
+stat E:\go\bin\cmd.wsf
+stat E:\go\bin\cmd.wsh
+stat E:\go\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\local\bin\cmd.com
+stat C:\Program Files\Git\usr\local\bin\cmd.exe
+stat C:\Program Files\Git\usr\local\bin\cmd.bat
+stat C:\Program Files\Git\usr\local\bin\cmd.cmd
+stat C:\Program Files\Git\usr\local\bin\cmd.vbs
+stat C:\Program Files\Git\usr\local\bin\cmd.vbe
+stat C:\Program Files\Git\usr\local\bin\cmd.js
+stat C:\Program Files\Git\usr\local\bin\cmd.jse
+stat C:\Program Files\Git\usr\local\bin\cmd.wsf
+stat C:\Program Files\Git\usr\local\bin\cmd.wsh
+stat C:\Program Files\Git\usr\local\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\VanDyke Software\Clients\cmd.com
+stat C:\Program Files\VanDyke Software\Clients\cmd.exe
+stat C:\Program Files\VanDyke Software\Clients\cmd.bat
+stat C:\Program Files\VanDyke Software\Clients\cmd.cmd
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbs
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbe
+stat C:\Program Files\VanDyke Software\Clients\cmd.js
+stat C:\Program Files\VanDyke Software\Clients\cmd.jse
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsf
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsh
+stat C:\Program Files\VanDyke Software\Clients\cmd.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.msc
+stat C:\WINDOWS\system32\cmd.com
+stat C:\WINDOWS\system32\cmd.exe
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+getenv PATHEXT
+stat cmd.com
+stat cmd.exe
+stat cmd.bat
+stat cmd.cmd
+stat cmd.vbs
+stat cmd.vbe
+stat cmd.js
+stat cmd.jse
+stat cmd.wsf
+stat cmd.wsh
+stat cmd.msc
+getenv path
+stat E:\go\bin\cmd.com
+stat E:\go\bin\cmd.exe
+stat E:\go\bin\cmd.bat
+stat E:\go\bin\cmd.cmd
+stat E:\go\bin\cmd.vbs
+stat E:\go\bin\cmd.vbe
+stat E:\go\bin\cmd.js
+stat E:\go\bin\cmd.jse
+stat E:\go\bin\cmd.wsf
+stat E:\go\bin\cmd.wsh
+stat E:\go\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\local\bin\cmd.com
+stat C:\Program Files\Git\usr\local\bin\cmd.exe
+stat C:\Program Files\Git\usr\local\bin\cmd.bat
+stat C:\Program Files\Git\usr\local\bin\cmd.cmd
+stat C:\Program Files\Git\usr\local\bin\cmd.vbs
+stat C:\Program Files\Git\usr\local\bin\cmd.vbe
+stat C:\Program Files\Git\usr\local\bin\cmd.js
+stat C:\Program Files\Git\usr\local\bin\cmd.jse
+stat C:\Program Files\Git\usr\local\bin\cmd.wsf
+stat C:\Program Files\Git\usr\local\bin\cmd.wsh
+stat C:\Program Files\Git\usr\local\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Program Files\Git\mingw64\bin\cmd.com
+stat C:\Program Files\Git\mingw64\bin\cmd.exe
+stat C:\Program Files\Git\mingw64\bin\cmd.bat
+stat C:\Program Files\Git\mingw64\bin\cmd.cmd
+stat C:\Program Files\Git\mingw64\bin\cmd.vbs
+stat C:\Program Files\Git\mingw64\bin\cmd.vbe
+stat C:\Program Files\Git\mingw64\bin\cmd.js
+stat C:\Program Files\Git\mingw64\bin\cmd.jse
+stat C:\Program Files\Git\mingw64\bin\cmd.wsf
+stat C:\Program Files\Git\mingw64\bin\cmd.wsh
+stat C:\Program Files\Git\mingw64\bin\cmd.msc
+stat C:\Program Files\Git\usr\bin\cmd.com
+stat C:\Program Files\Git\usr\bin\cmd.exe
+stat C:\Program Files\Git\usr\bin\cmd.bat
+stat C:\Program Files\Git\usr\bin\cmd.cmd
+stat C:\Program Files\Git\usr\bin\cmd.vbs
+stat C:\Program Files\Git\usr\bin\cmd.vbe
+stat C:\Program Files\Git\usr\bin\cmd.js
+stat C:\Program Files\Git\usr\bin\cmd.jse
+stat C:\Program Files\Git\usr\bin\cmd.wsf
+stat C:\Program Files\Git\usr\bin\cmd.wsh
+stat C:\Program Files\Git\usr\bin\cmd.msc
+stat C:\Users\sas\bin\cmd.com
+stat C:\Users\sas\bin\cmd.exe
+stat C:\Users\sas\bin\cmd.bat
+stat C:\Users\sas\bin\cmd.cmd
+stat C:\Users\sas\bin\cmd.vbs
+stat C:\Users\sas\bin\cmd.vbe
+stat C:\Users\sas\bin\cmd.js
+stat C:\Users\sas\bin\cmd.jse
+stat C:\Users\sas\bin\cmd.wsf
+stat C:\Users\sas\bin\cmd.wsh
+stat C:\Users\sas\bin\cmd.msc
+stat C:\Program Files\VanDyke Software\Clients\cmd.com
+stat C:\Program Files\VanDyke Software\Clients\cmd.exe
+stat C:\Program Files\VanDyke Software\Clients\cmd.bat
+stat C:\Program Files\VanDyke Software\Clients\cmd.cmd
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbs
+stat C:\Program Files\VanDyke Software\Clients\cmd.vbe
+stat C:\Program Files\VanDyke Software\Clients\cmd.js
+stat C:\Program Files\VanDyke Software\Clients\cmd.jse
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsf
+stat C:\Program Files\VanDyke Software\Clients\cmd.wsh
+stat C:\Program Files\VanDyke Software\Clients\cmd.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\cmd.msc
+stat C:\WINDOWS\system32\cmd.com
+stat C:\WINDOWS\system32\cmd.exe
+getenv PATHEXT
+stat C:\WINDOWS\system32\cmd.exe
+open NUL
+open C:\WINDOWS\system32\cmd.exe
+stat C:\Users
+stat C:\Users\sas
+stat C:\Users\sas\AppData
+stat C:\Users\sas\AppData\Local
+stat C:\Users\sas\AppData\Local\Temp
+stat C:\Users\sas\AppData\Local\Temp\TestNTNamespaceSymlink493828631
+stat C:\Users\sas\AppData\Local\Temp\TestNTNamespaceSymlink493828631\dirlink
+stat C:\Users\sas\AppData\Local\Temp\TestNTNamespaceSymlink493828631
+open C:\Users\sas\AppData\Local\Temp\TestNTNamespaceSymlink493828631

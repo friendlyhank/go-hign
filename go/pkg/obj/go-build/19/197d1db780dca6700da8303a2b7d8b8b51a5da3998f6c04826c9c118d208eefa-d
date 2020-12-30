@@ -1,0 +1,1131 @@
+# test log
+getenv GCCGO
+getenv PATHEXT
+stat gccgo.com
+stat gccgo.exe
+stat gccgo.bat
+stat gccgo.cmd
+stat gccgo.vbs
+stat gccgo.vbe
+stat gccgo.js
+stat gccgo.jse
+stat gccgo.wsf
+stat gccgo.wsh
+stat gccgo.msc
+getenv path
+stat E:\go\bin\gccgo.com
+stat E:\go\bin\gccgo.exe
+stat E:\go\bin\gccgo.bat
+stat E:\go\bin\gccgo.cmd
+stat E:\go\bin\gccgo.vbs
+stat E:\go\bin\gccgo.vbe
+stat E:\go\bin\gccgo.js
+stat E:\go\bin\gccgo.jse
+stat E:\go\bin\gccgo.wsf
+stat E:\go\bin\gccgo.wsh
+stat E:\go\bin\gccgo.msc
+stat C:\Users\sas\bin\gccgo.com
+stat C:\Users\sas\bin\gccgo.exe
+stat C:\Users\sas\bin\gccgo.bat
+stat C:\Users\sas\bin\gccgo.cmd
+stat C:\Users\sas\bin\gccgo.vbs
+stat C:\Users\sas\bin\gccgo.vbe
+stat C:\Users\sas\bin\gccgo.js
+stat C:\Users\sas\bin\gccgo.jse
+stat C:\Users\sas\bin\gccgo.wsf
+stat C:\Users\sas\bin\gccgo.wsh
+stat C:\Users\sas\bin\gccgo.msc
+stat C:\Program Files\Git\mingw64\bin\gccgo.com
+stat C:\Program Files\Git\mingw64\bin\gccgo.exe
+stat C:\Program Files\Git\mingw64\bin\gccgo.bat
+stat C:\Program Files\Git\mingw64\bin\gccgo.cmd
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbs
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbe
+stat C:\Program Files\Git\mingw64\bin\gccgo.js
+stat C:\Program Files\Git\mingw64\bin\gccgo.jse
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsf
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsh
+stat C:\Program Files\Git\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\local\bin\gccgo.com
+stat C:\Program Files\Git\usr\local\bin\gccgo.exe
+stat C:\Program Files\Git\usr\local\bin\gccgo.bat
+stat C:\Program Files\Git\usr\local\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\local\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\local\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\local\bin\gccgo.js
+stat C:\Program Files\Git\usr\local\bin\gccgo.jse
+stat C:\Program Files\Git\usr\local\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\local\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\local\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Program Files\Git\mingw64\bin\gccgo.com
+stat C:\Program Files\Git\mingw64\bin\gccgo.exe
+stat C:\Program Files\Git\mingw64\bin\gccgo.bat
+stat C:\Program Files\Git\mingw64\bin\gccgo.cmd
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbs
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbe
+stat C:\Program Files\Git\mingw64\bin\gccgo.js
+stat C:\Program Files\Git\mingw64\bin\gccgo.jse
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsf
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsh
+stat C:\Program Files\Git\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Users\sas\bin\gccgo.com
+stat C:\Users\sas\bin\gccgo.exe
+stat C:\Users\sas\bin\gccgo.bat
+stat C:\Users\sas\bin\gccgo.cmd
+stat C:\Users\sas\bin\gccgo.vbs
+stat C:\Users\sas\bin\gccgo.vbe
+stat C:\Users\sas\bin\gccgo.js
+stat C:\Users\sas\bin\gccgo.jse
+stat C:\Users\sas\bin\gccgo.wsf
+stat C:\Users\sas\bin\gccgo.wsh
+stat C:\Users\sas\bin\gccgo.msc
+stat C:\Program Files\VanDyke Software\Clients\gccgo.com
+stat C:\Program Files\VanDyke Software\Clients\gccgo.exe
+stat C:\Program Files\VanDyke Software\Clients\gccgo.bat
+stat C:\Program Files\VanDyke Software\Clients\gccgo.cmd
+stat C:\Program Files\VanDyke Software\Clients\gccgo.vbs
+stat C:\Program Files\VanDyke Software\Clients\gccgo.vbe
+stat C:\Program Files\VanDyke Software\Clients\gccgo.js
+stat C:\Program Files\VanDyke Software\Clients\gccgo.jse
+stat C:\Program Files\VanDyke Software\Clients\gccgo.wsf
+stat C:\Program Files\VanDyke Software\Clients\gccgo.wsh
+stat C:\Program Files\VanDyke Software\Clients\gccgo.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.msc
+stat C:\WINDOWS\system32\gccgo.com
+stat C:\WINDOWS\system32\gccgo.exe
+stat C:\WINDOWS\system32\gccgo.bat
+stat C:\WINDOWS\system32\gccgo.cmd
+stat C:\WINDOWS\system32\gccgo.vbs
+stat C:\WINDOWS\system32\gccgo.vbe
+stat C:\WINDOWS\system32\gccgo.js
+stat C:\WINDOWS\system32\gccgo.jse
+stat C:\WINDOWS\system32\gccgo.wsf
+stat C:\WINDOWS\system32\gccgo.wsh
+stat C:\WINDOWS\system32\gccgo.msc
+stat C:\WINDOWS\gccgo.com
+stat C:\WINDOWS\gccgo.exe
+stat C:\WINDOWS\gccgo.bat
+stat C:\WINDOWS\gccgo.cmd
+stat C:\WINDOWS\gccgo.vbs
+stat C:\WINDOWS\gccgo.vbe
+stat C:\WINDOWS\gccgo.js
+stat C:\WINDOWS\gccgo.jse
+stat C:\WINDOWS\gccgo.wsf
+stat C:\WINDOWS\gccgo.wsh
+stat C:\WINDOWS\gccgo.msc
+stat C:\WINDOWS\System32\Wbem\gccgo.com
+stat C:\WINDOWS\System32\Wbem\gccgo.exe
+stat C:\WINDOWS\System32\Wbem\gccgo.bat
+stat C:\WINDOWS\System32\Wbem\gccgo.cmd
+stat C:\WINDOWS\System32\Wbem\gccgo.vbs
+stat C:\WINDOWS\System32\Wbem\gccgo.vbe
+stat C:\WINDOWS\System32\Wbem\gccgo.js
+stat C:\WINDOWS\System32\Wbem\gccgo.jse
+stat C:\WINDOWS\System32\Wbem\gccgo.wsf
+stat C:\WINDOWS\System32\Wbem\gccgo.wsh
+stat C:\WINDOWS\System32\Wbem\gccgo.msc
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.com
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.exe
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.bat
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.cmd
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.vbs
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.vbe
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.js
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.jse
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.wsf
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.wsh
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.msc
+stat C:\WINDOWS\System32\OpenSSH\gccgo.com
+stat C:\WINDOWS\System32\OpenSSH\gccgo.exe
+stat C:\WINDOWS\System32\OpenSSH\gccgo.bat
+stat C:\WINDOWS\System32\OpenSSH\gccgo.cmd
+stat C:\WINDOWS\System32\OpenSSH\gccgo.vbs
+stat C:\WINDOWS\System32\OpenSSH\gccgo.vbe
+stat C:\WINDOWS\System32\OpenSSH\gccgo.js
+stat C:\WINDOWS\System32\OpenSSH\gccgo.jse
+stat C:\WINDOWS\System32\OpenSSH\gccgo.wsf
+stat C:\WINDOWS\System32\OpenSSH\gccgo.wsh
+stat C:\WINDOWS\System32\OpenSSH\gccgo.msc
+stat E:\gopath\bin\gccgo.com
+stat E:\gopath\bin\gccgo.exe
+stat E:\gopath\bin\gccgo.bat
+stat E:\gopath\bin\gccgo.cmd
+stat E:\gopath\bin\gccgo.vbs
+stat E:\gopath\bin\gccgo.vbe
+stat E:\gopath\bin\gccgo.js
+stat E:\gopath\bin\gccgo.jse
+stat E:\gopath\bin\gccgo.wsf
+stat E:\gopath\bin\gccgo.wsh
+stat E:\gopath\bin\gccgo.msc
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.com
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.exe
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.bat
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.cmd
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.vbs
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.vbe
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.js
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.jse
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.wsf
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.wsh
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.msc
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.com
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.exe
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.bat
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.cmd
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.vbs
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.vbe
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.js
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.jse
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.wsf
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.wsh
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.msc
+stat D:\apache-tomcat-7.0.92\bin\gccgo.com
+stat D:\apache-tomcat-7.0.92\bin\gccgo.exe
+stat D:\apache-tomcat-7.0.92\bin\gccgo.bat
+stat D:\apache-tomcat-7.0.92\bin\gccgo.cmd
+stat D:\apache-tomcat-7.0.92\bin\gccgo.vbs
+stat D:\apache-tomcat-7.0.92\bin\gccgo.vbe
+stat D:\apache-tomcat-7.0.92\bin\gccgo.js
+stat D:\apache-tomcat-7.0.92\bin\gccgo.jse
+stat D:\apache-tomcat-7.0.92\bin\gccgo.wsf
+stat D:\apache-tomcat-7.0.92\bin\gccgo.wsh
+stat D:\apache-tomcat-7.0.92\bin\gccgo.msc
+stat D:\apache-tomcat-7.0.92\lib\gccgo.com
+stat D:\apache-tomcat-7.0.92\lib\gccgo.exe
+stat D:\apache-tomcat-7.0.92\lib\gccgo.bat
+stat D:\apache-tomcat-7.0.92\lib\gccgo.cmd
+stat D:\apache-tomcat-7.0.92\lib\gccgo.vbs
+stat D:\apache-tomcat-7.0.92\lib\gccgo.vbe
+stat D:\apache-tomcat-7.0.92\lib\gccgo.js
+stat D:\apache-tomcat-7.0.92\lib\gccgo.jse
+stat D:\apache-tomcat-7.0.92\lib\gccgo.wsf
+stat D:\apache-tomcat-7.0.92\lib\gccgo.wsh
+stat D:\apache-tomcat-7.0.92\lib\gccgo.msc
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.com
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.exe
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.bat
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.cmd
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.vbs
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.vbe
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.js
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.jse
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.wsf
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.wsh
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.msc
+stat $HADOOP_HOME\bin\gccgo.com
+stat $HADOOP_HOME\bin\gccgo.exe
+stat $HADOOP_HOME\bin\gccgo.bat
+stat $HADOOP_HOME\bin\gccgo.cmd
+stat $HADOOP_HOME\bin\gccgo.vbs
+stat $HADOOP_HOME\bin\gccgo.vbe
+stat $HADOOP_HOME\bin\gccgo.js
+stat $HADOOP_HOME\bin\gccgo.jse
+stat $HADOOP_HOME\bin\gccgo.wsf
+stat $HADOOP_HOME\bin\gccgo.wsh
+stat $HADOOP_HOME\bin\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.msc
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.com
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.exe
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.bat
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.cmd
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.vbs
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.vbe
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.js
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.jse
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.wsf
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.wsh
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.msc
+stat E:\graphviz\bin\gccgo.com
+stat E:\graphviz\bin\gccgo.exe
+stat E:\graphviz\bin\gccgo.bat
+stat E:\graphviz\bin\gccgo.cmd
+stat E:\graphviz\bin\gccgo.vbs
+stat E:\graphviz\bin\gccgo.vbe
+stat E:\graphviz\bin\gccgo.js
+stat E:\graphviz\bin\gccgo.jse
+stat E:\graphviz\bin\gccgo.wsf
+stat E:\graphviz\bin\gccgo.wsh
+stat E:\graphviz\bin\gccgo.msc
+stat E:\go\bin\gccgo.com
+stat E:\go\bin\gccgo.exe
+stat E:\go\bin\gccgo.bat
+stat E:\go\bin\gccgo.cmd
+stat E:\go\bin\gccgo.vbs
+stat E:\go\bin\gccgo.vbe
+stat E:\go\bin\gccgo.js
+stat E:\go\bin\gccgo.jse
+stat E:\go\bin\gccgo.wsf
+stat E:\go\bin\gccgo.wsh
+stat E:\go\bin\gccgo.msc
+stat C:\Program Files\Git\cmd\gccgo.com
+stat C:\Program Files\Git\cmd\gccgo.exe
+stat C:\Program Files\Git\cmd\gccgo.bat
+stat C:\Program Files\Git\cmd\gccgo.cmd
+stat C:\Program Files\Git\cmd\gccgo.vbs
+stat C:\Program Files\Git\cmd\gccgo.vbe
+stat C:\Program Files\Git\cmd\gccgo.js
+stat C:\Program Files\Git\cmd\gccgo.jse
+stat C:\Program Files\Git\cmd\gccgo.wsf
+stat C:\Program Files\Git\cmd\gccgo.wsh
+stat C:\Program Files\Git\cmd\gccgo.msc
+stat D:\Program Files\nodejs\gccgo.com
+stat D:\Program Files\nodejs\gccgo.exe
+stat D:\Program Files\nodejs\gccgo.bat
+stat D:\Program Files\nodejs\gccgo.cmd
+stat D:\Program Files\nodejs\gccgo.vbs
+stat D:\Program Files\nodejs\gccgo.vbe
+stat D:\Program Files\nodejs\gccgo.js
+stat D:\Program Files\nodejs\gccgo.jse
+stat D:\Program Files\nodejs\gccgo.wsf
+stat D:\Program Files\nodejs\gccgo.wsh
+stat D:\Program Files\nodejs\gccgo.msc
+stat E:\kubectl\gccgo.com
+stat E:\kubectl\gccgo.exe
+stat E:\kubectl\gccgo.bat
+stat E:\kubectl\gccgo.cmd
+stat E:\kubectl\gccgo.vbs
+stat E:\kubectl\gccgo.vbe
+stat E:\kubectl\gccgo.js
+stat E:\kubectl\gccgo.jse
+stat E:\kubectl\gccgo.wsf
+stat E:\kubectl\gccgo.wsh
+stat E:\kubectl\gccgo.msc
+stat E:\Minikube\gccgo.com
+stat E:\Minikube\gccgo.exe
+stat E:\Minikube\gccgo.bat
+stat E:\Minikube\gccgo.cmd
+stat E:\Minikube\gccgo.vbs
+stat E:\Minikube\gccgo.vbe
+stat E:\Minikube\gccgo.js
+stat E:\Minikube\gccgo.jse
+stat E:\Minikube\gccgo.wsf
+stat E:\Minikube\gccgo.wsh
+stat E:\Minikube\gccgo.msc
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.com
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.exe
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.bat
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.cmd
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.vbs
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.vbe
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.js
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.jse
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.wsf
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.wsh
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.msc
+stat E:\nginx-1.9.9\gccgo.com
+stat E:\nginx-1.9.9\gccgo.exe
+stat E:\nginx-1.9.9\gccgo.bat
+stat E:\nginx-1.9.9\gccgo.cmd
+stat E:\nginx-1.9.9\gccgo.vbs
+stat E:\nginx-1.9.9\gccgo.vbe
+stat E:\nginx-1.9.9\gccgo.js
+stat E:\nginx-1.9.9\gccgo.jse
+stat E:\nginx-1.9.9\gccgo.wsf
+stat E:\nginx-1.9.9\gccgo.wsh
+stat E:\nginx-1.9.9\gccgo.msc
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.com
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.exe
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.bat
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.cmd
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.vbs
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.vbe
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.js
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.jse
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.wsf
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.wsh
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.msc
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.com
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.exe
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.bat
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.cmd
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.vbs
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.vbe
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.js
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.jse
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.wsf
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.wsh
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.msc
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.com
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.exe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.bat
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.cmd
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbs
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.js
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.jse
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsf
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsh
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.msc
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.com
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.exe
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.bat
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.cmd
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.vbs
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.vbe
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.js
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.jse
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.wsf
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.wsh
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.msc
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.com
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.exe
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.bat
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.cmd
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.vbs
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.vbe
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.js
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.jse
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.wsf
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.wsh
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.msc
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.com
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.exe
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.bat
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.cmd
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.vbs
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.vbe
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.js
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.jse
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.wsf
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.wsh
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.msc
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.com
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.exe
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.bat
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.cmd
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.vbs
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.vbe
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.js
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.jse
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.wsf
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.wsh
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.msc
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.com
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.exe
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.bat
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.cmd
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.vbs
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.vbe
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.js
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.jse
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.wsf
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.wsh
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.msc
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.com
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.exe
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.bat
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.cmd
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.vbs
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.vbe
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.js
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.jse
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.wsf
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.wsh
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.msc
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.com
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.exe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.bat
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.cmd
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbs
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.js
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.jse
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsf
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsh
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.com
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.exe
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.bat
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.js
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.jse
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.msc
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.com
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.exe
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.bat
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.js
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.jse
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.msc
+stat testdata\pointer
+stat testdata\pointer.gox
+open testdata\pointer.gox
+stat testdata\complexnums
+stat testdata\complexnums.gox
+open testdata\complexnums.gox
+stat testdata\complexnums
+stat testdata\complexnums.gox
+open testdata\complexnums.gox
+stat testdata\complexnums
+stat testdata\complexnums.gox
+open testdata\complexnums.gox
+stat testdata\complexnums
+stat testdata\complexnums.gox
+open testdata\complexnums.gox
+stat testdata\conversions
+stat testdata\conversions.gox
+open testdata\conversions.gox
+stat testdata\time
+stat testdata\time.gox
+open testdata\time.gox
+stat testdata\time
+stat testdata\time.gox
+open testdata\time.gox
+stat testdata\unicode
+stat testdata\unicode.gox
+open testdata\unicode.gox
+stat testdata\unicode
+stat testdata\unicode.gox
+open testdata\unicode.gox
+stat testdata\imports
+stat testdata\imports.gox
+open testdata\imports.gox
+stat testdata\importsar
+stat testdata\importsar.gox
+stat testdata\libimportsar.so
+stat testdata\libimportsar.a
+open testdata\libimportsar.a
+stat testdata\aliases
+stat testdata\aliases.gox
+open testdata\aliases.gox
+stat testdata\aliases
+stat testdata\aliases.gox
+open testdata\aliases.gox
+stat testdata\escapeinfo
+stat testdata\escapeinfo.gox
+open testdata\escapeinfo.gox
+stat testdata\issue27856
+stat testdata\issue27856.gox
+open testdata\issue27856.gox
+stat testdata\v1reflect
+stat testdata\v1reflect.gox
+open testdata\v1reflect.gox
+stat testdata\nointerface
+stat testdata\nointerface.gox
+open testdata\nointerface.gox
+stat testdata\issue29198
+stat testdata\issue29198.gox
+open testdata\issue29198.gox
+stat testdata\issue30628
+stat testdata\issue30628.gox
+open testdata\issue30628.gox
+stat testdata\issue31540
+stat testdata\issue31540.gox
+open testdata\issue31540.gox
+stat testdata\issue34182
+stat testdata\issue34182.gox
+open testdata\issue34182.gox
+getenv GCCGO
+getenv PATHEXT
+stat gccgo.com
+stat gccgo.exe
+stat gccgo.bat
+stat gccgo.cmd
+stat gccgo.vbs
+stat gccgo.vbe
+stat gccgo.js
+stat gccgo.jse
+stat gccgo.wsf
+stat gccgo.wsh
+stat gccgo.msc
+getenv path
+stat E:\go\bin\gccgo.com
+stat E:\go\bin\gccgo.exe
+stat E:\go\bin\gccgo.bat
+stat E:\go\bin\gccgo.cmd
+stat E:\go\bin\gccgo.vbs
+stat E:\go\bin\gccgo.vbe
+stat E:\go\bin\gccgo.js
+stat E:\go\bin\gccgo.jse
+stat E:\go\bin\gccgo.wsf
+stat E:\go\bin\gccgo.wsh
+stat E:\go\bin\gccgo.msc
+stat C:\Users\sas\bin\gccgo.com
+stat C:\Users\sas\bin\gccgo.exe
+stat C:\Users\sas\bin\gccgo.bat
+stat C:\Users\sas\bin\gccgo.cmd
+stat C:\Users\sas\bin\gccgo.vbs
+stat C:\Users\sas\bin\gccgo.vbe
+stat C:\Users\sas\bin\gccgo.js
+stat C:\Users\sas\bin\gccgo.jse
+stat C:\Users\sas\bin\gccgo.wsf
+stat C:\Users\sas\bin\gccgo.wsh
+stat C:\Users\sas\bin\gccgo.msc
+stat C:\Program Files\Git\mingw64\bin\gccgo.com
+stat C:\Program Files\Git\mingw64\bin\gccgo.exe
+stat C:\Program Files\Git\mingw64\bin\gccgo.bat
+stat C:\Program Files\Git\mingw64\bin\gccgo.cmd
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbs
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbe
+stat C:\Program Files\Git\mingw64\bin\gccgo.js
+stat C:\Program Files\Git\mingw64\bin\gccgo.jse
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsf
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsh
+stat C:\Program Files\Git\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\local\bin\gccgo.com
+stat C:\Program Files\Git\usr\local\bin\gccgo.exe
+stat C:\Program Files\Git\usr\local\bin\gccgo.bat
+stat C:\Program Files\Git\usr\local\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\local\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\local\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\local\bin\gccgo.js
+stat C:\Program Files\Git\usr\local\bin\gccgo.jse
+stat C:\Program Files\Git\usr\local\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\local\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\local\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Program Files\Git\mingw64\bin\gccgo.com
+stat C:\Program Files\Git\mingw64\bin\gccgo.exe
+stat C:\Program Files\Git\mingw64\bin\gccgo.bat
+stat C:\Program Files\Git\mingw64\bin\gccgo.cmd
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbs
+stat C:\Program Files\Git\mingw64\bin\gccgo.vbe
+stat C:\Program Files\Git\mingw64\bin\gccgo.js
+stat C:\Program Files\Git\mingw64\bin\gccgo.jse
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsf
+stat C:\Program Files\Git\mingw64\bin\gccgo.wsh
+stat C:\Program Files\Git\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\gccgo.com
+stat C:\Program Files\Git\usr\bin\gccgo.exe
+stat C:\Program Files\Git\usr\bin\gccgo.bat
+stat C:\Program Files\Git\usr\bin\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\gccgo.js
+stat C:\Program Files\Git\usr\bin\gccgo.jse
+stat C:\Program Files\Git\usr\bin\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\gccgo.msc
+stat C:\Users\sas\bin\gccgo.com
+stat C:\Users\sas\bin\gccgo.exe
+stat C:\Users\sas\bin\gccgo.bat
+stat C:\Users\sas\bin\gccgo.cmd
+stat C:\Users\sas\bin\gccgo.vbs
+stat C:\Users\sas\bin\gccgo.vbe
+stat C:\Users\sas\bin\gccgo.js
+stat C:\Users\sas\bin\gccgo.jse
+stat C:\Users\sas\bin\gccgo.wsf
+stat C:\Users\sas\bin\gccgo.wsh
+stat C:\Users\sas\bin\gccgo.msc
+stat C:\Program Files\VanDyke Software\Clients\gccgo.com
+stat C:\Program Files\VanDyke Software\Clients\gccgo.exe
+stat C:\Program Files\VanDyke Software\Clients\gccgo.bat
+stat C:\Program Files\VanDyke Software\Clients\gccgo.cmd
+stat C:\Program Files\VanDyke Software\Clients\gccgo.vbs
+stat C:\Program Files\VanDyke Software\Clients\gccgo.vbe
+stat C:\Program Files\VanDyke Software\Clients\gccgo.js
+stat C:\Program Files\VanDyke Software\Clients\gccgo.jse
+stat C:\Program Files\VanDyke Software\Clients\gccgo.wsf
+stat C:\Program Files\VanDyke Software\Clients\gccgo.wsh
+stat C:\Program Files\VanDyke Software\Clients\gccgo.msc
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.com
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.exe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.bat
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.cmd
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.vbs
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.vbe
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.js
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.jse
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.wsf
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.wsh
+stat C:\Program Files (x86)\Common Files\Oracle\Java\javapath\gccgo.msc
+stat C:\WINDOWS\system32\gccgo.com
+stat C:\WINDOWS\system32\gccgo.exe
+stat C:\WINDOWS\system32\gccgo.bat
+stat C:\WINDOWS\system32\gccgo.cmd
+stat C:\WINDOWS\system32\gccgo.vbs
+stat C:\WINDOWS\system32\gccgo.vbe
+stat C:\WINDOWS\system32\gccgo.js
+stat C:\WINDOWS\system32\gccgo.jse
+stat C:\WINDOWS\system32\gccgo.wsf
+stat C:\WINDOWS\system32\gccgo.wsh
+stat C:\WINDOWS\system32\gccgo.msc
+stat C:\WINDOWS\gccgo.com
+stat C:\WINDOWS\gccgo.exe
+stat C:\WINDOWS\gccgo.bat
+stat C:\WINDOWS\gccgo.cmd
+stat C:\WINDOWS\gccgo.vbs
+stat C:\WINDOWS\gccgo.vbe
+stat C:\WINDOWS\gccgo.js
+stat C:\WINDOWS\gccgo.jse
+stat C:\WINDOWS\gccgo.wsf
+stat C:\WINDOWS\gccgo.wsh
+stat C:\WINDOWS\gccgo.msc
+stat C:\WINDOWS\System32\Wbem\gccgo.com
+stat C:\WINDOWS\System32\Wbem\gccgo.exe
+stat C:\WINDOWS\System32\Wbem\gccgo.bat
+stat C:\WINDOWS\System32\Wbem\gccgo.cmd
+stat C:\WINDOWS\System32\Wbem\gccgo.vbs
+stat C:\WINDOWS\System32\Wbem\gccgo.vbe
+stat C:\WINDOWS\System32\Wbem\gccgo.js
+stat C:\WINDOWS\System32\Wbem\gccgo.jse
+stat C:\WINDOWS\System32\Wbem\gccgo.wsf
+stat C:\WINDOWS\System32\Wbem\gccgo.wsh
+stat C:\WINDOWS\System32\Wbem\gccgo.msc
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.com
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.exe
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.bat
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.cmd
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.vbs
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.vbe
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.js
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.jse
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.wsf
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.wsh
+stat C:\WINDOWS\System32\WindowsPowerShell\v1.0\gccgo.msc
+stat C:\WINDOWS\System32\OpenSSH\gccgo.com
+stat C:\WINDOWS\System32\OpenSSH\gccgo.exe
+stat C:\WINDOWS\System32\OpenSSH\gccgo.bat
+stat C:\WINDOWS\System32\OpenSSH\gccgo.cmd
+stat C:\WINDOWS\System32\OpenSSH\gccgo.vbs
+stat C:\WINDOWS\System32\OpenSSH\gccgo.vbe
+stat C:\WINDOWS\System32\OpenSSH\gccgo.js
+stat C:\WINDOWS\System32\OpenSSH\gccgo.jse
+stat C:\WINDOWS\System32\OpenSSH\gccgo.wsf
+stat C:\WINDOWS\System32\OpenSSH\gccgo.wsh
+stat C:\WINDOWS\System32\OpenSSH\gccgo.msc
+stat E:\gopath\bin\gccgo.com
+stat E:\gopath\bin\gccgo.exe
+stat E:\gopath\bin\gccgo.bat
+stat E:\gopath\bin\gccgo.cmd
+stat E:\gopath\bin\gccgo.vbs
+stat E:\gopath\bin\gccgo.vbe
+stat E:\gopath\bin\gccgo.js
+stat E:\gopath\bin\gccgo.jse
+stat E:\gopath\bin\gccgo.wsf
+stat E:\gopath\bin\gccgo.wsh
+stat E:\gopath\bin\gccgo.msc
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.com
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.exe
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.bat
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.cmd
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.vbs
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.vbe
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.js
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.jse
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.wsf
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.wsh
+stat D:\Program Files\Java\jdk1.8.0_201\bin\gccgo.msc
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.com
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.exe
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.bat
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.cmd
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.vbs
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.vbe
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.js
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.jse
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.wsf
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.wsh
+stat D:\Program Files\apache-maven-3.6.0\bin\gccgo.msc
+stat D:\apache-tomcat-7.0.92\bin\gccgo.com
+stat D:\apache-tomcat-7.0.92\bin\gccgo.exe
+stat D:\apache-tomcat-7.0.92\bin\gccgo.bat
+stat D:\apache-tomcat-7.0.92\bin\gccgo.cmd
+stat D:\apache-tomcat-7.0.92\bin\gccgo.vbs
+stat D:\apache-tomcat-7.0.92\bin\gccgo.vbe
+stat D:\apache-tomcat-7.0.92\bin\gccgo.js
+stat D:\apache-tomcat-7.0.92\bin\gccgo.jse
+stat D:\apache-tomcat-7.0.92\bin\gccgo.wsf
+stat D:\apache-tomcat-7.0.92\bin\gccgo.wsh
+stat D:\apache-tomcat-7.0.92\bin\gccgo.msc
+stat D:\apache-tomcat-7.0.92\lib\gccgo.com
+stat D:\apache-tomcat-7.0.92\lib\gccgo.exe
+stat D:\apache-tomcat-7.0.92\lib\gccgo.bat
+stat D:\apache-tomcat-7.0.92\lib\gccgo.cmd
+stat D:\apache-tomcat-7.0.92\lib\gccgo.vbs
+stat D:\apache-tomcat-7.0.92\lib\gccgo.vbe
+stat D:\apache-tomcat-7.0.92\lib\gccgo.js
+stat D:\apache-tomcat-7.0.92\lib\gccgo.jse
+stat D:\apache-tomcat-7.0.92\lib\gccgo.wsf
+stat D:\apache-tomcat-7.0.92\lib\gccgo.wsh
+stat D:\apache-tomcat-7.0.92\lib\gccgo.msc
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.com
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.exe
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.bat
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.cmd
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.vbs
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.vbe
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.js
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.jse
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.wsf
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.wsh
+stat D:\Program Files\Java\jdk1.8.0_201\jre\bin\gccgo.msc
+stat $HADOOP_HOME\bin\gccgo.com
+stat $HADOOP_HOME\bin\gccgo.exe
+stat $HADOOP_HOME\bin\gccgo.bat
+stat $HADOOP_HOME\bin\gccgo.cmd
+stat $HADOOP_HOME\bin\gccgo.vbs
+stat $HADOOP_HOME\bin\gccgo.vbe
+stat $HADOOP_HOME\bin\gccgo.js
+stat $HADOOP_HOME\bin\gccgo.jse
+stat $HADOOP_HOME\bin\gccgo.wsf
+stat $HADOOP_HOME\bin\gccgo.wsh
+stat $HADOOP_HOME\bin\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.msc
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.com
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.exe
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.bat
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.cmd
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.vbs
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.vbe
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.js
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.jse
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.wsf
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.wsh
+stat C:\Program Files (x86)\Microsoft VS Code\bin\gccgo.msc
+stat E:\graphviz\bin\gccgo.com
+stat E:\graphviz\bin\gccgo.exe
+stat E:\graphviz\bin\gccgo.bat
+stat E:\graphviz\bin\gccgo.cmd
+stat E:\graphviz\bin\gccgo.vbs
+stat E:\graphviz\bin\gccgo.vbe
+stat E:\graphviz\bin\gccgo.js
+stat E:\graphviz\bin\gccgo.jse
+stat E:\graphviz\bin\gccgo.wsf
+stat E:\graphviz\bin\gccgo.wsh
+stat E:\graphviz\bin\gccgo.msc
+stat E:\go\bin\gccgo.com
+stat E:\go\bin\gccgo.exe
+stat E:\go\bin\gccgo.bat
+stat E:\go\bin\gccgo.cmd
+stat E:\go\bin\gccgo.vbs
+stat E:\go\bin\gccgo.vbe
+stat E:\go\bin\gccgo.js
+stat E:\go\bin\gccgo.jse
+stat E:\go\bin\gccgo.wsf
+stat E:\go\bin\gccgo.wsh
+stat E:\go\bin\gccgo.msc
+stat C:\Program Files\Git\cmd\gccgo.com
+stat C:\Program Files\Git\cmd\gccgo.exe
+stat C:\Program Files\Git\cmd\gccgo.bat
+stat C:\Program Files\Git\cmd\gccgo.cmd
+stat C:\Program Files\Git\cmd\gccgo.vbs
+stat C:\Program Files\Git\cmd\gccgo.vbe
+stat C:\Program Files\Git\cmd\gccgo.js
+stat C:\Program Files\Git\cmd\gccgo.jse
+stat C:\Program Files\Git\cmd\gccgo.wsf
+stat C:\Program Files\Git\cmd\gccgo.wsh
+stat C:\Program Files\Git\cmd\gccgo.msc
+stat D:\Program Files\nodejs\gccgo.com
+stat D:\Program Files\nodejs\gccgo.exe
+stat D:\Program Files\nodejs\gccgo.bat
+stat D:\Program Files\nodejs\gccgo.cmd
+stat D:\Program Files\nodejs\gccgo.vbs
+stat D:\Program Files\nodejs\gccgo.vbe
+stat D:\Program Files\nodejs\gccgo.js
+stat D:\Program Files\nodejs\gccgo.jse
+stat D:\Program Files\nodejs\gccgo.wsf
+stat D:\Program Files\nodejs\gccgo.wsh
+stat D:\Program Files\nodejs\gccgo.msc
+stat E:\kubectl\gccgo.com
+stat E:\kubectl\gccgo.exe
+stat E:\kubectl\gccgo.bat
+stat E:\kubectl\gccgo.cmd
+stat E:\kubectl\gccgo.vbs
+stat E:\kubectl\gccgo.vbe
+stat E:\kubectl\gccgo.js
+stat E:\kubectl\gccgo.jse
+stat E:\kubectl\gccgo.wsf
+stat E:\kubectl\gccgo.wsh
+stat E:\kubectl\gccgo.msc
+stat E:\Minikube\gccgo.com
+stat E:\Minikube\gccgo.exe
+stat E:\Minikube\gccgo.bat
+stat E:\Minikube\gccgo.cmd
+stat E:\Minikube\gccgo.vbs
+stat E:\Minikube\gccgo.vbe
+stat E:\Minikube\gccgo.js
+stat E:\Minikube\gccgo.jse
+stat E:\Minikube\gccgo.wsf
+stat E:\Minikube\gccgo.wsh
+stat E:\Minikube\gccgo.msc
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.com
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.exe
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.bat
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.cmd
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.vbs
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.vbe
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.js
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.jse
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.wsf
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.wsh
+stat D:\Program Files\Redis-x64-3.0.504\gccgo.msc
+stat E:\nginx-1.9.9\gccgo.com
+stat E:\nginx-1.9.9\gccgo.exe
+stat E:\nginx-1.9.9\gccgo.bat
+stat E:\nginx-1.9.9\gccgo.cmd
+stat E:\nginx-1.9.9\gccgo.vbs
+stat E:\nginx-1.9.9\gccgo.vbe
+stat E:\nginx-1.9.9\gccgo.js
+stat E:\nginx-1.9.9\gccgo.jse
+stat E:\nginx-1.9.9\gccgo.wsf
+stat E:\nginx-1.9.9\gccgo.wsh
+stat E:\nginx-1.9.9\gccgo.msc
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.com
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.exe
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.bat
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.cmd
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.vbs
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.vbe
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.js
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.jse
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.wsf
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.wsh
+stat D:\Program Files\mysql-5.7.30-winx64\bin\gccgo.msc
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.com
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.exe
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.bat
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.cmd
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.vbs
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.vbe
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.js
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.jse
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.wsf
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.wsh
+stat D:\Program Files\httpd-2.4.43-o111g-x64-vc15\Apache24\bin\gccgo.msc
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.com
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.exe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.bat
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.cmd
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbs
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.js
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.jse
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsf
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsh
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.msc
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.com
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.exe
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.bat
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.cmd
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.vbs
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.vbe
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.js
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.jse
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.wsf
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.wsh
+stat C:\Program Files\Docker\Docker\resources\bin\gccgo.msc
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.com
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.exe
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.bat
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.cmd
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.vbs
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.vbe
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.js
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.jse
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.wsf
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.wsh
+stat C:\ProgramData\DockerDesktop\version-bin\gccgo.msc
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.com
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.exe
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.bat
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.cmd
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.vbs
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.vbe
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.js
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.jse
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.wsf
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.wsh
+stat C:\Users\sas\AppData\Local\Microsoft\WindowsApps\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\bin\gccgo.msc
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.com
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.exe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.bat
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.cmd
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbs
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.vbe
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.js
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.jse
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsf
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.wsh
+stat D:\Program Files\Microsoft VS Code\Microsoft VS Code\bin\gccgo.msc
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.com
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.exe
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.bat
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.cmd
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.vbs
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.vbe
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.js
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.jse
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.wsf
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.wsh
+stat D:\Program Files\jetbrains\IntelliJ IDEA 2018.3.4\bin\gccgo.msc
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.com
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.exe
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.bat
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.cmd
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.vbs
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.vbe
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.js
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.jse
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.wsf
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.wsh
+stat D:\Program Files\GoLand 2019.3.2\bin\gccgo.msc
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.com
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.exe
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.bat
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.cmd
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.vbs
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.vbe
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.js
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.jse
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.wsf
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.wsh
+stat C:\Users\sas\AppData\Roaming\npm\gccgo.msc
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.com
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.exe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.bat
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.cmd
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbs
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.vbe
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.js
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.jse
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsf
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.wsh
+stat C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin\gccgo.msc
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.com
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.exe
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.bat
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.js
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.jse
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\vendor_perl\gccgo.msc
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.com
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.exe
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.bat
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.cmd
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.vbs
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.vbe
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.js
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.jse
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.wsf
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.wsh
+stat C:\Program Files\Git\usr\bin\core_perl\gccgo.msc

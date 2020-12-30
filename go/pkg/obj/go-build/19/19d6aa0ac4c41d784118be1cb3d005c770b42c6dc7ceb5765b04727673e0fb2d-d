@@ -1,0 +1,7 @@
+# test log
+getenv GO_WANT_HELPER_PROCESS
+getenv PATHEXT
+stat C:\Users\sas\AppData\Local\Temp\go-build644637418\b662\windows.test.exe
+open NUL
+getenv SYSTEMROOT
+open C:\Users\sas\AppData\Local\Temp\go-build644637418\b662\windows.test.exe

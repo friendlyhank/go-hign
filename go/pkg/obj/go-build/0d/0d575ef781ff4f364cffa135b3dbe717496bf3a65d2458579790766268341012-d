@@ -1,0 +1,16 @@
+./crash.go
+./dropm_stub.go
+./main.go
+_cgo_gotypes.go
+aprof.cgo1.go
+bigstack_windows.cgo1.go
+cgo.cgo1.go
+deadlock.cgo1.go
+dll_windows.cgo1.go
+pprof.cgo1.go
+sigpanic.cgo1.go
+stack_windows.cgo1.go
+threadpanic.cgo1.go
+traceback.cgo1.go
+tracebackctxt.cgo1.go
+_cgo_import.go
