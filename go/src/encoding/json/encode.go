@@ -207,12 +207,17 @@ func typeEncoder(t reflect.Type) encoderFunc {
 //根据反射类型kind去获取编码方法
 func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	switch t.Kind() {
+	case reflect.String:
+		return stringEncoder
 	case reflect.Struct:
-		return
+		return newStructEncoder(t)
 	case reflect.Ptr://如果是指针,一般会先进来这里
 		return newPtrEncoder(t)
 	}
 	return nil
+}
+
+func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
 }
 
 //结构体编码器
@@ -249,14 +254,6 @@ func (pe ptrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts){
 	pe.elemEnc(e,v.Elem(),opts)
 }
 
-// A field represents a single field found in a struct.
-//用于结构体的字段
-type field struct{
-	name string
-
-	typ reflect.Type
-}
-
 // typeFields returns a list of fields that JSON should recognize for the given type.
 // The algorithm is breadth-first search over the set of structs to include - the top struct
 // and then any reachable anonymous structs.
@@ -266,16 +263,107 @@ func typeFields(t reflect.Type)structFields{
 	current :=[]field{}
 	next :=[]field{{typ:t}}
 
+	// Types already visited at an earlier level.
+	//过滤器
+	visited := map[reflect.Type]bool{}
+
 	//所有的字段
 	var fields []field
 
 	for len(next) > 0{
 		current, next = next, current[:0]
+		for _, f := range current {
+			if visited[f.typ] {
+				continue
+			}
+			visited[f.typ] = true
+
+			// Scan f.typ for fields to include.
+			for i := 0; i < f.typ.NumField(); i++ {
+				sf := f.typ.Field(i)
+				isUnexported := sf.PkgPath != "" //如果包的路径不为空，说明是私有属性，忽略
+				if sf.Anonymous {
+					t := sf.Type
+					//指针类型需要进一步解析
+					if t.Kind() == reflect.Ptr {
+						t = t.Elem()
+					}
+					if isUnexported && t.Kind() != reflect.Struct {
+						// Ignore embedded fields of unexported non-struct types.
+						continue
+					}
+					// Do not ignore embedded fields of unexported struct types
+					// since they may have exported fields.
+				}else if isUnexported {
+					// Ignore unexported non-embedded fields.
+					continue
+				}
+				tag := sf.Tag.Get("json")
+				if tag == "-" {//如果有-表示忽略该字段的解析
+					continue
+				}
+				name, opts := parseTag(tag)
+				if !isValidTag(name){
+					name = ""
+				}
+				//设置索引
+				index :=make([]int,len(f.index)+1)
+				copy(index,f.index)
+				index[len(f.index)] = i
+
+				ft :=sf.Type
+
+				// Record found field and index sequence.
+				if name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct {
+					tagged := name != ""
+					if name == ""{
+						name = sf.Name
+					}
+					field := field{
+						name:name,
+						tag:tagged,
+						index:index,
+						typ:ft,
+						omitEmpty:opts.Contains("omitempty"),
+					}
+					field.nameBytes =[]byte(field.name)
+
+					fields = append(fields,field)
+				}
+			}
+		}
 	}
+	nameIndex := make(map[string]int,len(fields))
+	for i,field :=range fields{
+		nameIndex[field.name] = i
+	}
+	return structFields{fields,nameIndex}
 }
 
-// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
+//检查标签是否有效
+func isValidTag(s string) bool {
+	if s == ""{
+		return false
+	}
+	return true
+}
+
+// A field represents a single field found in a struct.
+//用于结构体的字段
+type field struct{
+	name string
+	nameBytes []byte                 // []byte(name)
+
+	tag bool //是否设置标签
+	index []int //索引
+	typ reflect.Type
+	omitEmpty bool //是否要过滤空值字段
+
+}
+
+
+	// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
 //解析struct结构体的字段并缓存
 func cachedTypeFields(t reflect.Type)structFields{
-
+	return typeFields(t)
 }

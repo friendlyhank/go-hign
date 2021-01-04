@@ -15,7 +15,10 @@
 // https://golang.org/doc/articles/laws_of_reflection.html
 package reflect
 
-import "unsafe"
+import (
+	"strconv"
+	"unsafe"
+)
 
 // Type is the representation of a Go type.
 //
@@ -35,6 +38,15 @@ type Type interface {
 	// Elem returns a type's element type.
 	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
 	Elem() Type
+
+	// Field returns a struct type's i'th field.
+	// It panics if the type's Kind is not Struct.
+	// It panics if i is not in the range [0, NumField()).
+	Field(i int) StructField
+
+	// NumField returns a struct type's field count.
+	// It panics if the type's Kind is not Struct.
+	NumField() int
 }
 
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
@@ -115,10 +127,155 @@ type rtype struct {
 	ptrToThis typeOff // type for pointer to this type, may be zero
 }
 
-// ptrType represents a pointer type.
+//A StructField describes a single field in a struct.
+//结构体对应的字段
+type StructField struct {
+	// Name is the field name.
+	Name string
+	// PkgPath is the package path that qualifies a lower case (unexported)
+	// field name. It is empty for upper case (exported) field names.
+	// See https://golang.org/ref/spec#Uniqueness_of_identifiers
+	PkgPath string//包的路径
+
+	Type      Type      // field type
+	Tag       StructTag //标签 field tag string
+	Offset    uintptr   //相对于结构体的偏移量 offset within struct, in bytes
+	Index     []int     //索引 index sequence for Type.FieldByIndex
+	Anonymous bool      //是否嵌套字段(如内嵌指针需要进一步解析) is an embedded field
+}
+
+// A StructTag is the tag string in a struct field.
+//
+// By convention, tag strings are a concatenation of
+// optionally space-separated key:"value" pairs.
+// Each key is a non-empty string consisting of non-control
+// characters other than space (U+0020 ' '), quote (U+0022 '"'),
+// and colon (U+003A ':').  Each value is quoted using U+0022 '"'
+// characters and Go string literal syntax.
+type StructTag string
+
+// Get returns the value associated with key in the tag string.
+// If there is no such key in the tag, Get returns the empty string.
+// If the tag does not have the conventional format, the value
+// returned by Get is unspecified. To determine whether a tag is
+// explicitly set to the empty string, use Lookup.
+//获取结构体标签的具体某个key值
+func (tag StructTag) Get(key string) string {
+	v, _ := tag.Lookup(key)
+	return v
+}
+
+// Lookup returns the value associated with key in the tag string.
+// If the key is present in the tag the value (which may be empty)
+// is returned. Otherwise the returned value will be the empty string.
+// The ok return value reports whether the value was explicitly set in
+// the tag string. If the tag does not have the conventional format,
+// the value returned by Lookup is unspecified.
+//查找结构体标签的具体某个key值
+func (tag StructTag) Lookup(key string) (value string, ok bool) {
+	// When modifying this code, also update the validateStructTag code
+	// in cmd/vet/structtag.go.
+
+	for tag != "" {
+		// Skip leading space.
+		i := 0
+		for i < len(tag) && tag[i] == ' ' {
+			i++
+		}
+		tag = tag[i:]
+		if tag == "" {
+			break
+		}
+
+		// Scan to colon. A space, a quote or a control character is a syntax error.
+		// Strictly speaking, control chars include the range [0x7f, 0x9f], not just
+		// [0x00, 0x1f], but in practice, we ignore the multi-byte control characters
+		// as it is simpler to inspect the tag's bytes than the tag's runes.
+		i = 0
+		for i < len(tag) && tag[i] > ' ' && tag[i] != ':' && tag[i] != '"' && tag[i] != 0x7f {
+			i++
+		}
+		if i == 0 || i+1 >= len(tag) || tag[i] != ':' || tag[i+1] != '"' {
+			break
+		}
+		name := string(tag[:i])
+		tag = tag[i+1:]
+
+		// Scan quoted string to find value.
+		i = 1
+		for i < len(tag) && tag[i] != '"' {
+			if tag[i] == '\\' {
+				i++
+			}
+			i++
+		}
+		if i >= len(tag) {
+			break
+		}
+		qvalue := string(tag[:i+1])
+		tag = tag[i+1:]
+
+		if key == name {
+			value, err := strconv.Unquote(qvalue)
+			if err != nil {
+				break
+			}
+			return value, true
+		}
+	}
+	return "", false
+}
+
+//指针类型 ptrType represents a pointer type.
 type ptrType struct{
 	rtype
 	elem *rtype
+}
+
+//结构体类型 structType represents a struct type.
+type structType struct {
+	rtype
+	pkgPath name
+	fields  []structField // sorted by offset
+}
+
+//结构体字段 Struct field
+type structField struct {
+	name        name    // name is always non-empty
+	typ         *rtype  // type of field
+	offsetEmbed uintptr //相对于结构体的偏移量 byte offset of field<<1 | isEmbedded
+}
+
+//获得某个字段的偏移量
+func (f *structField) offset() uintptr {
+	return f.offsetEmbed >> 1
+}
+
+// name is an encoded type name with optional extra data.
+//
+// The first byte is a bit field containing:
+//
+//	1<<0 the name is exported
+//	1<<1 tag data follows the name
+//	1<<2 pkgPath nameOff follows the name and tag
+//
+// The next two bytes are the data length:
+//
+//	 l := uint16(data[1])<<8 | uint16(data[2])
+//
+// Bytes [3:3+l] are the string data.
+//
+// If tag data follows then bytes 3+l and 3+l+1 are the tag length,
+// with the data following.
+//
+// If the import path follows, then 4 bytes at the end of
+// the data form a nameOff. The import path is only set for concrete
+// methods that are defined in a different package than their type.
+//
+// If a name starts with "*", then the exported bit represents
+// whether the pointed to type is exported.
+type name struct {
+	bytes *byte
 }
 
 const(
@@ -168,6 +325,22 @@ func (t *rtype)Elem()Type{
 		return toType(tt.elem)
 	}
 	panic("")
+}
+
+func (t *rtype) Field(i int) StructField {
+	if t.Kind() != Struct {
+		panic("reflect: Field of non-struct type ")
+	}
+	tt := (*structType)(unsafe.Pointer(t))
+	return tt.Field(i)
+}
+
+func (t *rtype) NumField() int {
+	if t.Kind() != Struct {
+		panic("reflect: NumField of non-struct type ")
+	}
+	tt := (*structType)(unsafe.Pointer(t))
+	return len(tt.fields)
 }
 
 // toType converts from a *rtype to a Type that can be returned
