@@ -56,8 +56,20 @@ type Value struct{
 type flag uintptr
 
 const (
+	flagKindWidth        = 5 // there are 27 kinds
+	flagKindMask    flag = 1<<flagKindWidth - 1
+	flagStickyRO    flag = 1 << 5
+	flagEmbedRO     flag = 1 << 6
+	flagIndir       flag = 1 << 7
+	flagAddr        flag = 1 << 8
 	flagMethod      flag = 1 << 9
+	flagRO          flag = flagStickyRO | flagEmbedRO
 )
+
+//Value可以通过flag获取Kind
+func (f flag)kind()Kind{
+	return Kind(f & flagKindMask)
+}
 
 //
 func unpackEface(i interface{}) Value {
@@ -86,7 +98,32 @@ type emptyInterface struct{
 	word unsafe.Pointer
 }
 
+// Elem returns the value that the interface v contains
+// or that the pointer v points to.
+// It panics if v's Kind is not Interface or Ptr.
+// It returns the zero Value if v is nil.
+//这个方法用于查找下级元素的,Type.Elem也有这个方法,一个返回Value和Type,实现方法大致相同但是也不一样
+//这样实现的目的是为了保持链式法保持原来的结构去查询指定的键值
+func (v Value) Elem() Value {
+	k :=v.kind()
+	switch k {
+	case Ptr:
+		ptr := v.ptr
+		// The returned value's address is v's value.
+		if ptr == nil{
+			return Value{}
+		}
+		tt :=(*ptrType)(unsafe.Pointer(v.typ))
+		typ :=tt.elem
+		fl := v.flag&flagRO | flagIndir | flagAddr
+		fl |= flag(typ.Kind())
+		return Value{typ,ptr,fl}
+	}
+	panic(&ValueError{"reflect.Value.Elem", v.kind()})
+}
+
 //Type returns v's type.
+//和反射reflect.TypeOf一样
 func (v Value)Type()Type{
 	f :=v.flag
 	if f == 0{

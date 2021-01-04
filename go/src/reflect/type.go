@@ -31,6 +31,10 @@ import "unsafe"
 type Type interface {
 	// Kind returns the specific kind of this type.
 	Kind()Kind //对应kind 所有的数据类型
+
+	// Elem returns a type's element type.
+	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
+	Elem() Type
 }
 
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
@@ -111,6 +115,12 @@ type rtype struct {
 	ptrToThis typeOff // type for pointer to this type, may be zero
 }
 
+// ptrType represents a pointer type.
+type ptrType struct{
+	rtype
+	elem *rtype
+}
+
 const(
 	kindMask        = (1 << 5) - 1
 )
@@ -150,3 +160,24 @@ type typeOff int32 // offset to an *rtype
 type textOff int32 // offset from top of text section
 
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
+
+func (t *rtype)Elem()Type{
+	switch t.Kind() {
+	case Ptr:
+		tt := (*ptrType)(unsafe.Pointer(t))
+		return toType(tt.elem)
+	}
+	panic("")
+}
+
+// toType converts from a *rtype to a Type that can be returned
+// to the client of package reflect. In gc, the only concern is that
+// a nil *rtype must be replaced by a nil Type, but in gccgo this
+// function takes care of ensuring that multiple *rtype for the same
+// type are coalesced into a single Type.
+func toType(t *rtype)Type{
+	if t == nil{
+		return nil
+	}
+	return t
+}

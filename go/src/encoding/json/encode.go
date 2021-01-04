@@ -207,10 +207,75 @@ func typeEncoder(t reflect.Type) encoderFunc {
 //根据反射类型kind去获取编码方法
 func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	switch t.Kind() {
-	case reflect.Ptr:
-
+	case reflect.Struct:
+		return
+	case reflect.Ptr://如果是指针,一般会先进来这里
+		return newPtrEncoder(t)
 	}
 	return nil
 }
 
-type pt
+//结构体编码器
+type structEncoder struct{
+	fields structFields
+}
+
+type structFields struct {
+	list []field //所有的字段
+	nameIndex map[string]int //字段名索引,方便查找
+}
+
+func newStructEncoder(t reflect.Type)encoderFunc{
+	se :=structEncoder{fields: cachedTypeFields(t)}
+	return se.encode
+}
+
+func (se structEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+
+}
+
+//指针类型
+type ptrEncoder struct{
+	elemEnc encoderFunc
+}
+
+func newPtrEncoder(t reflect.Type)encoderFunc{
+	enc := ptrEncoder{typeEncoder(t.Elem())}
+	return enc.encode
+}
+
+func (pe ptrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts){
+	//指针类型进入递归解析
+	pe.elemEnc(e,v.Elem(),opts)
+}
+
+// A field represents a single field found in a struct.
+//用于结构体的字段
+type field struct{
+	name string
+
+	typ reflect.Type
+}
+
+// typeFields returns a list of fields that JSON should recognize for the given type.
+// The algorithm is breadth-first search over the set of structs to include - the top struct
+// and then any reachable anonymous structs.
+//获取结构体的字段
+func typeFields(t reflect.Type)structFields{
+	// Anonymous fields to explore at the current level and the next.
+	current :=[]field{}
+	next :=[]field{{typ:t}}
+
+	//所有的字段
+	var fields []field
+
+	for len(next) > 0{
+		current, next = next, current[:0]
+	}
+}
+
+// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
+//解析struct结构体的字段并缓存
+func cachedTypeFields(t reflect.Type)structFields{
+
+}
