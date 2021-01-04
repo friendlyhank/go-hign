@@ -148,12 +148,23 @@ import (
 func Marshal(v interface{}) ([]byte, error) {
 	e := newEncodeState()
 
-	err := e.marshal(v, encOpts{})
+	err := e.marshal(v, encOpts{escapeHTML:true})
 	if err != nil {
 		return nil, err
 	}
 	buf :=append([]byte(nil),e.Bytes()...)
 	return buf, nil
+}
+
+// HTMLEscape appends to dst the JSON-encoded src with <, >, &, U+2028 and U+2029
+// characters inside string literals changed to \u003c, \u003e, \u0026, \u2028, \u2029
+// so that the JSON will be safe to embed inside HTML <script> tags.
+// For historical reasons, web browsers don't honor standard HTML
+// escaping within <script> tags, so an alternative JSON encoding must
+// be used.
+//将数据解析成json格式并写入buffer
+func HTMLEscape(dst *bytes.Buffer, src []byte) {
+
 }
 
 // An encodeState encodes JSON into a bytes.Buffer.
@@ -176,6 +187,9 @@ func (e *encodeState) reflectValue(v reflect.Value, opts encOpts) {
 }
 
 type encOpts struct {
+	// escapeHTML causes '<', '>', and '&' to be escaped in JSON strings.
+	//是否解析成json格式
+	escapeHTML bool
 }
 
 //编码的方法
@@ -271,6 +285,10 @@ func typeFields(t reflect.Type)structFields{
 	//所有的字段
 	var fields []field
 
+	// Buffer to run HTMLEscape on field names.
+	//按格式将数据写入buf
+	var nameEscBuf bytes.Buffer
+
 	for len(next) > 0{
 		current, next = next, current[:0]
 		for _, f := range current {
@@ -328,6 +346,10 @@ func typeFields(t reflect.Type)structFields{
 						omitEmpty:opts.Contains("omitempty"),
 					}
 					field.nameBytes =[]byte(field.name)
+
+					// Build nameEscHTML and nameNonEsc ahead of time.
+					//重置下缓冲区
+					nameEscBuf.Reset()
 
 					fields = append(fields,field)
 				}
