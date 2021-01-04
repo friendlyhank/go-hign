@@ -350,6 +350,7 @@ func typeFields(t reflect.Type)structFields{
 					// Build nameEscHTML and nameNonEsc ahead of time.
 					//重置下缓冲区
 					nameEscBuf.Reset()
+					nameEscBuf.WriteString(`"`)
 
 					fields = append(fields,field)
 				}
