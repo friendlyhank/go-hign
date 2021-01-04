@@ -125,10 +125,16 @@ func (b *Buffer)grow(n int) int {
 	return m
 }
 
-// makeSlice allocates a slice of size n. If the allocation fails, it panics
-// with ErrTooLarge.
-func makeSlice(n int)[]byte{
-	return make([]byte,n)
+// Write appends the contents of p to the buffer, growing the buffer as
+// needed. The return value n is the length of p; err is always nil. If the
+// buffer becomes too large, Write will panic with ErrTooLarge.
+func (b *Buffer)Write(p []byte) (n int, err error) {
+	b.lastRead = opInvalid
+	m,ok :=b.tryGrowByReslice(len(p))
+	if !ok{
+		m = b.grow(len(p))
+	}
+	return copy(b.buf[m:],p),nil
 }
 
 // WriteString appends the contents of s to the buffer, growing the buffer as
@@ -142,4 +148,24 @@ func (b *Buffer) WriteString(s string) (n int, err error) {
 		m = b.grow(len(s))
 	}
 	return copy(b.buf[m:],s),nil
+}
+
+// makeSlice allocates a slice of size n. If the allocation fails, it panics
+// with ErrTooLarge.
+func makeSlice(n int)[]byte{
+	return make([]byte,n)
+}
+
+// WriteByte appends the byte c to the buffer, growing the buffer as needed.
+// The returned error is always nil, but is included to match bufio.Writer's
+// WriteByte. If the buffer becomes too large, WriteByte will panic with
+// ErrTooLarge.
+func (b *Buffer) WriteByte(c byte) error {
+	b.lastRead =opInvalid
+	m,ok := b.tryGrowByReslice(1)
+	if !ok{
+		m = b.grow(1)
+	}
+	b.buf[m] =c
+	return nil
 }

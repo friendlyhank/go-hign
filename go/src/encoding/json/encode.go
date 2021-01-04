@@ -164,8 +164,32 @@ func Marshal(v interface{}) ([]byte, error) {
 // be used.
 //将数据解析成json格式并写入buffer
 func HTMLEscape(dst *bytes.Buffer, src []byte) {
-
+	// The characters can only appear in string literals,
+	// so just scan the string one byte at a time.
+	start := 0
+	for i, c := range src {
+		if c == '<' || c == '>' || c == '&' {
+			if start < i {
+				dst.Write(src[start:i])
+			}
+			dst.WriteString(`\u00`)
+			dst.WriteByte(hex[c>>4])
+			dst.WriteByte(hex[c&0xF])
+			start = i + 1
+		}
+		// Convert U+2028 and U+2029 (E2 80 A8 and E2 80 A9).
+		if c == 0xE2 && i+2 < len(src) && src[i+1] == 0x80 && src[i+2]&^1 == 0xA8 {
+			if start < i {
+				dst.Write(src[start:i])
+			}
+			dst.WriteString(`\u202`)
+			dst.WriteByte(hex[src[i+2]&0xF])
+			start = i + 3
+		}
+	}
 }
+
+var hex = "0123456789abcdef"
 
 // An encodeState encodes JSON into a bytes.Buffer.
 type encodeState struct {
@@ -351,11 +375,18 @@ func typeFields(t reflect.Type)structFields{
 					//重置下缓冲区
 					nameEscBuf.Reset()
 					nameEscBuf.WriteString(`"`)
+					HTMLEscape(&nameEscBuf,field.nameBytes)
+					nameEscBuf.WriteString(`":`)
 
 					fields = append(fields,field)
 				}
 			}
 		}
+	}
+	for i :=range fields{
+		f := &fields[i]
+		//结构体的字段继续进行编码解析
+		f.encoder = typeEncoder(typeByIndex(t,f.index))
 	}
 	nameIndex := make(map[string]int,len(fields))
 	for i,field :=range fields{
@@ -372,6 +403,17 @@ func isValidTag(s string) bool {
 	return true
 }
 
+//根据索引去获取结构体字段的类型
+func typeByIndex(t reflect.Type,index []int)reflect.Type{
+	for _,i := range index{
+		if t.Kind() == reflect.Ptr{
+			t  =t.Elem()
+		}
+		t = t.Field(i).Type
+	}
+	return t
+}
+
 // A field represents a single field found in a struct.
 //用于结构体的字段
 type field struct{
@@ -383,6 +425,7 @@ type field struct{
 	typ reflect.Type
 	omitEmpty bool //是否要过滤空值字段
 
+	encoder encoderFunc //字段继续编码
 }
 
 
