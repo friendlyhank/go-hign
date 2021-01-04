@@ -152,12 +152,13 @@ func Marshal(v interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	buf :=append([]byte(nil),e.Bytes()...)
+	return buf, nil
 }
 
 // An encodeState encodes JSON into a bytes.Buffer.
 type encodeState struct {
-	bytes.Buffer // accumulated output
+	bytes.Buffer //缓冲池 accumulated output
 }
 
 func newEncodeState() *encodeState {

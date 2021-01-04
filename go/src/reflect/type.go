@@ -16,6 +16,7 @@
 package reflect
 
 import (
+	"internal/unsafeheader"
 	"strconv"
 	"unsafe"
 )
@@ -111,6 +112,7 @@ type tflag uint8
 // It is embedded in other struct types.
 //
 // rtype must be kept in sync with ../runtime/type.go:/^type._type.
+//通用的数据类型
 type rtype struct {
 	size uintptr
 	ptrdata    uintptr // number of bytes in the type that can contain pointers
@@ -239,6 +241,35 @@ type structType struct {
 	fields  []structField // sorted by offset
 }
 
+// Field returns the i'th struct field.
+//获取结构体的具体某个字段
+func (t *structType) Field(i int) (f StructField) {
+	if i < 0 || i >= len(t.fields){
+	}
+	p :=&t.fields[i]
+	f.Type =toType(p.typ)
+	f.Name = p.name.name()
+	f.Anonymous =p.embedded()
+	//如果不需要输出，说明是私有属性,那么要记录下包名
+	if !p.name.isExported(){
+		f.PkgPath = t.pkgPath.name()
+	}
+	if tag :=p.name.tag();tag != ""{
+		f.Tag =StructTag(tag)
+	}
+	f.Offset = p.offset()
+
+	// NOTE(rsc): This is the only allocation in the interface
+	// presented by a reflect.Type. It would be nice to avoid,
+	// at least in the common cases, but we need to make sure
+	// that misbehaving clients of reflect cannot affect other
+	// uses of reflect. One possibility is CL 5371098, but we
+	// postponed that ugliness until there is a demonstrated
+	// need for the performance. This is issue 2320.
+	f.Index = []int{i}
+	return
+}
+
 //结构体字段 Struct field
 type structField struct {
 	name        name    // name is always non-empty
@@ -249,6 +280,11 @@ type structField struct {
 //获得某个字段的偏移量
 func (f *structField) offset() uintptr {
 	return f.offsetEmbed >> 1
+}
+
+//是否嵌入式类型(所谓嵌入式表示包含指针或结构体)
+func (f *structField)embedded()bool{
+	return f.offsetEmbed&1 != 0
 }
 
 // name is an encoded type name with optional extra data.
@@ -276,6 +312,61 @@ func (f *structField) offset() uintptr {
 // whether the pointed to type is exported.
 type name struct {
 	bytes *byte
+}
+
+func (n name) data(off int, whySafe string) *byte {
+	return (*byte)(add(unsafe.Pointer(n.bytes), uintptr(off), whySafe))
+}
+
+//是否需要输出字段,输出说明是公有属性,不输出说明是私有属性
+func (n name)isExported()bool{
+	return (*n.bytes)&(1<<0) != 0
+}
+
+func (n name) nameLen() int {
+	return int(uint16(*n.data(1, "name len field"))<<8 | uint16(*n.data(2, "name len field")))
+}
+
+func (n name) tagLen() int {
+	if *n.data(0, "name flag field")&(1<<1) == 0 {
+		return 0
+	}
+	off := 3 + n.nameLen()
+	return int(uint16(*n.data(off, "name taglen field"))<<8 | uint16(*n.data(off+1, "name taglen field")))
+}
+
+func (n name)name()(s string){
+	if n.bytes == nil{
+		return
+	}
+	b :=(*[4]byte)(unsafe.Pointer(n.bytes))
+	hdr :=(*unsafeheader.String)(unsafe.Pointer(&s))
+	hdr.Data = unsafe.Pointer(&b[3])
+	hdr.Len = int(b[1])<<8 | int(b[2])
+	return s
+}
+
+func (n name)tag()(s string){
+	tl := n.tagLen()
+	if tl == 0 {
+		return ""
+	}
+	nl := n.nameLen()
+	hdr := (*unsafeheader.String)(unsafe.Pointer(&s))
+	hdr.Data = unsafe.Pointer(n.data(3+nl+2, "non-empty string"))
+	hdr.Len = tl
+	return s
+}
+
+// add returns p+x.
+//
+// The whySafe string is ignored, so that the function still inlines
+// as efficiently as p+x, but all call sites should use the string to
+// record why the addition is safe, which is to say why the addition
+// does not cause x to advance to the very end of p's allocation
+// and therefore point incorrectly at the next block in memory.
+func add(p unsafe.Pointer, x uintptr, whySafe string) unsafe.Pointer {
+	return unsafe.Pointer(uintptr(p) + x)
 }
 
 const(

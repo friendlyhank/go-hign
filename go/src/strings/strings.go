@@ -16,4 +16,5 @@ func Index(s,substr string)int{
 	case n > len(s):
 		return -1
 	}
+	return -1
 }
