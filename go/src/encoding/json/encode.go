@@ -156,6 +156,24 @@ func Marshal(v interface{}) ([]byte, error) {
 	return buf, nil
 }
 
+func isEmptyValue(v reflect.Value)bool{
+	switch v.Kind() {
+	case reflect.Array,reflect.Map,reflect.Slice,reflect.String:
+		return v.Len() == 0
+	case reflect.Bool:
+		return !v.Bool()
+	case reflect.Int,reflect.Int8,reflect.Int16,reflect.Int32,reflect.Int64:
+		return v.Int() == 0
+	case reflect.Uint,reflect.Uint8,reflect.Uint16,reflect.Uint32,reflect.Uint64,reflect.Uintptr:
+		return v.Uint() == 0
+	case reflect.Float32,reflect.Float64:
+		return v.Float() == 0
+	case reflect.Interface,reflect.Ptr:
+		return v.IsNil()
+	}
+	return false
+}
+
 // HTMLEscape appends to dst the JSON-encoded src with <, >, &, U+2028 and U+2029
 // characters inside string literals changed to \u003c, \u003e, \u0026, \u2028, \u2029
 // so that the JSON will be safe to embed inside HTML <script> tags.
@@ -275,7 +293,17 @@ func newStructEncoder(t reflect.Type)encoderFunc{
 }
 
 func (se structEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	for i := range se.fields.list{
+		f :=&se.fields.list[i]
 
+		// Find the nested struct field by following f.index.
+		fv :=v
+
+		//
+		if f.omitEmpty && isEmptyValue(fv){
+			continue
+		}
+	}
 }
 
 //指针类型
@@ -356,6 +384,20 @@ func typeFields(t reflect.Type)structFields{
 
 				ft :=sf.Type
 
+				// Only strings, floats, integers, and booleans can be quoted.
+				quoted := false
+				//string将string,floats,integers and booleans设置成string
+				if opts.Contains("string"){
+					switch ft.Kind() {
+					case reflect.Bool,
+						reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+						reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+						reflect.Float32, reflect.Float64,
+						reflect.String:
+							quoted = true
+					}
+				}
+
 				// Record found field and index sequence.
 				if name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct {
 					tagged := name != ""
@@ -368,6 +410,7 @@ func typeFields(t reflect.Type)structFields{
 						index:index,
 						typ:ft,
 						omitEmpty:opts.Contains("omitempty"),
+						quoted:quoted,
 					}
 					field.nameBytes =[]byte(field.name)
 
@@ -379,6 +422,8 @@ func typeFields(t reflect.Type)structFields{
 					nameEscBuf.WriteString(`":`)
 
 					fields = append(fields,field)
+
+					continue
 				}
 			}
 		}
@@ -424,6 +469,7 @@ type field struct{
 	index []int //索引
 	typ reflect.Type
 	omitEmpty bool //是否要过滤空值字段
+	quoted bool //是否要转化为string类型
 
 	encoder encoderFunc //字段继续编码
 }

@@ -228,6 +228,12 @@ func (tag StructTag) Lookup(key string) (value string, ok bool) {
 	return "", false
 }
 
+// arrayType represents a fixed array type.
+type arrayType struct{
+	rtype
+	len uintptr
+}
+
 //指针类型 ptrType represents a pointer type.
 type ptrType struct{
 	rtype
@@ -408,6 +414,9 @@ type typeOff int32 // offset to an *rtype
 type textOff int32 // offset from top of text section
 
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
+
+//是否指针类型
+func (t *rtype)pointers()bool{return t.ptrdata != 0}
 
 func (t *rtype)Elem()Type{
 	switch t.Kind() {

@@ -2,6 +2,8 @@ package reflect
 
 import "unsafe"
 
+const ptrSize = 4 << (^uintptr(0) >> 63) // unsafe.Sizeof(uintptr(0)) but an ideal const
+
 // Value is the reflection interface to a Go value.
 //
 // Not all methods apply to all kinds of values. Restrictions,
@@ -71,6 +73,19 @@ func (f flag)kind()Kind{
 	return Kind(f & flagKindMask)
 }
 
+// pointer returns the underlying pointer represented by v.
+// v.Kind() must be Ptr, Map, Chan, Func, or UnsafePointer
+//转化为指针,只有Ptr,Map,Chan,Func或者pointter才能转化为指针
+func (v Value) pointer()unsafe.Pointer{
+	if v.typ.size !=ptrSize || !v.typ.pointers(){
+		panic("can't call pointer on a non-pointer Value")
+	}
+	if v.flag&flagIndir != 0{
+		return *(*unsafe.Pointer)(v.ptr)
+	}
+	return v.ptr
+}
+
 //
 func unpackEface(i interface{}) Value {
 	e := (*emptyInterface)(unsafe.Pointer(&i))
@@ -96,6 +111,22 @@ type ValueError struct {
 type emptyInterface struct{
 	typ *rtype
 	word unsafe.Pointer
+}
+
+// mustBe panics if f's kind is not expected.
+// Making this a method on flag instead of on Value
+// (and embedding flag in Value) means that we can write
+// the very clear v.mustBe(Bool) and have it compile into
+// v.flag.mustBe(Bool), which will only bother to copy the
+// single important word for the receiver.
+func (f flag)mustBe(expected Kind) {}
+
+// Bool returns v's underlying value.
+// It panics if v's kind is not Bool.
+//value转为bool类型，如果不是bool类型会报错
+func(v Value)Bool()bool{
+	v.mustBe(Bool)
+	return *(*bool)(v.ptr)
 }
 
 // Elem returns the value that the interface v contains
@@ -137,6 +168,107 @@ func (v Value)Type()Type{
 
 	//如果Value是方法
 	return nil
+}
+
+// Int returns v's underlying value, as an int64.
+// It panics if v's Kind is not Int, Int8, Int16, Int32, or Int64.
+//value转int64类型,如果v.Kind不是Int,Int8,Int16,Int32,Int64类型会抛出异常
+func (v Value)Int()int64{
+ 	k :=v.kind()
+ 	p := v.ptr
+	switch k {
+	case Int:
+		return int64(*(*int)(p))
+	case Int8:
+		return int64(*(*int8)(p))
+	case Int16:
+		return int64(*(*int16)(p))
+	case Int32:
+		return int64(*(*int32)(p))
+	case Int64:
+		return  *(*int64)(p)
+	}
+	panic(&ValueError{"reflect.Value.Int", v.kind()})
+}
+
+// Uint returns v's underlying value, as a uint64.
+// It panics if v's Kind is not Uint, Uintptr, Uint8, Uint16, Uint32, or Uint64.
+func (v Value)Uint()uint64{
+	k := v.kind()
+	p := v.ptr
+	switch k {
+	case Uint:
+		return uint64(*(*uint)(p))
+	case Uint8:
+		return uint64(*(*uint8)(p))
+	case Uint16:
+		return uint64(*(*uint16)(p))
+	case Uint32:
+		return uint64(*(*uint32)(p))
+	case Uint64:
+		return *(*uint64)(p)
+	case Uintptr:
+		return uint64(*(*uintptr)(p))
+	}
+	panic(&ValueError{"reflect.Value.Uint", v.kind()})
+}
+
+// Float returns v's underlying value, as a float64.
+// It panics if v's Kind is not Float32 or Float64
+func (v Value)Float()float64{
+	k := v.kind()
+	switch k {
+	case Float32:
+		return float64(*(*float32)(v.ptr))
+	case Float64:
+		return *(*float64)(v.ptr)
+	}
+	panic(&ValueError{"reflect.Value.Float", v.kind()})
+}
+
+// IsNil reports whether its argument v is nil. The argument must be
+// a chan, func, interface, map, pointer, or slice value; if it is
+// not, IsNil panics. Note that IsNil is not always equivalent to a
+// regular comparison with nil in Go. For example, if v was created
+// by calling ValueOf with an uninitialized interface variable i,
+// i==nil will be true but v.IsNil will panic as v will be the zero
+// Value.
+//chan,func,interface,map,pointer or slice,pointer类型才能判断是否空值,不然会抛出异常
+func (v Value)IsNil() bool {
+	k :=v.kind()
+	switch k {
+	case Chan,Func,Map,Ptr,UnsafePointer:
+		if v.flag&flagMethod != 0{
+			return false
+		}
+		ptr := v.ptr
+		if v.flag&flagIndir != 0{
+			ptr = *(*unsafe.Pointer)(ptr)
+		}
+		return ptr == nil
+	case Interface,Slice:
+		// Both interface and slice are nil if first word is 0.
+		// Both are always bigger than a word; assume flagIndir.
+		return *(*unsafe.Pointer)(v.ptr) == nil
+	}
+	panic(&ValueError{"reflect.Value.IsNil", v.kind()})
+}
+
+// Kind returns v's Kind.
+// If v is the zero Value (IsValid returns false), Kind returns Invalid.
+func (v Value)Kind()Kind{
+	return v.kind()
+}
+
+// Len returns v's length.
+// It panics if v's Kind is not Array, Chan, Map, Slice, or String.
+func (v Value)Len()int{
+	k := v.kind()
+	switch k {
+	case Array:
+		tt :=(*arrayType)(unsafe.Pointer(v.typ))
+		return int(tt.len)
+	}
 }
 
 // ValueOf returns a new Value initialized to the concrete value
