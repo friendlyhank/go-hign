@@ -153,6 +153,12 @@ func (v Value) Elem() Value {
 	panic(&ValueError{"reflect.Value.Elem", v.kind()})
 }
 
+// Field returns the i'th field of the struct v.
+// It panics if v's Kind is not Struct or i is out of range.
+func (v Value)Field(i int)Value{
+
+}
+
 //Type returns v's type.
 //和反射reflect.TypeOf一样
 func (v Value)Type()Type{

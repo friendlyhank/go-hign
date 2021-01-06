@@ -229,6 +229,9 @@ func (e *encodeState) reflectValue(v reflect.Value, opts encOpts) {
 }
 
 type encOpts struct {
+	// quoted causes primitive fields to be encoded inside JSON strings.
+	//是否将指定的字段转化为string类型
+	quoted bool
 	// escapeHTML causes '<', '>', and '&' to be escaped in JSON strings.
 	//是否解析成json格式
 	escapeHTML bool
@@ -293,16 +296,37 @@ func newStructEncoder(t reflect.Type)encoderFunc{
 }
 
 func (se structEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	next := byte('{')
+FieldLoop:
 	for i := range se.fields.list{
 		f :=&se.fields.list[i]
 
 		// Find the nested struct field by following f.index.
 		fv :=v
+		for _,i := range f.index{
+			//如果是指针类型,去获取其对应的元素
+			if fv.Kind() == reflect.Ptr{
+				if fv.IsNil(){
+					continue FieldLoop
+				}
+				fv = fv.Elem()
+			}
+			fv =
+		}
 
 		//
 		if f.omitEmpty && isEmptyValue(fv){
 			continue
 		}
+		e.WriteByte(next)
+		next = ','
+		if opts.escapeHTML{
+			e.WriteString(f.nameEscHTML)
+		}else{
+			e.WriteString(f.nameNonEsc)
+		}
+		//继续对每个字段进行编码
+		f.encoder(e,fv,opts)
 	}
 }
 
@@ -420,6 +444,8 @@ func typeFields(t reflect.Type)structFields{
 					nameEscBuf.WriteString(`"`)
 					HTMLEscape(&nameEscBuf,field.nameBytes)
 					nameEscBuf.WriteString(`":`)
+					field.nameEscHTML =nameEscBuf.String()
+					field.nameNonEsc = `"` + field.name + `":`
 
 					fields = append(fields,field)
 
@@ -464,6 +490,10 @@ func typeByIndex(t reflect.Type,index []int)reflect.Type{
 type field struct{
 	name string
 	nameBytes []byte                 // []byte(name)
+
+	//两种json的数据格式
+	nameNonEsc  string // `"` + name + `":`
+	nameEscHTML string // `"` + HTMLEscape(name) + `":`
 
 	tag bool //是否设置标签
 	index []int //索引
