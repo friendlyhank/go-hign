@@ -205,6 +205,9 @@ func HTMLEscape(dst *bytes.Buffer, src []byte) {
 			start = i + 3
 		}
 	}
+	if start < len(src) {
+		dst.Write(src[start:])
+	}
 }
 
 var hex = "0123456789abcdef"
@@ -221,6 +224,16 @@ func newEncodeState() *encodeState {
 func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
 	e.reflectValue(reflect.ValueOf(v), opts)
 	return nil
+}
+
+// NOTE: keep in sync with stringBytes below.
+func (e *encodeState)string(s string,escapeHTML bool){
+	e.WriteByte('"')
+	start := 0
+	if start < len(s){
+		e.WriteString(s[start:])
+	}
+	e.WriteByte('"')
 }
 
 //用反射去序列化
@@ -266,19 +279,68 @@ func typeEncoder(t reflect.Type) encoderFunc {
 // The returned encoder only checks CanAddr when allowAddr is true.
 //根据反射类型kind去获取编码方法
 func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
+
 	switch t.Kind() {
+	case reflect.Bool:
+		return boolEncoder
+	case reflect.Int,reflect.Int8,reflect.Int16,reflect.Int32,reflect.Int64:
+		return intEncoder
+	case reflect.Uint,reflect.Uint8,reflect.Uint16,reflect.Uint32,reflect.Uint64,reflect.Uintptr:
+		return uintEncoder
+	case reflect.Float32:
+		return float32Encoder
+	case reflect.Float64:
+		return float64Encoder
 	case reflect.String:
 		return stringEncoder
+	case reflect.Interface:
+		return interfaceEncoder
 	case reflect.Struct:
 		return newStructEncoder(t)
+	case reflect.Map:
+		return newMapEncoder(t)
+	case reflect.Slice:
+		return newSliceEncoder(t)
+	case reflect.Array:
+		return newArrayEncoder(t)
 	case reflect.Ptr://如果是指针,一般会先进来这里
 		return newPtrEncoder(t)
+	default:
+		return unsupportedTypeEncoder
 	}
-	return nil
+}
+
+func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
+
+}
+
+func intEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	if opts.quoted{
+		e.WriteByte('"')
+	}
+	if opts.quoted{
+		e.WriteByte('"')
+	}
 }
 
 func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	e.string(v.String(),opts.escapeHTML)
 }
+
+func uintEncoder(e *encodeState,v reflect.Value,opts encOpts){
+}
+
+var (
+	float32Encoder = (floatEncoder(32)).encode
+	float64Encoder = (floatEncoder(64)).encode
+)
+
+type floatEncoder int // number of bits
+func (bits floatEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+
+}
+
+func interfaceEncoder(e *encodeState,v reflect.Value,opts encOpts){}
 
 //结构体编码器
 type structEncoder struct{
@@ -311,10 +373,10 @@ FieldLoop:
 				}
 				fv = fv.Elem()
 			}
-			fv =
+			fv = fv.Field(i)
 		}
 
-		//
+		//如果要忽略空值
 		if f.omitEmpty && isEmptyValue(fv){
 			continue
 		}
@@ -325,12 +387,53 @@ FieldLoop:
 		}else{
 			e.WriteString(f.nameNonEsc)
 		}
+		opts.quoted = f.quoted
 		//继续对每个字段进行编码
 		f.encoder(e,fv,opts)
 	}
+	if next == '{' {
+		e.WriteString("{}")
+	}else{
+		e.WriteByte('}')
+	}
 }
 
-//指针类型
+//map类型编码
+type mapEncoder struct{
+	elemEnc encoderFunc
+}
+
+func newMapEncoder(t reflect.Type)encoderFunc{
+	me := mapEncoder{}
+	return me.encode
+}
+
+func (me mapEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+
+//slice类型编码
+type sliceEncoder struct{
+	arrayEnc encoderFunc
+}
+
+func newSliceEncoder(r reflect.Type)encoderFunc{
+	enc :=sliceEncoder{}
+	return enc.encode
+}
+
+func (se sliceEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+
+type arrayEncoder struct{
+	elemEnc encoderFunc
+}
+
+func newArrayEncoder(t reflect.Type)encoderFunc{
+	enc :=arrayEncoder{}
+	return enc.encode
+}
+
+func (ae arrayEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+
+//指针类型编码
 type ptrEncoder struct{
 	elemEnc encoderFunc
 }
@@ -343,6 +446,11 @@ func newPtrEncoder(t reflect.Type)encoderFunc{
 func (pe ptrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts){
 	//指针类型进入递归解析
 	pe.elemEnc(e,v.Elem(),opts)
+}
+
+//所有类型都不知道错误方法
+func unsupportedTypeEncoder(e *encodeState,v reflect.Value, _ encOpts){
+
 }
 
 // typeFields returns a list of fields that JSON should recognize for the given type.
@@ -456,7 +564,7 @@ func typeFields(t reflect.Type)structFields{
 	}
 	for i :=range fields{
 		f := &fields[i]
-		//结构体的字段继续进行编码解析
+		//获取对应子字段得编码方法
 		f.encoder = typeEncoder(typeByIndex(t,f.index))
 	}
 	nameIndex := make(map[string]int,len(fields))

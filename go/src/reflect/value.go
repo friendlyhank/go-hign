@@ -1,6 +1,9 @@
 package reflect
 
-import "unsafe"
+import (
+	"internal/unsafeheader"
+	"unsafe"
+)
 
 const ptrSize = 4 << (^uintptr(0) >> 63) // unsafe.Sizeof(uintptr(0)) but an ideal const
 
@@ -129,6 +132,23 @@ func(v Value)Bool()bool{
 	return *(*bool)(v.ptr)
 }
 
+// String returns the string v's underlying value, as a string.
+// String is a special case because of Go's String method convention.
+// Unlike the other getters, it does not panic if v's Kind is not String.
+// Instead, it returns a string of the form "<T value>" where T is v's type.
+// The fmt package treats Values specially. It does not call their String
+// method implicitly but instead prints the concrete values they hold.
+//value转化为string类型
+func (v Value)String()string{
+	switch k :=v.kind();k {
+	case Invalid:
+		return "<invalid Value>"
+	case String:
+		return *(*string)(v.ptr)
+	}
+	return ""
+}
+
 // Elem returns the value that the interface v contains
 // or that the pointer v points to.
 // It panics if v's Kind is not Interface or Ptr.
@@ -155,8 +175,28 @@ func (v Value) Elem() Value {
 
 // Field returns the i'th field of the struct v.
 // It panics if v's Kind is not Struct or i is out of range.
+//获取结构体得指定字段,如果不是结构体会抛出异常
 func (v Value)Field(i int)Value{
+	if v.kind() != Struct{
+		panic(&ValueError{"reflect.Value.Field",v.kind()})
+	}
+	tt :=(*structType)(unsafe.Pointer(v.typ))
+	if uint(i)>=uint(len(tt.fields)){
+		panic("reflect: Field index out of range")
+	}
+	field :=&tt.fields[i]
+	typ :=field.typ
 
+	// Inherit permission bits from v, but clear flagEmbedRO.
+	fl := v.flag&(flagStickyRO|flagIndir|flagAddr) | flag(typ.Kind())
+
+	// Either flagIndir is set and v.ptr points at struct,
+	// or flagIndir is not set and v.ptr is the actual struct data.
+	// In the former case, we want v.ptr + offset.
+	// In the latter case, we must have field.offset = 0,
+	// so v.ptr + field.offset is still the correct address.
+	ptr := add(v.ptr,field.offset(),"same as non-reflect &v.field")
+	return Value{typ,ptr,fl}
 }
 
 //Type returns v's type.
@@ -274,7 +314,17 @@ func (v Value)Len()int{
 	case Array:
 		tt :=(*arrayType)(unsafe.Pointer(v.typ))
 		return int(tt.len)
+	case Chan:
+		return chanlen(v.pointer())
+	case Map:
+		return maplen(v.pointer())
+	case Slice:
+		return (*unsafeheader.Slice)(v.ptr).Len
+	case String:
+		// String is bigger than a word; assume flagIndir.
+		return (*unsafeheader.String)(v.ptr).Len
 	}
+	panic(&ValueError{"reflect.Value.Len", v.kind()})
 }
 
 // ValueOf returns a new Value initialized to the concrete value
@@ -286,3 +336,11 @@ func ValueOf(i interface{})Value{
 
 	return unpackEface(i)
 }
+
+// implemented in ../runtime
+////获取chan长度
+func chanlen(ch unsafe.Pointer) int
+
+//获取map长度
+//go:noescape
+func maplen(m unsafe.Pointer) int

@@ -129,6 +129,18 @@ type rtype struct {
 	ptrToThis typeOff // type for pointer to this type, may be zero
 }
 
+// add returns p+x.
+//
+// The whySafe string is ignored, so that the function still inlines
+// as efficiently as p+x, but all call sites should use the string to
+// record why the addition is safe, which is to say why the addition
+// does not cause x to advance to the very end of p's allocation
+// and therefore point incorrectly at the next block in memory.
+//结构体得偏移量计算,得到某个字段得内存空间地址
+func add(p unsafe.Pointer,x uintptr,whySafe string)unsafe.Pointer{
+	return unsafe.Pointer(uintptr(p)+x)
+}
+
 //A StructField describes a single field in a struct.
 //结构体对应的字段
 type StructField struct {
@@ -276,7 +288,7 @@ func (t *structType) Field(i int) (f StructField) {
 	return
 }
 
-//结构体字段 Struct field
+//structType得结构体字段 Struct field
 type structField struct {
 	name        name    // name is always non-empty
 	typ         *rtype  // type of field
@@ -362,17 +374,6 @@ func (n name)tag()(s string){
 	hdr.Data = unsafe.Pointer(n.data(3+nl+2, "non-empty string"))
 	hdr.Len = tl
 	return s
-}
-
-// add returns p+x.
-//
-// The whySafe string is ignored, so that the function still inlines
-// as efficiently as p+x, but all call sites should use the string to
-// record why the addition is safe, which is to say why the addition
-// does not cause x to advance to the very end of p's allocation
-// and therefore point incorrectly at the next block in memory.
-func add(p unsafe.Pointer, x uintptr, whySafe string) unsafe.Pointer {
-	return unsafe.Pointer(uintptr(p) + x)
 }
 
 const(
