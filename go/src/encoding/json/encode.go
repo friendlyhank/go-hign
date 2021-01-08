@@ -13,6 +13,7 @@ package json
 import (
 	"bytes"
 	"reflect"
+	"strconv"
 )
 
 // Marshal returns the JSON encoding of v.
@@ -156,6 +157,10 @@ func Marshal(v interface{}) ([]byte, error) {
 	return buf, nil
 }
 
+func (e *encodeState)error(err error){
+	panic(jsonError{err})
+}
+
 func isEmptyValue(v reflect.Value)bool{
 	switch v.Kind() {
 	case reflect.Array,reflect.Map,reflect.Slice,reflect.String:
@@ -210,16 +215,32 @@ func HTMLEscape(dst *bytes.Buffer, src []byte) {
 	}
 }
 
+// An UnsupportedTypeError is returned by Marshal when attempting
+// to encode an unsupported value type.
+type UnsupportedTypeError struct{
+	Type reflect.Type
+}
+
+func (e *UnsupportedTypeError)Error()string{
+	return "json: unsupported type: "
+}
+
 var hex = "0123456789abcdef"
 
 // An encodeState encodes JSON into a bytes.Buffer.
 type encodeState struct {
 	bytes.Buffer //缓冲池 accumulated output
+	scratch [64]byte // 64字节数组去装载数组类型(像是用来临时存储的)
 }
 
 func newEncodeState() *encodeState {
 	return &encodeState{}
 }
+
+// jsonError is an error wrapper type for internal use only.
+// Panics with errors are wrapped in jsonError so that the top-level recover
+// can distinguish intentional panics from this package.
+type jsonError struct{ error }
 
 func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
 	e.reflectValue(reflect.ValueOf(v), opts)
@@ -255,6 +276,9 @@ type encoderFunc func(e *encodeState, v reflect.Value, opts encOpts)
 
 //根据反射去获取编码的方法
 func valueEncoder(v reflect.Value) encoderFunc {
+	if !v.IsValid(){
+		return invalidValueEncoder
+	}
 	return typeEncoder(v.Type())
 }
 
@@ -310,24 +334,47 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	}
 }
 
-func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
+//无效的编码输出
+func invalidValueEncoder(e *encodeState,v reflect.Value,_ encOpts){
+	e.WriteString("null")
+}
 
+func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
+	if opts.quoted{
+		e.WriteByte('"')
+	}
+	if v.Bool(){
+		e.WriteString("true")
+	}else{
+		e.WriteString("false")
+	}
+	if opts.quoted{
+		e.WriteByte('"')
+	}
 }
 
 func intEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	//这里将反射获得int的值转化为字节类型的ASCII码
+	//e.scratch为64字节数组,每次作为临时数据用字节的第一位去装载数值
+	b := strconv.AppendInt(e.scratch[:0],v.Int(),10)
 	if opts.quoted{
 		e.WriteByte('"')
 	}
+	e.Write(b)
 	if opts.quoted{
 		e.WriteByte('"')
 	}
-}
-
-func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
-	e.string(v.String(),opts.escapeHTML)
 }
 
 func uintEncoder(e *encodeState,v reflect.Value,opts encOpts){
+	b :=strconv.AppendUint(e.scratch[:0],v.Uint(),10)
+	if opts.quoted{
+		e.WriteByte('"')
+	}
+	e.Write(b)
+	if opts.quoted{
+		e.WriteByte('"')
+	}
 }
 
 var (
@@ -340,7 +387,16 @@ func (bits floatEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
 
 }
 
-func interfaceEncoder(e *encodeState,v reflect.Value,opts encOpts){}
+func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	e.string(v.String(),opts.escapeHTML)
+}
+
+func interfaceEncoder(e *encodeState,v reflect.Value,opts encOpts){
+	if v.IsNil(){
+		e.WriteString("null")
+	}
+	valueEncoder(v)(e,v,opts)
+}
 
 //结构体编码器
 type structEncoder struct{
@@ -404,11 +460,20 @@ type mapEncoder struct{
 }
 
 func newMapEncoder(t reflect.Type)encoderFunc{
-	me := mapEncoder{}
+	me := mapEncoder{typeEncoder(t.Elem())}
 	return me.encode
 }
 
-func (me mapEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+func (me mapEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	if v.IsNil(){
+		e.WriteString("null")
+		return
+	}
+	e.WriteByte('{')
+
+	// Extract and sort the keys.
+
+}
 
 //slice类型编码
 type sliceEncoder struct{
@@ -444,13 +509,18 @@ func newPtrEncoder(t reflect.Type)encoderFunc{
 }
 
 func (pe ptrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts){
+	if v.IsNil(){
+		e.WriteString("null")
+		return
+	}
+
 	//指针类型进入递归解析
 	pe.elemEnc(e,v.Elem(),opts)
 }
 
 //所有类型都不知道错误方法
 func unsupportedTypeEncoder(e *encodeState,v reflect.Value, _ encOpts){
-
+	e.error(&UnsupportedTypeError{})
 }
 
 // typeFields returns a list of fields that JSON should recognize for the given type.

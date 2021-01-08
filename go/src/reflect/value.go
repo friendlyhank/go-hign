@@ -122,7 +122,13 @@ type emptyInterface struct{
 // the very clear v.mustBe(Bool) and have it compile into
 // v.flag.mustBe(Bool), which will only bother to copy the
 // single important word for the receiver.
-func (f flag)mustBe(expected Kind) {}
+//指定类型判断
+func (f flag)mustBe(expected Kind) {
+	// TODO(mvdan): use f.kind() again once mid-stack inlining gets better
+	if Kind(f&flagKindMask) != expected{
+		panic(&ValueError{})
+	}
+}
 
 // Bool returns v's underlying value.
 // It panics if v's kind is not Bool.
@@ -300,6 +306,16 @@ func (v Value)IsNil() bool {
 	panic(&ValueError{"reflect.Value.IsNil", v.kind()})
 }
 
+// IsValid reports whether v represents a value.
+// It returns false if v is the zero Value.
+// If IsValid returns false, all other methods except String panic.
+// Most functions and methods never return an invalid Value.
+// If one does, its documentation states the conditions explicitly.
+//判断是否有效的,所谓有效就是是某些特定的数据类型
+func (v Value)IsValid()bool{
+	return v.flag != 0
+}
+
 // Kind returns v's Kind.
 // If v is the zero Value (IsValid returns false), Kind returns Invalid.
 func (v Value)Kind()Kind{
@@ -326,6 +342,11 @@ func (v Value)Len()int{
 	}
 	panic(&ValueError{"reflect.Value.Len", v.kind()})
 }
+
+// MapKeys returns a slice containing all the keys present in the map,
+// in unspecified order.
+// It panics if v's Kind is not Map.
+// It returns an empty slice if v represents a nil map.
 
 // ValueOf returns a new Value initialized to the concrete value
 // stored in the interface i. ValueOf(nil) returns the zero Value.
