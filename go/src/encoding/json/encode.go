@@ -388,6 +388,23 @@ func (bits floatEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
 }
 
 func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	//如果是json.Number类型
+	if v.Type() == numberType{
+		numStr :=v.String()
+		// In Go1.5 the empty string encodes to "0", while this is not a valid number literal
+		// we keep compatibility so check validity after this.
+		if numStr ==""{
+			numStr = "0"
+		}
+		if opts.quoted{
+			e.WriteByte('"')
+		}
+		e.WriteString(numStr)
+		if opts.quoted{
+			e.WriteByte('"')
+		}
+		return
+	}
 	e.string(v.String(),opts.escapeHTML)
 }
 

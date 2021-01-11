@@ -111,6 +111,7 @@ type ValueError struct {
 }
 
 // emptyInterface is the header for an interface{} value.
+//通用的结构体,Type或Value解析类型的时候使用
 type emptyInterface struct{
 	typ *rtype
 	word unsafe.Pointer

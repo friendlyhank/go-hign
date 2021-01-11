@@ -113,13 +113,6 @@ type Unmarshaler interface {
 //解析错误
 const phasePanicMsg = "JSON decoder out of sync - data changing underfoot?"
 
-// decodeState represents the state while decoding a JSON value.
-type decodeState struct{
-	data []byte
-	off int //next read offset in data
-	savedError error
-}
-
 func (d *decodeState)unmarshal(v interface{}) error{
 	rv := reflect.ValueOf(v)
 	// We decode rv not rv.Elem because the Unmarshaler interface
@@ -129,6 +122,22 @@ func (d *decodeState)unmarshal(v interface{}) error{
 
 	}
 	return d.savedError
+}
+
+// A Number represents a JSON number literal.
+//json内部定义的Number类型,用于编解码中未知是string或是int类型
+//用于interface类型编解码过程将数值解析成float64类型，如果数值较大会精度丢失的问题
+//filename json.Number `json:"filename"`
+type Number string
+
+// String returns the literal text of the number.
+func(n Number)String()string{return string(n)}
+
+// decodeState represents the state while decoding a JSON value.
+type decodeState struct{
+	data []byte
+	off int //next read offset in data
+	savedError error
 }
 
 func (d *decodeState)init(data []byte)*decodeState{
@@ -190,4 +199,6 @@ func (d *decodeState)object(v reflect.Value)error{
 		var f *field
 	}
 }
+
+var numberType  = reflect.TypeOf()
 

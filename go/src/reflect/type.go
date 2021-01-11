@@ -302,6 +302,14 @@ func (t *structType) Field(i int) (f StructField) {
 	return
 }
 
+// TypeOf returns the reflection Type that represents the dynamic type of i.
+// If i is a nil interface value, TypeOf returns nil.
+//反射获取类型
+func TypeOf(i interface{})Type{
+	eface :=*(*emptyInterface)(unsafe.Pointer(&i))
+	return toType(eface.typ)
+}
+
 //structType得结构体字段 Struct field
 type structField struct {
 	name        name    // name is always non-empty
