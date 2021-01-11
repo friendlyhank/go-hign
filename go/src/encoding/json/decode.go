@@ -176,12 +176,20 @@ func (d *decodeState)object(v reflect.Value)error{
 	// Check for unmarshaler.
 	//三种格式Unmarshaler,TextUnmarshaler
 	u,ut,pv :=indirect(v,false)
+	//Unmarshaler
+	if u != nil{
+
+	}
+	//encoding.TextUnmarshaler
+	if ut != nil{
+
+	}
 
 	v = pv
-	t :=v.Type()
+	//t :=v.Type()
 
 	//结构体的解析
-	var fields structFields
+	//var fields structFields
 
 	// Check type of target:
 	//   struct or
@@ -190,15 +198,17 @@ func (d *decodeState)object(v reflect.Value)error{
 	switch v.Kind() {
 	case reflect.Struct:
 		//获取每个字段
-		fields = cachedTypeFields(t)
+		//fields = cachedTypeFields(t)
 	}
 
 	if v.Kind() == reflect.Map{
 
 	}else{
 		var f *field
+		println(f)
 	}
+	return nil
 }
 
-var numberType  = reflect.TypeOf()
+var numberType  = reflect.TypeOf("")
 

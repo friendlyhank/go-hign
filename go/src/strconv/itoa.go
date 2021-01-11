@@ -53,11 +53,11 @@ const smallsString = "00010203040506070809" +
 // set, the string is appended to dst and the resulting byte slice is
 // returned as the first result value; otherwise the string is returned
 // as the second result value.
-//
+//大于100的数值转化为string ASCII码
 func formatBits(dst []byte, u uint64, base int, neg, append_ bool) (d []byte, s string) {
 	if base < 2 || base > len(digits){
 		panic("strconv: illegal AppendInt/FormatInt base")
 	}
 	// 2 <= base && base <= len(digits)
-
+	return nil,""
 }
