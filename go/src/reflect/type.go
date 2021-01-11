@@ -310,6 +310,16 @@ func TypeOf(i interface{})Type{
 	return toType(eface.typ)
 }
 
+// PtrTo returns the pointer type with element t.
+// For example, if t represents type Foo, PtrTo(t) represents *Foo.
+func PtrTo(t Type) Type {
+	return t.(*rtype).ptrTo()
+}
+
+func (t *rtype) ptrTo()*rtype{
+
+}
+
 //structType得结构体字段 Struct field
 type structField struct {
 	name        name    // name is always non-empty

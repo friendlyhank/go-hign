@@ -304,6 +304,10 @@ func typeEncoder(t reflect.Type) encoderFunc {
 //根据反射类型kind去获取编码方法
 func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 
+	if t.Kind() != reflect.Ptr && allowAddr{
+
+	}
+
 	switch t.Kind() {
 	case reflect.Bool:
 		return boolEncoder
