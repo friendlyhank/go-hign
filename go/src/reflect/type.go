@@ -38,15 +38,22 @@ type Type interface {
 
 	// Elem returns a type's element type.
 	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
+	//获取Array,Chan,Map,Ptr或者Slice的元素类型
 	Elem() Type
+
+	// Implements reports whether the type implements the interface type u.
+	//判断是否继承某个接口
+	Implements(u Type) bool
 
 	// Field returns a struct type's i'th field.
 	// It panics if the type's Kind is not Struct.
 	// It panics if i is not in the range [0, NumField()).
+	//根据索引获取指定结构体某个字段
 	Field(i int) StructField
 
 	// NumField returns a struct type's field count.
 	// It panics if the type's Kind is not Struct.
+	//获取结构体的字段个数
 	NumField() int
 }
 
@@ -115,7 +122,7 @@ type tflag uint8
 //通用的数据类型
 type rtype struct {
 	size uintptr
-	ptrdata    uintptr // number of bytes in the type that can contain pointers
+	ptrdata    uintptr //指针数据 number of bytes in the type that can contain pointers
 	hash       uint32  // hash of type; avoids computation in hash tables
 	tflag      tflag   // extra type information flags
 	align      uint8   // alignment of variable with this type
@@ -126,7 +133,7 @@ type rtype struct {
 	equal     func(unsafe.Pointer, unsafe.Pointer) bool
 	gcdata    *byte   // garbage collection data
 	str       nameOff // string form
-	ptrToThis typeOff // type for pointer to this type, may be zero
+	ptrToThis typeOff //获取指针类型的偏移量 type for pointer to this type, may be zero
 }
 
 // add returns p+x.
@@ -312,12 +319,18 @@ func TypeOf(i interface{})Type{
 
 // PtrTo returns the pointer type with element t.
 // For example, if t represents type Foo, PtrTo(t) represents *Foo.
+//将某个类型转化为指针类型返回
 func PtrTo(t Type) Type {
 	return t.(*rtype).ptrTo()
 }
 
+//将某个类型转化为指针类型返回
 func (t *rtype) ptrTo()*rtype{
-
+	//根据偏移量去获取
+	if t.ptrToThis != 0{
+		return t.typeOff(t.ptrToThis)
+	}
+	return nil
 }
 
 //structType得结构体字段 Struct field
@@ -442,9 +455,20 @@ var kindNames = []string{
 	UnsafePointer: "unsafe.Pointer",
 }
 
+// resolveTypeOff resolves an *rtype offset from a base type.
+// The (*rtype).typeOff method is a convenience wrapper for this function.
+// Implemented in the runtime package.
+//resolveTypeOff关联到runtime的reflect_resolveTypeOff
+func resolveTypeOff(rtype unsafe.Pointer, off int32) unsafe.Pointer
+
+//这个应该是偏移量的一些计算
 type nameOff int32 // offset to a name
-type typeOff int32 // offset to an *rtype
+type typeOff int32 //指针*rtype的偏移量 offset to an *rtype
 type textOff int32 // offset from top of text section
+
+func (t *rtype) typeOff(off typeOff) *rtype {
+	return (*rtype)(resolveTypeOff(unsafe.Pointer(t), int32(off)))
+}
 
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
 
