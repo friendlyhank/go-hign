@@ -12,6 +12,7 @@ package json
 
 import (
 	"bytes"
+	"encoding"
 	"reflect"
 	"strconv"
 )
@@ -215,6 +216,12 @@ func HTMLEscape(dst *bytes.Buffer, src []byte) {
 	}
 }
 
+// Marshaler is the interface implemented by types that
+// can marshal themselves into valid JSON.
+type Marshaler interface {
+	MarshalJSON()([]byte, error)
+}
+
 // An UnsupportedTypeError is returned by Marshal when attempting
 // to encode an unsupported value type.
 type UnsupportedTypeError struct{
@@ -299,12 +306,33 @@ func typeEncoder(t reflect.Type) encoderFunc {
 	return f
 }
 
+var (
+	marshalerType     = reflect.TypeOf((*Marshaler)(nil)).Elem()
+	//nil空实现了任意的接口
+	textMarshalerType = reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()
+)
+
 // newTypeEncoder constructs an encoderFunc for a type.
 // The returned encoder only checks CanAddr when allowAddr is true.
 //根据反射类型kind去获取编码方法
 func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
+	// If we have a non-pointer value whose type implements
+	// Marshaler with a value receiver, then we're better off taking
+	// the address of the value - otherwise we end up with an
+	// allocation as we cast the value to an interface.
+	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(marshalerType){
 
-	if t.Kind() != reflect.Ptr && allowAddr{
+	}
+	//继承Marshaler TODO HANK 这种类型暂时没找到
+	if t.Implements(marshalerType){
+
+	}
+	//不是指针类型，转化为指针再判断是否继承TextMarshaler
+	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(textMarshalerType){
+
+	}
+	//继承TextMarshaler
+	if t.Implements(textMarshalerType){
 
 	}
 

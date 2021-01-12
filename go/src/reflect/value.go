@@ -63,11 +63,11 @@ type flag uintptr
 const (
 	flagKindWidth        = 5 // there are 27 kinds
 	flagKindMask    flag = 1<<flagKindWidth - 1
-	flagStickyRO    flag = 1 << 5
-	flagEmbedRO     flag = 1 << 6
-	flagIndir       flag = 1 << 7
-	flagAddr        flag = 1 << 8
-	flagMethod      flag = 1 << 9
+	flagStickyRO    flag = 1 << 5 //不是嵌套结构的私有属性
+	flagEmbedRO     flag = 1 << 6 //嵌套结构的私有属性
+	flagIndir       flag = 1 << 7 //标记是否指针
+	flagAddr        flag = 1 << 8//标记是否可以寻址
+	flagMethod      flag = 1 << 9//标记是否匿名函数
 	flagRO          flag = flagStickyRO | flagEmbedRO
 )
 
@@ -137,6 +137,38 @@ func (f flag)mustBe(expected Kind) {
 func(v Value)Bool()bool{
 	v.mustBe(Bool)
 	return *(*bool)(v.ptr)
+}
+
+// CanAddr reports whether the value's address can be obtained with Addr.
+// Such values are called addressable. A value is addressable if it is
+// an element of a slice, an element of an addressable array,
+// a field of an addressable struct, or the result of dereferencing a pointer.
+// If CanAddr returns false, calling Addr will panic.
+/*
+	var x float64 = 3.4
+	v := reflect.ValueOf(&x)
+	fmt.Println(v.Elem().CanAddr()) // true
+1.对于一些私有的字段，我们也可以获取它的地址
+2.CanAddr是CanSet的充分不必要条件,一个Value如果是CanAddr,不一定CanSet
+但是如果CanSet一定是可以CanAddr
+*/
+func (v Value) CanAddr() bool {
+	return v.flag&flagAddr != 0
+}
+
+// CanSet reports whether the value of v can be changed.
+// A Value can be changed only if it is addressable and was not
+// obtained by the use of unexported struct fields.
+// If CanSet returns false, calling Set or any type-specific
+// setter (e.g., SetBool, SetInt) will panic.
+/*
+ var x float64 = 3.4
+ v := reflect.ValueOf(&x)
+ fmt.Println(v.Elem().CanSet()) // true
+ 首先传入的必须是指针,指针是不能设置值的，要找到对应的元素才能设置值
+ */
+func (v Value) CanSet() bool {
+	return v.flag&(flagAddr|flagRO) == flagAddr
 }
 
 // String returns the string v's underlying value, as a string.
