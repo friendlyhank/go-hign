@@ -320,10 +320,12 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	// Marshaler with a value receiver, then we're better off taking
 	// the address of the value - otherwise we end up with an
 	// allocation as we cast the value to an interface.
+	//不是指针类型,转化为指针再判断是否继承Marshaler
+	//注意这里必须找到对应实现接口的那个类型
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(marshalerType){
 
 	}
-	//继承Marshaler TODO HANK 这种类型暂时没找到
+	//指针类型实现了接口 继承Marshaler
 	if t.Implements(marshalerType){
 
 	}
@@ -331,7 +333,7 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(textMarshalerType){
 
 	}
-	//继承TextMarshaler
+	//指针类型实现了接口 继承TextMarshaler
 	if t.Implements(textMarshalerType){
 
 	}
@@ -369,6 +371,13 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 //无效的编码输出
 func invalidValueEncoder(e *encodeState,v reflect.Value,_ encOpts){
 	e.WriteString("null")
+}
+
+//指针实现了marshaler接口
+func marshalerEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	if v.Kind() == reflect.Ptr && v.IsNil(){
+		e.WriteString("null")
+	}
 }
 
 func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
@@ -565,6 +574,23 @@ func (pe ptrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts){
 
 	//指针类型进入递归解析
 	pe.elemEnc(e,v.Elem(),opts)
+}
+
+//条件编码
+//用在接口的实现Marshaler和TextMarshaler
+type condAddrEncoder struct{
+	canAddrEnc, elseEnc encoderFunc
+}
+
+// newCondAddrEncoder returns an encoder that checks whether its value
+// CanAddr and delegates to canAddrEnc if so, else to elseEnc.
+func newCondAddrEncoder(canAddrEnc, elseEnc encoderFunc) encoderFunc {
+	enc :=condAddrEncoder{canAddrEnc: canAddrEnc,elseEnc:elseEnc}
+	return enc.encode
+}
+
+func (ce condAddrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts) {
+
 }
 
 //所有类型都不知道错误方法

@@ -89,7 +89,13 @@ func (v Value) pointer()unsafe.Pointer{
 	return v.ptr
 }
 
-//
+//将value转化为interface
+func packEface(v Value)interface{}{
+	// First, fill in the data portion of the interface.
+	return nil
+}
+
+//将interface转化为Value
 func unpackEface(i interface{}) Value {
 	e := (*emptyInterface)(unsafe.Pointer(&i))
 	// NOTE: don't read e.word until we know whether it is really a pointer or not.
@@ -309,6 +315,18 @@ func (v Value)Float()float64{
 		return *(*float64)(v.ptr)
 	}
 	panic(&ValueError{"reflect.Value.Float", v.kind()})
+}
+
+//Value转Interface类型
+func (v Value)Interface()(i interface{}) {
+	return valueInterface(v,true)
+}
+
+func valueInterface(v Value,safe bool)interface{}{
+	if v.flag  == 0{
+		panic(&ValueError{"reflect.Value.Interface",Invalid})
+	}
+	return nil
 }
 
 // IsNil reports whether its argument v is nil. The argument must be
