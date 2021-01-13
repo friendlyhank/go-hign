@@ -15,6 +15,7 @@ import (
 	"encoding"
 	"reflect"
 	"strconv"
+	"unicode/utf8"
 )
 
 // Marshal returns the JSON encoding of v.
@@ -232,6 +233,33 @@ func (e *UnsupportedTypeError)Error()string{
 	return "json: unsupported type: "
 }
 
+type UnsupportedValueError struct{
+	Value reflect.Value
+	Str string
+}
+
+func (e *UnsupportedValueError)Error()string{
+	return "json: unsupported value: " + e.Str
+}
+
+// A MarshalerError represents an error from calling a MarshalJSON or MarshalText method.
+//接口实现的错误
+type MarshalerError struct {
+	Type       reflect.Type
+	Err        error
+	sourceFunc string
+}
+
+func (e *MarshalerError) Error() string {
+	srcFunc := e.sourceFunc
+	if srcFunc == ""{
+		srcFunc = "MarshalJSON"
+	}
+	return "json: error calling " + srcFunc +
+		" for type "  +
+		": " + e.Err.Error()
+}
+
 var hex = "0123456789abcdef"
 
 // An encodeState encodes JSON into a bytes.Buffer.
@@ -260,6 +288,46 @@ func (e *encodeState)string(s string,escapeHTML bool){
 	start := 0
 	if start < len(s){
 		e.WriteString(s[start:])
+	}
+	e.WriteByte('"')
+}
+
+// NOTE: keep in sync with string above.
+func (e *encodeState)stringBytes(s []byte,escapeHTML bool){
+	e.WriteByte('"')
+	start := 0
+	for i :=0;i<len(s);{
+		if b := s[i]; b < utf8.RuneSelf {
+			//这说明json数据是遵循html特殊字符安全的
+			//另一种是不是html的安全过滤
+			if htmlSafeSet[b] || (!escapeHTML && safeSet[b]){
+				i++
+				//安全的不需要处理的数据之前跳过
+				continue
+			}
+			//先将特殊符号之前符合的数据先写入缓冲区
+			if start <i {
+				e.Write(s[start:i])
+			}
+			//特殊字符加上转移字符
+			e.WriteByte('\\')
+			switch b {
+			case '\\','"':
+				e.WriteByte(b)
+			case '\n'://遇到换行
+				e.WriteByte('n')
+			case '\r'://回车
+				e.WriteByte('r')
+			case '\t'://水平制表
+				e.WriteByte('t')
+			}
+			i++
+			start = i
+			continue
+		}
+	}
+	if start < len(s) {
+		e.Write(s[start:])
 	}
 	e.WriteByte('"')
 }
@@ -386,7 +454,20 @@ func marshalerEncoder(e *encodeState, v reflect.Value, opts encOpts) {
 
 //非指针实现了marshaler接口
 func addrMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
-
+	va :=v.Addr()
+	if va.IsNil(){
+		e.WriteString("null")
+		return
+	}
+	m :=va.Interface().(Marshaler)
+	b,err :=m.MarshalJSON()
+	if err == nil{
+		// copy JSON into buffer, checking validity.
+		println(b)
+	}
+	if err != nil{
+		e.error(&MarshalerError{v.Type(),err,"MarshalJSON"})
+	}
 }
 
 //指针实现了textMarshaler接口
@@ -396,7 +477,17 @@ func textMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
 
 //非指针实现了textMarshaler接口
 func addrTextMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
-
+	va :=v.Addr()
+	if va.IsNil(){
+		e.WriteString("null")
+		return
+	}
+	m := va.Interface().(encoding.TextMarshaler)
+	b,err :=m.MarshalText()
+	if err != nil{
+		e.error(&MarshalerError{v.Type(), err, "MarshalText"})
+	}
+	e.stringBytes(b,opts.escapeHTML)
 }
 
 func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
@@ -609,7 +700,11 @@ func newCondAddrEncoder(canAddrEnc, elseEnc encoderFunc) encoderFunc {
 }
 
 func (ce condAddrEncoder) encode(e *encodeState, v reflect.Value, opts encOpts) {
-
+	if v.CanAddr() {
+		ce.canAddrEnc(e,v,opts)
+	}else{
+		ce.elseEnc(e,v,opts)
+	}
 }
 
 //所有类型都不知道错误方法

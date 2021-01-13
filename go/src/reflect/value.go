@@ -92,7 +92,18 @@ func (v Value) pointer()unsafe.Pointer{
 //将value转化为interface
 func packEface(v Value)interface{}{
 	// First, fill in the data portion of the interface.
-	return nil
+	t :=v.typ
+	//TODO HANK interface转化为指针之后,操作指针之后修改这个值,就能影响到i?
+	var i interface{}
+	e :=(*emptyInterface)(unsafe.Pointer(&i))
+	// First, fill in the data portion of the interface.
+	switch {
+	default:
+		// Value is direct, and so is the interface.
+		e.word = v.ptr
+	}
+	e.typ = t
+	return i
 }
 
 //将interface转化为Value
@@ -135,6 +146,22 @@ func (f flag)mustBe(expected Kind) {
 	if Kind(f&flagKindMask) != expected{
 		panic(&ValueError{})
 	}
+}
+
+// Addr returns a pointer value representing the address of v.
+// It panics if CanAddr() returns false.
+// Addr is typically used to obtain a pointer to a struct field
+// or slice element in order to call a method that requires a
+// pointer receiver.
+//返回指针的地址值,通常用于结构体字段或者slice元素
+func (v Value) Addr() Value {
+	if v.flag&flagAddr == 0{
+		panic("reflect.Value.Addr of unaddressable value")
+	}
+	// Preserve flagRO instead of using v.flag.ro() so that
+	// v.Addr().Elem() is equivalent to v (#32772)
+	fl :=v.flag & flagRO
+	return Value{v.typ.ptrTo(),v.ptr,fl | flag(Ptr)}
 }
 
 // Bool returns v's underlying value.
@@ -326,7 +353,12 @@ func valueInterface(v Value,safe bool)interface{}{
 	if v.flag  == 0{
 		panic(&ValueError{"reflect.Value.Interface",Invalid})
 	}
-	return nil
+
+	if v.kind() == Interface{
+
+	}
+	// TODO: pass safe to packEface so we don't need to copy if safe==true?
+	return packEface(v)
 }
 
 // IsNil reports whether its argument v is nil. The argument must be
