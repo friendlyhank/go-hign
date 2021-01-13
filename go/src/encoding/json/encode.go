@@ -322,20 +322,24 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	// allocation as we cast the value to an interface.
 	//不是指针类型,转化为指针再判断是否继承Marshaler
 	//注意这里必须找到对应实现接口的那个类型
+	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断
+	//然后条件编码的内部还要根据是否可以寻址去决定执行继承的相关接口
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(marshalerType){
-
+		return newCondAddrEncoder(addrMarshalerEncoder,newTypeEncoder(t,false))
 	}
 	//指针类型实现了接口 继承Marshaler
 	if t.Implements(marshalerType){
-
+		return marshalerEncoder
 	}
 	//不是指针类型，转化为指针再判断是否继承TextMarshaler
+	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断
+	//然后条件编码的内部还要根据是否可以寻址去决定执行继承的相关接口
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(textMarshalerType){
-
+		return newCondAddrEncoder(addrTextMarshalerEncoder,newTypeEncoder(t,false))
 	}
 	//指针类型实现了接口 继承TextMarshaler
 	if t.Implements(textMarshalerType){
-
+		return textMarshalerEncoder
 	}
 
 	switch t.Kind() {
@@ -378,6 +382,21 @@ func marshalerEncoder(e *encodeState, v reflect.Value, opts encOpts) {
 	if v.Kind() == reflect.Ptr && v.IsNil(){
 		e.WriteString("null")
 	}
+}
+
+//非指针实现了marshaler接口
+func addrMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
+
+}
+
+//指针实现了textMarshaler接口
+func textMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
+
+}
+
+//非指针实现了textMarshaler接口
+func addrTextMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
+
 }
 
 func boolEncoder(e *encodeState,v reflect.Value,opts encOpts){
