@@ -286,6 +286,31 @@ func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
 func (e *encodeState)string(s string,escapeHTML bool){
 	e.WriteByte('"')
 	start := 0
+	for i :=0;i <len(s);{
+		if b :=s[i];b <utf8.RuneSelf{
+			if htmlSafeSet[b] || (!escapeHTML && safeSet[b]){
+				i++
+				continue
+			}
+			if start < i{
+				e.WriteString(s[start:i])
+			}
+			e.WriteByte('\\')
+			switch b {
+			case '\\', '"':
+				e.WriteByte(b)
+			case '\n':
+				e.WriteByte('n')
+			case '\r':
+				e.WriteByte('r')
+			case '\t':
+				e.WriteByte('t')
+			}
+			i++
+			start = i
+			continue
+		}
+	}
 	if start < len(s){
 		e.WriteString(s[start:])
 	}
@@ -388,24 +413,23 @@ func newTypeEncoder(t reflect.Type, allowAddr bool) encoderFunc {
 	// Marshaler with a value receiver, then we're better off taking
 	// the address of the value - otherwise we end up with an
 	// allocation as we cast the value to an interface.
-	//不是指针类型,转化为指针再判断是否继承Marshaler
-	//注意这里必须找到对应实现接口的那个类型
-	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断
+	//不是指针类型,转化为指针再判断是否实现Marshaler
 	//然后条件编码的内部还要根据是否可以寻址去决定执行继承的相关接口
+	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断,还有为什么是根据能否寻址去条件编码
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(marshalerType){
 		return newCondAddrEncoder(addrMarshalerEncoder,newTypeEncoder(t,false))
 	}
-	//指针类型实现了接口 继承Marshaler
+	//继承Marshaler
 	if t.Implements(marshalerType){
 		return marshalerEncoder
 	}
-	//不是指针类型，转化为指针再判断是否继承TextMarshaler
-	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断
+	//不是指针类型，转化为指针再判断是否实现TextMarshaler
 	//然后条件编码的内部还要根据是否可以寻址去决定执行继承的相关接口
+	//TODO Hank 这里不是特别明白,为什么要转化为指针类型去判断,还有为什么是根据能否寻址去条件编码
 	if t.Kind() != reflect.Ptr && allowAddr && reflect.PtrTo(t).Implements(textMarshalerType){
 		return newCondAddrEncoder(addrTextMarshalerEncoder,newTypeEncoder(t,false))
 	}
-	//指针类型实现了接口 继承TextMarshaler
+	//实现TextMarshaler
 	if t.Implements(textMarshalerType){
 		return textMarshalerEncoder
 	}
@@ -445,14 +469,26 @@ func invalidValueEncoder(e *encodeState,v reflect.Value,_ encOpts){
 	e.WriteString("null")
 }
 
-//指针实现了marshaler接口
+//实现了marshaler接口
 func marshalerEncoder(e *encodeState, v reflect.Value, opts encOpts) {
 	if v.Kind() == reflect.Ptr && v.IsNil(){
 		e.WriteString("null")
 	}
+	m,ok :=v.Interface().(Marshaler)
+	if !ok{
+		e.WriteString("null")
+		return
+	}
+	b,err :=m.MarshalJSON()
+	if err != nil{
+
+	}
+	if err != nil {
+		e.error(&MarshalerError{v.Type(), err, "MarshalJSON"})
+	}
 }
 
-//非指针实现了marshaler接口
+//非指针通过转化指针实现marshaler接口(条件是必须是可寻址的)
 func addrMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
 	va :=v.Addr()
 	if va.IsNil(){
@@ -470,12 +506,25 @@ func addrMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
 	}
 }
 
-//指针实现了textMarshaler接口
+//实现了textMarshaler接口
 func textMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
-
+	if v.Kind() == reflect.Ptr && v.IsNil(){
+		e.WriteString("null")
+		return
+	}
+	m,ok := v.Interface().(encoding.TextMarshaler)
+	if !ok{
+		e.WriteString("null")
+		return
+	}
+	b, err := m.MarshalText()
+	if err != nil{
+		e.error(&MarshalerError{v.Type(), err, "MarshalText"})
+	}
+	e.stringBytes(b, opts.escapeHTML)
 }
 
-//非指针实现了textMarshaler接口
+//非指针通过转化指针实现textMarshaler接口(条件是必须是可寻址的)
 func addrTextMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
 	va :=v.Addr()
 	if va.IsNil(){
