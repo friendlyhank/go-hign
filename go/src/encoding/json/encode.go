@@ -480,8 +480,9 @@ func marshalerEncoder(e *encodeState, v reflect.Value, opts encOpts) {
 		return
 	}
 	b,err :=m.MarshalJSON()
-	if err != nil{
-
+	if err == nil{
+		// copy JSON into buffer, checking validity.
+		err = compact(&e.Buffer, b, opts.escapeHTML)
 	}
 	if err != nil {
 		e.error(&MarshalerError{v.Type(), err, "MarshalJSON"})
@@ -499,7 +500,7 @@ func addrMarshalerEncoder(e *encodeState,v reflect.Value,opts encOpts){
 	b,err :=m.MarshalJSON()
 	if err == nil{
 		// copy JSON into buffer, checking validity.
-		println(b)
+		err = compact(&e.Buffer, b, opts.escapeHTML)
 	}
 	if err != nil{
 		e.error(&MarshalerError{v.Type(),err,"MarshalJSON"})
