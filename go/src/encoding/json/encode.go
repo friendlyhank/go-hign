@@ -585,7 +585,20 @@ var (
 
 type floatEncoder int // number of bits
 func (bits floatEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	// Convert as if by ES6 number to string conversion.
+	// This matches most other JSON generators.
+	// See golang.org/issue/6384 and golang.org/issue/14135.
+	// Like fmt %g, but the exponent cutoffs are different
+	// and exponents themselves are not padded to two digits.
+	b := e.scratch[:0]
 
+	if opts.quoted{
+		e.WriteByte('"')
+	}
+	e.Write(b)
+	if opts.quoted {
+		e.WriteByte('"')
+	}
 }
 
 func stringEncoder(e *encodeState, v reflect.Value, opts encOpts) {
@@ -871,6 +884,9 @@ func typeFields(t reflect.Type)structFields{
 			}
 		}
 	}
+
+	//排序
+
 	for i :=range fields{
 		f := &fields[i]
 		//获取对应子字段得编码方法

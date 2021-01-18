@@ -115,6 +115,22 @@ const(
 //	runtime/type.go
 type tflag uint8
 
+const(
+	// tflagUncommon means that there is a pointer, *uncommonType,
+	// just beyond the outer type structure.
+	//
+	// For example, if t.Kind() == Struct and t.tflag&tflagUncommon != 0,
+	// then t has uncommonType data and it can be accessed as:
+	//
+	//	type tUncommon struct {
+	//		structType
+	//		u uncommonType
+	//	}
+	//	u := &(*tUncommon)(unsafe.Pointer(t)).u
+	//uncommon类型
+	tflagUncommon tflag = 1 << 0
+)
+
 // rtype is the common implementation of most values.
 // It is embedded in other struct types.
 //
@@ -134,6 +150,24 @@ type rtype struct {
 	gcdata    *byte   // garbage collection data
 	str       nameOff // string form
 	ptrToThis typeOff //获取指针类型的偏移量 type for pointer to this type, may be zero
+}
+
+// Method on non-interface type
+type method struct{
+	name nameOff // name of method
+	mtyp typeOff //方法类型 method type (without receiver)
+}
+
+// uncommonType is present only for defined types or types with methods
+// (if T is a defined type, the uncommonTypes for T and *T have methods).
+// Using a pointer to this struct reduces the overall size required
+// to describe a non-defined type with no methods.
+type uncommonType struct {
+	pkgPath nameOff // import path; empty for built-in types like int, string
+	mcount  uint16  //方法的数量 number of methods
+	xcount  uint16  // number of exported methods
+	moff    uint32  //方法的偏移量 offset from this uncommontype to [mcount]method
+	_       uint32  // unused
 }
 
 // add returns p+x.
@@ -247,13 +281,51 @@ func (tag StructTag) Lookup(key string) (value string, ok bool) {
 	return "", false
 }
 
-// arrayType represents a fixed array type.
+//数组类型 arrayType represents a fixed array type.
 type arrayType struct{
 	rtype
+	elem  *rtype // array element type
 	len uintptr
 }
 
-// mapType represents a map type.
+//chan类型
+type chanType struct{
+	rtype
+	elem  *rtype // channel element type
+}
+
+// funcType represents a function type.
+//
+// A *rtype for each in and out parameter is stored in an array that
+// directly follows the funcType (and possibly its uncommonType). So
+// a function type with one method, one input, and one output is:
+//
+//	struct {
+//		funcType
+//		uncommonType
+//		[2]*rtype    // [0] is in, [1] is out
+//	}
+//方法类型
+type funcType struct{
+	rtype
+	inCount  uint16
+	outCount uint16 // top bit is set if last input parameter is ...
+}
+
+// imethod represents a method on an interface type
+type imethod struct {
+	name nameOff //name of method 查找方法名偏移量
+	typ  typeOff // .(*FuncType) underneath查找方法地址的偏移量
+}
+
+//接口类型 interfaceType represents an interface type.
+type interfaceType struct{
+	rtype
+	pkgPath name      //对应的包名 import path
+	methods []imethod //对应的方法 sorted by hash
+}
+
+//map类型 mapType represents a map type.
 type mapType struct{
 	rtype
 	key    *rtype //key map key type
@@ -271,6 +343,13 @@ type mapType struct{
 type ptrType struct{
 	rtype
 	elem *rtype
+}
+
+// sliceType represents a slice type.
+//slice类型
+type sliceType struct{
+	rtype
+	elem *rtype // slice element type
 }
 
 //结构体类型 structType represents a struct type.
@@ -331,6 +410,82 @@ func (t *rtype) ptrTo()*rtype{
 		return t.typeOff(t.ptrToThis)
 	}
 	return nil
+}
+
+//判断是否继承某个接口
+func (t *rtype)Implements(u Type)bool{
+	if u == nil{
+		panic("reflect: nil type passed to Type.Implements")
+	}
+	if u.Kind() != Interface{
+		panic("reflect: non-interface type passed to Type.Implements")
+	}
+	return implements(u.(*rtype),t)
+}
+
+func implements(T,V *rtype)bool{
+	if T.Kind() != Interface{
+		return false
+	}
+	t :=(*interfaceType)(unsafe.Pointer(T))
+	if len(t.methods) == 0{
+		return true
+	}
+
+	// The same algorithm applies in both cases, but the
+	// method tables for an interface type and a concrete type
+	// are different, so the code is duplicated.
+	// In both cases the algorithm is a linear scan over the two
+	// lists - T's methods and V's methods - simultaneously.
+	// Since method tables are stored in a unique sorted order
+	// (alphabetical, with no duplicate method names), the scan
+	// through V's methods must hit a match for each of T's
+	// methods along the way, or else V does not implement T.
+	// This lets us run the scan in overall linear time instead of
+	// the quadratic time  a naive search would require.
+	// See also ../runtime/iface.go.
+	if V.Kind()  == Interface{
+
+	}
+
+	//转化为特定的带方法的类型
+	v := V.uncommon()
+	if v == nil{
+		return false
+	}
+	i := 0
+	vmethods := v.methods()
+	for j :=0;j < int(v.mcount);j++{
+		//根据偏移量获取方法
+		tm :=&t.methods[i]
+		tmName :=t.nameOff(tm.name)
+		vm :=vmethods[j]
+		vmName :=V.nameOff(vm.name)
+		if vmName.name() == tmName.name() && V.typeOff(vm.mtyp) == t.typeOff(tm.typ){
+			if !tmName.isExported(){
+				tmPkgPath :=tmName.pkgPath()
+				if tmPkgPath == ""{
+					tmPkgPath = t.pkgPath.name()
+				}
+				vmPkgPath :=vmName.pkgPath()
+				if vmPkgPath == ""{
+					vmPkgPath = V.nameOff(v.pkgPath).name()
+				}
+				if tmPkgPath != vmPkgPath {
+					continue
+				}
+			}
+			if i++;i >= len(t.methods){
+				return true
+			}
+		}
+	}
+	return false
+}
+
+type structTypeUncommon struct{
+	structType
+	u uncommonType
 }
 
 //structType得结构体字段 Struct field
@@ -421,6 +576,22 @@ func (n name)tag()(s string){
 	return s
 }
 
+func (n name) pkgPath() string {
+	if n.bytes == nil || *n.data(0, "name flag field")&(1<<2) == 0 {
+		return ""
+	}
+	off := 3 + n.nameLen()
+	if tl := n.tagLen(); tl > 0 {
+		off += 2 + tl
+	}
+	var nameOff int32
+	// Note that this field may not be aligned in memory,
+	// so we cannot use a direct int32 assignment here.
+	copy((*[4]byte)(unsafe.Pointer(&nameOff))[:], (*[4]byte)(unsafe.Pointer(n.data(off, "name offset field")))[:])
+	pkgPathName := name{(*byte)(resolveTypeOff(unsafe.Pointer(n.bytes), nameOff))}
+	return pkgPathName.name()
+}
+
 const(
 	kindMask        = (1 << 5) - 1
 )
@@ -455,19 +626,95 @@ var kindNames = []string{
 	UnsafePointer: "unsafe.Pointer",
 }
 
+func (t *uncommonType)methods()[]method{
+	if t.mcount == 0{
+		return nil
+	}
+	return (*[1 << 16]method)(add(unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0"))[:t.xcount:t.xcount]
+}
+
+// resolveNameOff resolves a name offset from a base pointer.
+// The (*rtype).nameOff method is a convenience wrapper for this function.
+// Implemented in the runtime package.
+func resolveNameOff(ptrInModule unsafe.Pointer, off int32) unsafe.Pointer
+
 // resolveTypeOff resolves an *rtype offset from a base type.
 // The (*rtype).typeOff method is a convenience wrapper for this function.
 // Implemented in the runtime package.
 //resolveTypeOff关联到runtime的reflect_resolveTypeOff
 func resolveTypeOff(rtype unsafe.Pointer, off int32) unsafe.Pointer
 
+//TODO HANK 搞清楚为什么判断接口实现的时候是当nameOff和typeOff偏移量去判断的
 //这个应该是偏移量的一些计算
 type nameOff int32 // offset to a name
 type typeOff int32 //指针*rtype的偏移量 offset to an *rtype
 type textOff int32 // offset from top of text section
 
+func (t *rtype)nameOff(off nameOff)name{
+	return name{(*byte)(resolveNameOff(unsafe.Pointer(t), int32(off)))}
+}
+
 func (t *rtype) typeOff(off typeOff) *rtype {
 	return (*rtype)(resolveTypeOff(unsafe.Pointer(t), int32(off)))
+}
+
+//转化成带方法的特定类型uncommonType
+func (t *rtype) uncommon() *uncommonType {
+	if t.tflag&tflagUncommon == 0{
+		return nil
+	}
+	switch t.Kind() {
+	case Struct:
+		return &(*structTypeUncommon)(unsafe.Pointer(t)).u
+	case Ptr:
+		type u struct{
+			ptrType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Func:
+		type u struct{
+			funcType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Slice:
+		type u struct{
+			sliceType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Array:
+		type u struct{
+			arrayType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Chan:
+		type u struct{
+			chanType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Map:
+		type u struct {
+			mapType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	case Interface:
+		type u struct{
+			interfaceType
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	default:
+		type u struct{
+			rtype
+			u uncommonType
+		}
+		return &(*u)(unsafe.Pointer(t)).u
+	}
 }
 
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
