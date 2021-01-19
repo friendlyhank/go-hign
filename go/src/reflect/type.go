@@ -55,6 +55,10 @@ type Type interface {
 	// It panics if the type's Kind is not Struct.
 	//获取结构体的字段个数
 	NumField() int
+
+	// Name returns the type's name within its package for a defined type.
+	// For other (non-defined) types it returns the empty string.
+	Name() string
 }
 
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
@@ -127,8 +131,12 @@ const(
 	//		u uncommonType
 	//	}
 	//	u := &(*tUncommon)(unsafe.Pointer(t)).u
-	//uncommon类型
+	//uncommon类型,带有实现的方法
 	tflagUncommon tflag = 1 << 0
+
+	//是否有名字
+	// tflagNamed means the type has a name.
+	tflagNamed tflag = 1 << 2
 )
 
 // rtype is the common implementation of most values.
@@ -724,8 +732,20 @@ func (t *rtype)pointers()bool{return t.ptrdata != 0}
 
 func (t *rtype)Elem()Type{
 	switch t.Kind() {
+	case Array:
+		tt :=(*arrayType)(unsafe.Pointer(t))
+		return toType(tt.elem)
+	case Chan:
+		tt := (*chanType)(unsafe.Pointer(t))
+		return toType(tt.elem)
+	case Map:
+		tt :=(*mapType)(unsafe.Pointer(t))
+		return toType(tt.elem)
 	case Ptr:
 		tt := (*ptrType)(unsafe.Pointer(t))
+		return toType(tt.elem)
+	case Slice:
+		tt := (*sliceType)(unsafe.Pointer(t))
 		return toType(tt.elem)
 	}
 	panic("")

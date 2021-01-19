@@ -784,6 +784,9 @@ func typeFields(t reflect.Type)structFields{
 	current :=[]field{}
 	next :=[]field{{typ:t}}
 
+	// Count of queued names for current level and the next.
+	var count, nextCount map[reflect.Type]int
+
 	// Types already visited at an earlier level.
 	//过滤器
 	visited := map[reflect.Type]bool{}
@@ -797,6 +800,8 @@ func typeFields(t reflect.Type)structFields{
 
 	for len(next) > 0{
 		current, next = next, current[:0]
+		count, nextCount = nextCount, map[reflect.Type]int{}
+
 		for _, f := range current {
 			if visited[f.typ] {
 				continue
@@ -878,8 +883,13 @@ func typeFields(t reflect.Type)structFields{
 					field.nameNonEsc = `"` + field.name + `":`
 
 					fields = append(fields,field)
-
 					continue
+				}
+
+				// Record new anonymous struct to explore in next round.
+				nextCount[ft]++
+				if nextCount[ft] == 1 {
+					next = append(next,field{name: ft.})
 				}
 			}
 		}
