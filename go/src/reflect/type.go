@@ -134,6 +134,12 @@ const(
 	//uncommon类型,带有实现的方法
 	tflagUncommon tflag = 1 << 0
 
+	// tflagExtraStar means the name in the str field has an
+	// extraneous '*' prefix. This is because for most types T in
+	// a program, the type *T also exists and reusing the str data
+	// saves binary size.
+	tflagExtraStar tflag = 1 << 1
+
 	//是否有名字
 	// tflagNamed means the type has a name.
 	tflagNamed tflag = 1 << 2
@@ -156,7 +162,7 @@ type rtype struct {
 	// (ptr to object A, ptr to object B) -> ==?
 	equal     func(unsafe.Pointer, unsafe.Pointer) bool
 	gcdata    *byte   // garbage collection data
-	str       nameOff // string form
+	str       nameOff //名字偏移量信息 string form
 	ptrToThis typeOff //获取指针类型的偏移量 type for pointer to this type, may be zero
 }
 
@@ -725,10 +731,31 @@ func (t *rtype) uncommon() *uncommonType {
 	}
 }
 
+func (t *rtype)String()string{
+	s :=t.nameOff(t.str).name()
+	return s
+}
+
 func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
 
 //是否指针类型
 func (t *rtype)pointers()bool{return t.ptrdata != 0}
+
+func (t *rtype)hasName()bool{
+	return t.tflag&tflagNamed != 0
+}
+
+func (t *rtype)Name()string{
+	if !t.hasName(){
+		return ""
+	}
+	s :=t.String()
+	i := len(s) - 1
+	for i >=0 && s[i] != '.'{
+		i--
+	}
+	return s[i+1:]
+}
 
 func (t *rtype)Elem()Type{
 	switch t.Kind() {

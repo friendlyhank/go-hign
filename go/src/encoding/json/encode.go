@@ -889,7 +889,7 @@ func typeFields(t reflect.Type)structFields{
 				// Record new anonymous struct to explore in next round.
 				nextCount[ft]++
 				if nextCount[ft] == 1 {
-					next = append(next,field{name: ft.})
+					next = append(next,field{name: ft.Name(),index: index,typ: ft})
 				}
 			}
 		}
