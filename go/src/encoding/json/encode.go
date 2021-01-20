@@ -883,6 +883,8 @@ func typeFields(t reflect.Type)structFields{
 					field.nameNonEsc = `"` + field.name + `":`
 
 					fields = append(fields,field)
+					if count[f.typ] > 1{
+					}
 					continue
 				}
 
