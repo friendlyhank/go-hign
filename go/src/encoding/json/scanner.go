@@ -13,6 +13,19 @@ package json
 // This file starts with two simple examples using the scanner
 // before diving into the scanner itself.
 
+// checkValid verifies that data is valid JSON-encoded data.
+// scan is passed in for use by checkValid to avoid an allocation.
+//检查数据是否有效
+func checkValid(data []byte, scan *scanner) error {
+	scan.reset()
+	for _,c := range data{
+		if scan.step(scan,c) == scanError{
+			return scan.err
+		}
+	}
+	return nil
+}
+
 // A SyntaxError is a description of a JSON syntax error.
 type SyntaxError struct{
 	msg string // description of error
@@ -131,6 +144,7 @@ func stateBeginValue(s *scanner,c byte)int{
 }
 
 // stateBeginStringOrEmpty is the state after reading `{`.
+//解析的步骤在`{`用到
 func stateBeginStringOrEmpty(s *scanner,c byte)int{
 	if isSpace(c){
 		return scanSkipSpace
@@ -139,6 +153,7 @@ func stateBeginStringOrEmpty(s *scanner,c byte)int{
 }
 
 // stateBeginString is the state after reading `{"key": value,`.
+//解析的步骤在`{"key": value,`之后用到
 func stateBeginString(s *scanner, c byte) int {
 	if c == '"'{
 		s.step =stateInString
@@ -149,6 +164,7 @@ func stateBeginString(s *scanner, c byte) int {
 
 // stateEndValue is the state after completing a value,
 // such as after reading `{}` or `true` or `["x"`.
+//遇到`:`或`,`的时候转换成去寻找key或value
 func stateEndValue(s *scanner, c byte) int {
 	n :=len(s.parseState)
 	if n  == 0{
@@ -156,7 +172,7 @@ func stateEndValue(s *scanner, c byte) int {
 	}
 	ps :=s.parseState[n-1]
 	switch ps {
-	case parseObjectKey:
+	case parseObjectKey://当前解析的是key,下一步解析的是value
 		if c == ':'{
 			//解析状态改为解析值
 			s.parseState[n-1] = parseObjectValue
@@ -164,10 +180,18 @@ func stateEndValue(s *scanner, c byte) int {
 			return scanObjectKey
 		}
 		return s.error(c, "after object key")
+	case parseObjectValue://当前解析的是value,下一步解析的是key
+		if c == ','{
+			s.parseState[n-1] =parseObjectKey
+			s.step = stateBeginString
+			return scanObjectValue
+		}
 	}
 	return s.error(c,"")
 }
 
+// stateInString is the state after reading `"`.
+//遇到'"'符号时候解析去解析字段或值
 func stateInString(s *scanner,c byte)int{
 	if c == '"' {
 		s.step = stateEndValue

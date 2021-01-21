@@ -91,6 +91,10 @@ func Unmarshal(data []byte, v interface{}) error {
 	// Avoids filling out half a data structure
 	// before discovering a JSON syntax error.
 	var d decodeState
+	err :=checkValid(data,&d.scan)
+	if err != nil{
+		return err
+	}
 
 	d.init(data)
 	return d.unmarshal(v)
@@ -138,7 +142,6 @@ func (d *decodeState)unmarshal(v interface{}) error{
 	// test must be applied at the top level of the value.
 	err :=d.value(rv)
 	if err != nil{
-
 	}
 	return d.savedError
 }
@@ -205,6 +208,7 @@ func (d *decodeState) scanWhile(op int) {
 // Only in the second step do we use decodeState to tokenize literals, so we
 // know there aren't any syntax errors. We can take advantage of that knowledge,
 // and scan a literal's bytes much more quickly.
+//分析出单个key或value,更新偏移量和下一步的不走
 func (d *decodeState)rescanLiteral(){
 	data,i :=d.data,d.off
 Switch:
@@ -226,11 +230,18 @@ Switch:
 	d.off = i + 1
 }
 
+//递归 解析对象的值
 func (d *decodeState)value(v reflect.Value)error{
 	switch d.opcode{
 	default:
-		panic(phasePanicMsg)
-	case scanBeginObject:
+		panic(phasePanicMsg)//解析数组
+	case scanBeginArray:
+		if v.IsValid(){
+			if err :=d.array(v);err != nil{
+				return err
+			}
+		}
+	case scanBeginObject://解析对象
 		if v.IsValid(){
 			if err := d.object(v);err != nil{
 				return err
@@ -241,6 +252,7 @@ func (d *decodeState)value(v reflect.Value)error{
 		start :=d.readIndex()
 		d.rescanLiteral()
 		if v.IsValid(){
+			//将值设置到对应类型的反射value中
 			if err :=d.literalStore(d.data[start:d.readIndex()],v,false);err != nil{
 				return nil
 			}
@@ -257,6 +269,21 @@ func (d *decodeState)value(v reflect.Value)error{
 func indirect(v reflect.Value,decodingNull bool)(Unmarshaler,encoding.TextUnmarshaler,reflect.Value){
 	v = v.Elem()
 	return nil,nil,v
+}
+
+// array consumes an array from d.data[d.off-1:], decoding into v.
+// The first byte of the array ('[') has been read already.
+//解析数组
+func (d *decodeState)array(v reflect.Value) error {
+	// Check for unmarshaler.
+	u,ut,pv :=indirect(v,false)
+	if u != nil{
+	}
+	if ut != nil{
+
+	}
+	v = pv
+	return nil
 }
 
 // object consumes an object from d.data[d.off-1:], decoding into v.
@@ -354,7 +381,9 @@ func (d *decodeState)object(v reflect.Value)error{
 		if destring {
 
 		}else{
-			//继续进入递归调用
+			if err :=d.value(subv);err != nil{
+				return err
+			}
 		}
 
 	}
@@ -400,6 +429,7 @@ func (d *decodeState)literalStore(item []byte, v reflect.Value, fromQuoted bool)
 			v.SetString(string(s))
 		}
 	}
+	return nil
 }
 
 //去除特殊符号,等到想要的值或字段
