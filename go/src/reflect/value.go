@@ -34,7 +34,7 @@ type Value struct{
 
 	// Pointer-valued data or, if flagIndir is set, pointer to data.
 	// Valid when either flagIndir is set or typ.pointers() is true.
-	ptr unsafe.Pointer
+	ptr unsafe.Pointer //指针
 
 	// flag holds metadata about the value.
 	// The lowest bits are flag bits:
@@ -74,6 +74,14 @@ const (
 //Value可以通过flag获取Kind
 func (f flag)kind()Kind{
 	return Kind(f & flagKindMask)
+}
+
+//是否私有属性
+func (f flag)ro()flag{
+	if f &flagRO != 0{
+		return flagStickyRO
+	}
+	return 0
 }
 
 // pointer returns the underlying pointer represented by v.
@@ -331,6 +339,18 @@ func (v Value)Uint()uint64{
 	panic(&ValueError{"reflect.Value.Uint", v.kind()})
 }
 
+// arrayAt returns the i-th element of p,
+// an array whose elements are eltSize bytes wide.
+// The array pointed at by p must have at least i+1 elements:
+// it is invalid (but impossible to check here) to pass i >= len,
+// because then the result will point outside the array.
+// whySafe must explain why i < len. (Passing "i < len" is fine;
+// the benefit is to surface this assumption at the call site.)
+//根据偏移量，去获取数组的某个元素，返回的是指针
+func arrayAt(p unsafe.Pointer, i int, eltSize uintptr, whySafe string) unsafe.Pointer {
+	return add(p, uintptr(i)*eltSize, "i < len")
+}
+
 // Float returns v's underlying value, as a float64.
 // It panics if v's Kind is not Float32 or Float64
 func (v Value)Float()float64{
@@ -342,6 +362,56 @@ func (v Value)Float()float64{
 		return *(*float64)(v.ptr)
 	}
 	panic(&ValueError{"reflect.Value.Float", v.kind()})
+}
+
+var uint8Type = TypeOf(uint8(0)).(*rtype)
+
+// Index returns v's i'th element.
+// It panics if v's Kind is not Array, Slice, or String or i is out of range.
+//如果不是Array,Slice,or String或者是溢出都会抛出异常
+func(v Value)Index(i int) Value {
+	switch v.kind() {
+	case Array:
+		tt :=(*arrayType)(unsafe.Pointer(v.typ))
+		if uint(i) >= uint(tt.len){
+			panic("reflect: array index out of range")
+		}
+		typ := tt.elem
+		offset := uintptr(i) *typ.size //获取偏移量
+
+		// Either flagIndir is set and v.ptr points at array,
+		// or flagIndir is not set and v.ptr is the actual array data.
+		// In the former case, we want v.ptr + offset.
+		// In the latter case, we must be doing Index(0), so offset = 0,
+		// so v.ptr + offset is still the correct address.
+		//结构体和数组这些都是分配的连续的指针，所以只要知道首地址+偏移量就可以找到对应的值
+		val :=add(v.ptr,offset,"same as &v[i], i < tt.len")
+		fl := v.flag&(flagIndir|flagAddr) | v.flag.ro() | flag(typ.Kind())// bits same as overall array
+		return Value{typ,val,fl}
+
+	case Slice:
+		// Element flag same as Elem of Ptr.
+		// Addressable, indirect, possibly read-only.
+		s :=(*unsafeheader.Slice)(v.ptr)
+		if uint(i) >= uint(s.Len){
+			panic("reflect: slice index out of range")
+		}
+		tt :=(*sliceType)(unsafe.Pointer(v.typ))
+		typ := tt.elem
+		val :=arrayAt(s.Data,i,typ.size,"i < s.Len")
+		fl := flagAddr | flagIndir | v.flag.ro() | flag(typ.Kind())
+		return Value{typ,val,fl}
+
+	case String:
+		s :=(*unsafeheader.String)(v.ptr)
+		if uint(i) >= uint(s.Len){
+			panic("reflect: string index out of range")
+		}
+		p :=arrayAt(s.Data,i,1,"i < s.Len")
+		fl :=v.flag.ro() | flag(Uint8) | flagIndir
+		return Value{uint8Type,p,fl}
+	}
+	panic(&ValueError{"reflect.Value.Index", v.kind()})
 }
 
 //Value转Interface类型
@@ -424,6 +494,13 @@ func (v Value)Len()int{
 		return (*unsafeheader.String)(v.ptr).Len
 	}
 	panic(&ValueError{"reflect.Value.Len", v.kind()})
+}
+
+// SetString sets v's underlying value to x.
+// It panics if v's Kind is not String or if CanSet() is false.
+func (v Value)SetString(x string){
+	v.mustBe(String)
+	*(*string)(v.ptr) = x
 }
 
 // MapKeys returns a slice containing all the keys present in the map,

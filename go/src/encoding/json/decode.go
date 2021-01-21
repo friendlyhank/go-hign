@@ -9,6 +9,7 @@ package json
 import (
 	"encoding"
 	"reflect"
+	"unicode/utf8"
 )
 
 // Unmarshal parses the JSON-encoded data and stores the result
@@ -107,14 +108,32 @@ type Unmarshaler interface {
 	UnmarshalJSON([]byte) error
 }
 
-// phasePanicMsg is used as a panic message when we end up with something that
-// shouldn't happen. It can indicate a bug in the JSON decoder, or that
-// something is editing the data slice while the decoder executes.
-//解析错误
-const phasePanicMsg = "JSON decoder out of sync - data changing underfoot?"
+// An InvalidUnmarshalError describes an invalid argument passed to Unmarshal.
+// (The argument to Unmarshal must be a non-nil pointer.)
+type InvalidUnmarshalError struct {
+	Type reflect.Type
+}
+
+func (e *InvalidUnmarshalError) Error() string {
+	if e.Type == nil{
+		return "json: Unmarshal(nil)"
+	}
+
+	if e.Type.Kind() != reflect.Ptr{
+		return "json: Unmarshal(non-pointer " + ")"
+	}
+	return "json: Unmarshal(nil " + ")"
+}
 
 func (d *decodeState)unmarshal(v interface{}) error{
 	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Ptr || rv.IsNil(){
+		return &InvalidUnmarshalError{reflect.TypeOf(v)}
+	}
+
+	d.scan.reset()
+	//获取下一步解析的步骤,并判断是否结束
+	d.scanWhile(scanSkipSpace)
 	// We decode rv not rv.Elem because the Unmarshaler interface
 	// test must be applied at the top level of the value.
 	err :=d.value(rv)
@@ -135,10 +154,25 @@ func(n Number)String()string{return string(n)}
 
 // decodeState represents the state while decoding a JSON value.
 type decodeState struct{
-	data []byte
-	off int //next read offset in data
-	savedError error
+	data []byte  //数据
+	off int //读取数据的偏移量 next read offset in data
+	opcode       int //最近一次读取的状态码 last read result
+	scan         scanner
+	savedError error //保存错误
+	useNumber bool //是否使用了json.number
 }
+
+// readIndex returns the position of the last byte read.
+//获取最近一次读取的索引
+func (d *decodeState)readIndex()int{
+	return d.off - 1
+}
+
+// phasePanicMsg is used as a panic message when we end up with something that
+// shouldn't happen. It can indicate a bug in the JSON decoder, or that
+// something is editing the data slice while the decoder executes.
+//解析错误
+const phasePanicMsg = "JSON decoder out of sync - data changing underfoot?"
 
 func (d *decodeState)init(data []byte)*decodeState{
 	d.data = data
@@ -147,12 +181,68 @@ func (d *decodeState)init(data []byte)*decodeState{
 	return d
 }
 
+// scanWhile processes bytes in d.data[d.off:] until it
+// receives a scan code not equal to op.
+//遍历所有的数据,直到结束
+func (d *decodeState) scanWhile(op int) {
+	s,data,i := &d.scan,d.data,d.off
+	for i < len(data){
+		newOp := s.step(s,data[i])
+		i++
+		if newOp != op{
+			d.opcode = newOp
+			d.off = i //更新偏移量
+			return
+		}
+	}
+}
+
+// rescanLiteral is similar to scanWhile(scanContinue), but it specialises the
+// common case where we're decoding a literal. The decoder scans the input
+// twice, once for syntax errors and to check the length of the value, and the
+// second to perform the decoding.
+//
+// Only in the second step do we use decodeState to tokenize literals, so we
+// know there aren't any syntax errors. We can take advantage of that knowledge,
+// and scan a literal's bytes much more quickly.
+func (d *decodeState)rescanLiteral(){
+	data,i :=d.data,d.off
+Switch:
+	switch data[i-1] {
+	case '"': // string
+	for ;i < len(data);i++{
+		switch data[i] {
+		case '"':
+			i++// tokenize the closing quote too
+			break Switch
+		}
+		}
+	}
+	if i < len(data){
+		d.opcode =stateEndValue(&d.scan,data[i])
+	}else{
+		d.opcode =scanEnd
+	}
+	d.off = i + 1
+}
+
 func (d *decodeState)value(v reflect.Value)error{
-	switch scanBeginObject {
+	switch d.opcode{
+	default:
+		panic(phasePanicMsg)
 	case scanBeginObject:
 		if v.IsValid(){
 			if err := d.object(v);err != nil{
 				return err
+			}
+		}
+	case scanBeginLiteral://解析字段
+		// All bytes inside literal return scanContinue op code.
+		start :=d.readIndex()
+		d.rescanLiteral()
+		if v.IsValid(){
+			if err :=d.literalStore(d.data[start:d.readIndex()],v,false);err != nil{
+				return nil
 			}
 		}
 	}
@@ -174,7 +264,7 @@ func indirect(v reflect.Value,decodingNull bool)(Unmarshaler,encoding.TextUnmars
 //对象的解码
 func (d *decodeState)object(v reflect.Value)error{
 	// Check for unmarshaler.
-	//三种格式Unmarshaler,TextUnmarshaler
+	//三种格式Unmarshaler,TextUnmarshaler,第三种返回的是元素
 	u,ut,pv :=indirect(v,false)
 	//Unmarshaler
 	if u != nil{
@@ -186,29 +276,157 @@ func (d *decodeState)object(v reflect.Value)error{
 	}
 
 	v = pv
-	//t :=v.Type()
+	t :=v.Type()
 
 	//结构体的解析
-	//var fields structFields
+	var fields structFields
 
 	// Check type of target:
 	//   struct or
 	//   map[T1]T2 where T1 is string, an integer type,
 	//             or an encoding.TextUnmarshaler
 	switch v.Kind() {
+	case reflect.Map:
 	case reflect.Struct:
-		//获取每个字段
-		//fields = cachedTypeFields(t)
+		//获取结构体的所有字段
+		fields = cachedTypeFields(t)
 	}
 
-	if v.Kind() == reflect.Map{
+	for{
+		// Read opening " of string key or closing }.
+		d.scanWhile(scanSkipSpace)
+		//遍历对象结束
+		if d.opcode == scanEndObject{
+			// closing } - can only happen on first iteration.
+			break
+		}
+		if d.opcode != scanBeginLiteral{
+			panic(phasePanicMsg)
+		}
 
-	}else{
-		var f *field
-		println(f)
+		//Read key 获取key值
+		start := d.readIndex()
+		//找到key的偏移量并更新步骤方法
+		d.rescanLiteral()
+		item := d.data[start:d.readIndex()]
+		key,ok :=unquoteBytes(item)
+		if !ok{
+			panic(phasePanicMsg)
+		}
+
+		// Figure out field corresponding to key.
+		var subv reflect.Value
+		destring := false //是否要转化为string类型 whether the value is wrapped in a string to be decoded first
+
+		if v.Kind() == reflect.Map{
+
+		}else{
+			var f *field
+			if i,ok :=fields.nameIndex[string(key)];ok{
+				// Found an exact name match.
+				f = &fields.list[i]
+			}else{
+			}
+			if f != nil{
+				subv = v
+				destring = f.quoted
+				for _,i :=range f.index{
+					//如果结构体字段是指针,找到它的元素
+					if subv.Kind() == reflect.Ptr{
+						if subv.IsNil(){
+
+						}
+						subv = subv.Elem()
+					}
+					subv = subv.Field(i)
+				}
+			}
+		}
+
+		// Read : before value.
+		if d.opcode != scanObjectKey{
+			panic(phasePanicMsg)
+		}
+		//继续下一步
+		d.scanWhile(scanSkipSpace)
+
+		//转化为string
+		if destring {
+
+		}else{
+			//继续进入递归调用
+		}
+
 	}
 	return nil
 }
 
 var numberType  = reflect.TypeOf("")
+
+// literalStore decodes a literal stored in item into v.
+//
+// fromQuoted indicates whether this literal came from unwrapping a
+// string from the ",string" struct tag option. this is used only to
+// produce more helpful error messages.
+//将值写进对应的类型里
+func (d *decodeState)literalStore(item []byte, v reflect.Value, fromQuoted bool) error {
+	// Check for unmarshaler.
+	if len(item) == 0{
+		//Empty string given
+		return nil
+	}
+	isNull :=item[0] == 'n'
+	u,ut,pv :=indirect(v,isNull)
+	if u != nil{
+
+	}
+	if ut != nil{
+
+	}
+
+	v = pv
+
+	switch c := item[0]; c {
+	case 'n'://null
+	case 't','f'://true, false
+	case '"'://string
+		s,ok :=unquoteBytes(item)
+		if !ok{
+			panic(phasePanicMsg)
+		}
+		switch v.Kind() {
+		default:
+		case reflect.String:
+			v.SetString(string(s))
+		}
+	}
+}
+
+//去除特殊符号,等到想要的值或字段
+func unquoteBytes(s []byte) (t []byte, ok bool) {
+	//首位如果不是""则直接返回
+	if len(s)<2 || s[0] != '"' || s[len(s)-1] != '"'{
+		return
+	}
+	//去除首尾
+	s = s[1 : len(s)-1]
+	// Check for unusual characters. If there are none,
+	// then no unquoting is needed, so return a slice of the
+	// original bytes.
+	r := 0
+	for r < len(s) {
+		c := s[r]
+		if c == '\\' || c == '"' || c < ' ' {
+			break
+		}
+		if c < utf8.RuneSelf {
+			r++
+			continue
+		}
+	}
+	if r == len(s){
+		return s,true
+	}
+	return nil,false
+}
 

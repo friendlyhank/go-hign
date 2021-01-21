@@ -151,7 +151,7 @@ const(
 // rtype must be kept in sync with ../runtime/type.go:/^type._type.
 //通用的数据类型
 type rtype struct {
-	size uintptr
+	size uintptr //大小
 	ptrdata    uintptr //指针数据 number of bytes in the type that can contain pointers
 	hash       uint32  // hash of type; avoids computation in hash tables
 	tflag      tflag   // extra type information flags
@@ -191,7 +191,7 @@ type uncommonType struct {
 // record why the addition is safe, which is to say why the addition
 // does not cause x to advance to the very end of p's allocation
 // and therefore point incorrectly at the next block in memory.
-//结构体得偏移量计算,得到某个字段得内存空间地址
+//偏移量计算,得到某个字段(struct,array,slice)
 func add(p unsafe.Pointer,x uintptr,whySafe string)unsafe.Pointer{
 	return unsafe.Pointer(uintptr(p)+x)
 }

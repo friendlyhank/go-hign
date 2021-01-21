@@ -711,23 +711,39 @@ type sliceEncoder struct{
 	arrayEnc encoderFunc
 }
 
-func newSliceEncoder(r reflect.Type)encoderFunc{
-	enc :=sliceEncoder{}
+func newSliceEncoder(t reflect.Type)encoderFunc{
+	enc :=sliceEncoder{newArrayEncoder(t)}
 	return enc.encode
 }
 
-func (se sliceEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+func (se sliceEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	if v.IsNil(){
+		e.WriteString("null")
+		return
+	}
+	se.arrayEnc(e,v,opts)
+}
 
 type arrayEncoder struct{
 	elemEnc encoderFunc
 }
 
 func newArrayEncoder(t reflect.Type)encoderFunc{
-	enc :=arrayEncoder{}
+	enc :=arrayEncoder{typeEncoder(t.Elem())}
 	return enc.encode
 }
 
-func (ae arrayEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){}
+func (ae arrayEncoder)encode(e *encodeState,v reflect.Value,opts encOpts){
+	e.WriteByte('[')
+	n :=v.Len()
+	for i :=0;i <n;i++{
+		if i > 0{
+			e.WriteByte(',')
+		}
+		ae.elemEnc(e,v.Index(i),opts)
+	}
+	e.WriteByte(']')
+}
 
 //指针类型编码
 type ptrEncoder struct{
