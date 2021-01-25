@@ -136,7 +136,7 @@ func (d *decodeState)unmarshal(v interface{}) error{
 	}
 
 	d.scan.reset()
-	//获取下一步解析的步骤,并判断是否结束
+	//进入stateBeginValue 获取下一步解析的步骤,并判断是否结束
 	d.scanWhile(scanSkipSpace)
 	// We decode rv not rv.Elem because the Unmarshaler interface
 	// test must be applied at the top level of the value.

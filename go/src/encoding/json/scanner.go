@@ -117,11 +117,15 @@ func isSpace(c byte) bool {
 
 // stateBeginValueOrEmpty is the state after reading `[`.
 func stateBeginValueOrEmpty(s *scanner, c byte) int {
-	return 0
+	if isSpace(c){
+		return scanSkipSpace
+	}
+	return stateBeginValue(s,c)
 }
 
 // stateBeginValue is the state at the beginning of the input.
-//一开始输入的处理
+//状态从起始符号开始的解析,其实符号可以为`{`、`[`、`"`、0等
+//最后得到得结果分析只有三个object、array、单元素(key或value)
 func stateBeginValue(s *scanner,c byte)int{
 	if isSpace(c){
 		return scanSkipSpace
@@ -139,8 +143,19 @@ func stateBeginValue(s *scanner,c byte)int{
 		s.step = stateInString
 		//说明要解析的是字段key或value
 		return scanBeginLiteral
-	case '0':
+	case '0'://如果开始的字符是0,说明是小数点 beginning of 0.123
 		s.step = state0
+		return scanBeginLiteral
+	case 't'://如果开始的字符是t(true)开头 beginning of true
+		s.step = stateT
+		return  scanBeginLiteral
+	case 'f'://如果开始的字符是f(false)开头  beginning of false
+		return scanBeginLiteral
+	case 'n'://如果开始的字符是n(null)开头 beginning of null
+		return scanBeginLiteral
+	}
+	if '1' <= c && c <= '9'{// beginning of 1234.5
+		s.step = state1
 		return scanBeginLiteral
 	}
 	return s.error(c,"looking for beginning of value")
@@ -203,6 +218,17 @@ func stateInString(s *scanner,c byte)int{
 	return scanContinue
 }
 
+// state1 is the state after reading a non-zero integer during a number,
+// such as after reading `1` or `100` but not `0`.
+//读取到`1`、`100`之后，说明是小数点或数字
+func state1(s *scanner, c byte) int {
+	if '0' <= c && c <= '9'{
+		s.step = state1
+		return scanContinue
+	}
+	return state0(s,c)
+}
+
 // state0 is the state after reading `0` during a number.
 //遇到`0`开头的时候的的情况
 func state0(s *scanner,c byte) int{
@@ -225,11 +251,42 @@ func stateDot(s *scanner,c byte) int{
 
 // stateDot0 is the state after reading the integer, decimal point, and subsequent
 // digits of a number, such as after reading `3.14`.
+//读取`3.14`之后,说明是小数点,后面继续拼接的是数字
 func stateDot0(s *scanner,c byte)int{
 	if '0' <= c && c <= '9'{
 		return scanContinue
 	}
 	return stateEndValue(s,c)
+}
+
+// stateT is the state after reading `t`.
+//读取`t`字符后,应该紧跟的是`r`(true)
+func stateT(s *scanner,c byte)int{
+	if c == 'r'{
+		s.step = stateTr
+		return scanContinue
+	}
+	return s.error(c, "in literal true (expecting 'r')")
+}
+
+// stateTr is the state after reading `tr`.
+//读取`tr`字符后,应该紧跟的是`u`(true)
+func stateTr(s *scanner,c byte)int{
+	if c == 'u'{
+		s.step = stateTru
+		return scanContinue
+	}
+	return s.error(c, "in literal true (expecting 'u')")
+}
+
+// stateTru is the state after reading `tru`.
+//读取`tru`字符后,应该紧跟的是`e`(true)
+func stateTru(s *scanner, c byte) int {
+	if c == 'e'{
+		s.step = stateEndValue
+		return scanContinue
+	}
+	return s.error(c, "in literal true (expecting 'e')")
 }
 
 func stateError(s *scanner,c byte)int{
