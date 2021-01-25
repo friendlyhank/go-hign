@@ -139,6 +139,9 @@ func stateBeginValue(s *scanner,c byte)int{
 		s.step = stateInString
 		//说明要解析的是字段key或value
 		return scanBeginLiteral
+	case '0':
+		s.step = state0
+		return scanBeginLiteral
 	}
 	return s.error(c,"looking for beginning of value")
 }
@@ -198,6 +201,35 @@ func stateInString(s *scanner,c byte)int{
 		return scanContinue
 	}
 	return scanContinue
+}
+
+// state0 is the state after reading `0` during a number.
+//遇到`0`开头的时候的的情况
+func state0(s *scanner,c byte) int{
+	if c == '.'{
+		s.step = stateDot
+	}
+	return stateEndValue(s,c)
+}
+
+// stateDot is the state after reading the integer and decimal point in a number,
+// such as after reading `1.`.
+//遇到`1.`开头的情况,说明可能是小数点
+func stateDot(s *scanner,c byte) int{
+	if '0' <= c && c <= '9'{
+		s.step = stateDot0
+		return scanContinue
+	}
+	return s.error(c, "after decimal point in numeric literal")
+}
+
+// stateDot0 is the state after reading the integer, decimal point, and subsequent
+// digits of a number, such as after reading `3.14`.
+func stateDot0(s *scanner,c byte)int{
+	if '0' <= c && c <= '9'{
+		return scanContinue
+	}
+	return stateEndValue(s,c)
 }
 
 func stateError(s *scanner,c byte)int{

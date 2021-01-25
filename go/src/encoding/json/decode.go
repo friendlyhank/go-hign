@@ -221,6 +221,21 @@ Switch:
 			break Switch
 		}
 		}
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-': // number
+		for ;i < len(data);i ++{
+			switch data[i] {
+			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+				'.', 'e', 'E', '+', '-':
+			default:
+				break Switch
+			}
+		}
+	case 't'://true
+		i += len("rue")
+	case 'f'://false
+		i += len("alse")
+	case 'n'://null
+		i += len("ull")
 	}
 	if i < len(data){
 		d.opcode =stateEndValue(&d.scan,data[i])
