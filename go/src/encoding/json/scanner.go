@@ -150,6 +150,7 @@ func stateBeginValue(s *scanner,c byte)int{
 		s.step = stateT
 		return  scanBeginLiteral
 	case 'f'://如果开始的字符是f(false)开头  beginning of false
+		s.step = stateF
 		return scanBeginLiteral
 	case 'n'://如果开始的字符是n(null)开头 beginning of null
 		return scanBeginLiteral
@@ -287,6 +288,45 @@ func stateTru(s *scanner, c byte) int {
 		return scanContinue
 	}
 	return s.error(c, "in literal true (expecting 'e')")
+}
+
+// stateF is the state after reading `f`.
+//读取`f`字符后,应该紧跟得是`a`(false)
+func stateF(s *scanner,c byte)int{
+	if c == 'a'{
+		s.step = stateFa
+		return scanContinue
+	}
+	return s.error(c, "in literal false (expecting 'a')")
+}
+
+// stateFa is the state after reading `fa`.
+//读取`fa`字符后,应该紧跟的是`l`(false)
+func stateFa(s *scanner, c byte) int {
+ 	if c == 'l'{
+ 		s.step = stateFal
+		return scanContinue
+	}
+	return s.error(c, "in literal false (expecting 'l')")
+}
+
+// stateFal is the state after reading `fal`.
+//读取`fal`字符后,应该紧跟的是`s`(false)
+func stateFal(s *scanner, c byte) int {
+	if c == 's'{
+		s.step = stateFals
+		return scanContinue
+	}
+	return s.error(c, "in literal false (expecting 's')")
+}
+
+// stateFals is the state after reading `fals`.
+func stateFals(s *scanner, c byte) int {
+	if c == 'e' {
+		s.step = stateEndValue
+		return scanContinue
+	}
+	return s.error(c, "in literal false (expecting 'e')")
 }
 
 func stateError(s *scanner,c byte)int{
