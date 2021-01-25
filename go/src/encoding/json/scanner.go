@@ -143,6 +143,9 @@ func stateBeginValue(s *scanner,c byte)int{
 		s.step = stateInString
 		//说明要解析的是字段key或value
 		return scanBeginLiteral
+	case '-':
+		s.step = stateNeg
+		return scanBeginLiteral
 	case '0'://如果开始的字符是0,说明是小数点 beginning of 0.123
 		s.step = state0
 		return scanBeginLiteral
@@ -153,6 +156,7 @@ func stateBeginValue(s *scanner,c byte)int{
 		s.step = stateF
 		return scanBeginLiteral
 	case 'n'://如果开始的字符是n(null)开头 beginning of null
+		s.step = stateN
 		return scanBeginLiteral
 	}
 	if '1' <= c && c <= '9'{// beginning of 1234.5
@@ -217,6 +221,19 @@ func stateInString(s *scanner,c byte)int{
 		return scanContinue
 	}
 	return scanContinue
+}
+
+// stateNeg is the state after reading `-` during a number.
+func stateNeg(s *scanner,c byte)int{
+	if c == '0'{
+		s.step =state0
+		return scanContinue
+	}
+	if '1' <= c && c <= '9'{
+		s.step = state1
+		return  scanContinue
+	}
+	return s.error(c, "in numeric literal")
 }
 
 // state1 is the state after reading a non-zero integer during a number,
@@ -321,12 +338,43 @@ func stateFal(s *scanner, c byte) int {
 }
 
 // stateFals is the state after reading `fals`.
+//读取`fals`字符后,应该紧跟得是`e`(false)
 func stateFals(s *scanner, c byte) int {
 	if c == 'e' {
 		s.step = stateEndValue
 		return scanContinue
 	}
 	return s.error(c, "in literal false (expecting 'e')")
+}
+
+// stateN is the state after reading `n`.
+//读取`n`字符后,应该紧跟的是`u`(null)
+func stateN(s *scanner,c byte)int{
+	if c == 'u'{
+		s.step = stateNu
+		return scanContinue
+	}
+	return s.error(c, "in literal null (expecting 'u')")
+}
+
+// stateNu is the state after reading `nu`.
+//读取`nu`字符后,应该紧跟`l`(null)
+func stateNu(s *scanner, c byte) int {
+	if c == 'l'{
+		s.step = stateNul
+		return scanContinue
+	}
+	return s.error(c, "in literal null (expecting 'l')")
+}
+
+// stateNul is the state after reading `nul`.
+//读取`nul`字符后,应该紧跟`l`(null)
+func stateNul(s *scanner,c byte)int{
+	if c == 'l'{
+		s.step = stateEndValue
+		return scanContinue
+	}
+	return s.error(c, "in literal null (expecting 'l')")
 }
 
 func stateError(s *scanner,c byte)int{
