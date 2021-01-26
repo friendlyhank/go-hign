@@ -6,8 +6,15 @@
 
 package runtime
 
+// Needs to be in sync with ../cmd/link/internal/ld/decodesym.go:/^func.commonsize,
+// ../cmd/compile/internal/gc/reflect.go:/^func.dcommontype and
+// ../reflect/type.go:/^type.rtype.
+// ../internal/reflectlite/type.go:/^type.rtype.
+//表示某种数据类型
 type _type struct {
-	ptrdata uintptr //size of memory prefix holding all pointers
+	size       uintptr //大小
+	ptrdata uintptr //指针数据 size of memory prefix holding all pointers
+	hash       uint32
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.

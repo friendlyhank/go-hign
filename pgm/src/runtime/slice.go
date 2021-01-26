@@ -4,7 +4,10 @@
 
 package runtime
 
-import "unsafe"
+import (
+	"runtime/internal/math"
+	"unsafe"
+)
 
 //切片就是高级版的数组
 type slice struct {
@@ -18,4 +21,15 @@ type notInHeapSlice struct{
 	array *notInHeap
 	len   int
 	cap   int
+}
+
+// 调用make(slice,size)
+func makeslice(et *_type, len, cap int) unsafe.Pointer {
+	mem,overflow :=math.MulUintptr(et.size,uintptr(cap))
+	//如果内存地址溢出或者是超出可分配的最大值
+	if overflow || mem > maxAlloc || len < 0 || len > cap{
+
+	}
+	//分配内存空间
+	return mallocgc(mem,et,true)
 }
