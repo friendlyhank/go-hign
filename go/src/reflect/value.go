@@ -414,6 +414,15 @@ func(v Value)Index(i int) Value {
 	panic(&ValueError{"reflect.Value.Index", v.kind()})
 }
 
+// CanInterface reports whether Interface can be used without panicking.
+//如果是私有或者是嵌套私有都不能实现接口
+func (v Value)CanInterface()bool{
+	if v.flag == 0 {
+		panic(&ValueError{"reflect.Value.CanInterface", Invalid})
+	}
+	return v.flag&flagRO == 0
+}
+
 //Value转Interface类型
 func (v Value)Interface()(i interface{}) {
 	return valueInterface(v,true)

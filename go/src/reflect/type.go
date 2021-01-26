@@ -33,17 +33,25 @@ import (
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
 type Type interface {
+	// NumMethod returns the number of exported methods in the type's method set.
+	//获取方法的个数
+	NumMethod() int
+
+	// Name returns the type's name within its package for a defined type.
+	// For other (non-defined) types it returns the empty string.
+	Name() string
+
 	// Kind returns the specific kind of this type.
 	Kind()Kind //对应kind 所有的数据类型
+
+	// Implements reports whether the type implements the interface type u.
+	//判断是否继承某个接口
+	Implements(u Type) bool
 
 	// Elem returns a type's element type.
 	// It panics if the type's Kind is not Array, Chan, Map, Ptr, or Slice.
 	//获取Array,Chan,Map,Ptr或者Slice的元素类型
 	Elem() Type
-
-	// Implements reports whether the type implements the interface type u.
-	//判断是否继承某个接口
-	Implements(u Type) bool
 
 	// Field returns a struct type's i'th field.
 	// It panics if the type's Kind is not Struct.
@@ -55,10 +63,6 @@ type Type interface {
 	// It panics if the type's Kind is not Struct.
 	//获取结构体的字段个数
 	NumField() int
-
-	// Name returns the type's name within its package for a defined type.
-	// For other (non-defined) types it returns the empty string.
-	Name() string
 }
 
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
@@ -640,8 +644,17 @@ var kindNames = []string{
 	UnsafePointer: "unsafe.Pointer",
 }
 
+//得到所有的方法
 func (t *uncommonType)methods()[]method{
 	if t.mcount == 0{
+		return nil
+	}
+	return (*[1 << 16]method)(add(unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0"))[:t.xcount:t.xcount]
+}
+
+//输出得到所有的方法
+func (t *uncommonType) exportedMethods() []method {
+	if t.xcount == 0 {
 		return nil
 	}
 	return (*[1 << 16]method)(add(unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0"))[:t.xcount:t.xcount]
@@ -740,6 +753,20 @@ func (t *rtype)Kind()Kind{return Kind(t.kind & kindMask)}
 
 //是否指针类型
 func (t *rtype)pointers()bool{return t.ptrdata != 0}
+
+//输出这个类型实现的所有方法
+func (t *rtype)exportedMethods()[]method{
+	//先转化成通用的类型
+	ut :=t.uncommon()
+	return ut.exportedMethods()
+}
+
+func (t *rtype)NumMethod()int{
+	if t.Kind() == Interface{
+		tt :=(*interfaceType)(unsafe.Pointer(t))
+		return tt.NumMethod()
+	}
+}
 
 func (t *rtype)hasName()bool{
 	return t.tflag&tflagNamed != 0

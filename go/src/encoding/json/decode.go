@@ -282,7 +282,54 @@ func (d *decodeState)value(v reflect.Value)error{
 // If decodingNull is true, indirect stops at the first settable pointer so it
 // can be set to nil.
 func indirect(v reflect.Value,decodingNull bool)(Unmarshaler,encoding.TextUnmarshaler,reflect.Value){
-	v = v.Elem()
+	// Issue #24153 indicates that it is generally not a guaranteed property
+	// that you may round-trip a reflect.Value by calling Value.Addr().Elem()
+	// and expect the value to still be settable for values derived from
+	// unexported embedded struct fields.
+	//
+	// The logic below effectively does this when it first addresses the value
+	// (to satisfy possible pointer methods) and continues to dereference
+	// subsequent pointers as necessary.
+	//
+	// After the first round-trip, we set v back to the original value to
+	// preserve the original RW flags contained in reflect.Value.
+	v0 := v
+	haveAddr := false
+
+	// If v is a named type and is addressable,
+	// start with its address, so that if the type has pointer methods,
+	// we find them.
+	if v.Kind() != reflect.Ptr && v.Type().Name() != "" && v.CanAddr(){
+		haveAddr = true
+		v = v.Addr() //实现了接口,转化成指针去操作
+	}
+
+	for{
+		// Load value from interface, but only if the result will be
+		// usefully addressable.
+		if v.Kind() == reflect.Interface && !v.IsNil(){
+		}
+
+		if v.Kind() != reflect.Ptr{
+			break
+		}
+
+		if v.Type().NumMethod() > 0 &&v.CanInterface(){
+			if u,ok :=v.Interface().(Unmarshaler);ok{
+				return u,nil,reflect.Value{}
+			}
+			if u,ok :=v.Interface().(encoding.TextUnmarshaler);ok{
+				return nil,u,reflect.Value{}
+			}
+		}
+
+		if haveAddr{
+			v = v0 //执行完接口之后需要用回原来传入的值
+			haveAddr = false
+		}else{
+			v= v.Elem()
+		}
+	}
 	return nil,nil,v
 }
 
@@ -422,10 +469,17 @@ func (d *decodeState)literalStore(item []byte, v reflect.Value, fromQuoted bool)
 	isNull :=item[0] == 'n'
 	u,ut,pv :=indirect(v,isNull)
 	if u != nil{
-
+		return u.UnmarshalJSON(item)
 	}
 	if ut != nil{
-
+		s,ok := unquoteBytes(item)
+		if !ok{
+			if fromQuoted {
+				return nil
+			}
+			panic(phasePanicMsg)
+		}
+		return ut.UnmarshalText(s)
 	}
 
 	v = pv
