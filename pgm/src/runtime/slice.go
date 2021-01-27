@@ -33,3 +33,17 @@ func makeslice(et *_type, len, cap int) unsafe.Pointer {
 	//分配内存空间
 	return mallocgc(mem,et,true)
 }
+
+// growslice handles slice growth during append.
+// It is passed the slice element type, the old slice, and the desired new minimum capacity,
+// and it returns a new slice with at least that capacity, with the old data
+// copied into it.
+// The new slice's length is set to the old slice's length,
+// NOT to the new requested capacity.
+// This is for codegen convenience. The old slice's length is used immediately
+// to calculate where to write new values during an append.
+// TODO: When the old backend is gone, reconsider this decision.
+// The SSA backend might prefer the new length or to return only ptr/cap and save stack space.
+func growslice(et *_type,old slice,cap int)slice{
+
+}

@@ -204,4 +204,5 @@ func Offsetof(x ArbitraryType) uintptr
 // of a field of that type within a struct. This case is the same as the
 // value returned by reflect.TypeOf(s.f).FieldAlign().
 // The return value of Alignof is a Go constant.
+//返回结构体内存对齐的系数
 func Alignof(x ArbitraryType) uintptr
