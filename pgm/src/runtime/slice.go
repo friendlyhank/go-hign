@@ -46,4 +46,31 @@ func makeslice(et *_type, len, cap int) unsafe.Pointer {
 // The SSA backend might prefer the new length or to return only ptr/cap and save stack space.
 func growslice(et *_type,old slice,cap int)slice{
 
+	if cap < old.cap{
+
+	}
+
+	if et.size == 0{
+		// append should not create a slice with nil pointer but non-zero len.
+		// We assume that append doesn't need to preserve old.array in this case.
+		return slice{unsafe.Pointer(&zerobase),old.len,cap}
+	}
+
+	newcap := old.cap
+	doublecap :=newcap + newcap
+	if cap > doublecap{
+		newcap := newcap + newcap
+	}else{
+		// Check 0 < newcap to detect overflow
+		// and prevent an infinite loop.
+		for 0 <newcap && newcap < cap{
+			newcap += newcap / 4
+		}
+
+		// Set newcap to the requested cap when
+		// the newcap calculation overflowed.
+		if newcap <= 0{
+			newcap = cap
+		}
+	}
 }
