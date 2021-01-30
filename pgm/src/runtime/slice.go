@@ -6,6 +6,7 @@ package runtime
 
 import (
 	"runtime/internal/math"
+	"runtime/internal/sys"
 	"unsafe"
 )
 
@@ -73,4 +74,83 @@ func growslice(et *_type,old slice,cap int)slice{
 			newcap = cap
 		}
 	}
+
+	var overflow bool
+	var lenmem,newlenmem,capmem uintptr
+	/*
+	 *lenmem表示旧切片实际元素长度所占的内存空间大小
+	 *newlenmem表示新切片实际元素长度所占的内存空间大小
+	 *capmem表示扩容之后的容量大小
+	 *overflow是否溢出
+	 */
+	// Specialize for common values of et.size.
+	// For 1 we don't need any division/multiplication.
+	// For sys.PtrSize, compiler will optimize division/multiplication into a shift by a constant.
+	// For powers of 2, use a variable shift.
+	switch{
+	case et.size == 1://元素所占的字节数为1
+		lenmem = uintptr(old.len)
+		newlenmem = uintptr(cap)
+		capmem = roundupsize(uintptr(newcap))//向上取整分配内存
+		overflow = uintptr(newcap) > maxAlloc
+		newcap = int(capmem)
+	case et.size == sys.PtrSize://元素所占的字节数为8个字节
+		lenmem = uintptr(old.len) * sys.PtrSize
+		newlenmem = uintptr(cap) * sys.PtrSize
+		capmem = roundupsize(uintptr(newcap) * sys.PtrSize)
+		overflow = uintptr(newcap) > maxAlloc/sys.PtrSize
+		newcap = int(capmem / sys.PtrSize)
+	case isPowerOfTwo(et.size)://元素所占的字节数为2的倍数
+		var shift uintptr
+		//根据元素的字节数计算出位运算系数
+		if sys.PtrSize == 8 {
+			// Mask shift for better code generation.
+			shift = uintptr(sys.Ctz64(uint64(et.size))) & 63
+		} else {
+			shift = uintptr(sys.Ctz32(uint32(et.size))) & 31
+		}
+		//计算内存空间用位运算
+		lenmem = uintptr(old.len) << shift
+		newlenmem = uintptr(cap) << shift
+		capmem = roundupsize(uintptr(newcap) << shift)
+		overflow = uintptr(newcap) > (maxAlloc >> shift)
+		newcap = int(capmem >> shift)
+
+	default:
+		lenmem = uintptr(old.len) * et.size
+		newlenmem = uintptr(cap) * et.size
+		capmem, overflow = math.MulUintptr(et.size, uintptr(newcap))
+		capmem = roundupsize(capmem)
+		newcap = int(capmem / et.size)
+	}
+
+	// The check of overflow in addition to capmem > maxAlloc is needed
+	// to prevent an overflow which can be used to trigger a segfault
+	// on 32bit architectures with this example program:
+	//
+	// type T [1<<27 + 1]int64
+	//
+	// var d T
+	// var s []T
+	//
+	// func main() {
+	//   s = append(s, d, d, d, d)
+	//   print(len(s), "\n")
+	// }
+
+	if overflow || capmem > maxAlloc {
+	}
+
+	var p unsafe.Pointer
+	//如果元素不是指针
+	if et.ptrdata == 0{
+
+	}else{
+
+	}
+}
+
+//是否为2的倍数
+func isPowerOfTwo(x uintptr)bool{
+	return x&(x-1) == 0
 }

@@ -24,12 +24,32 @@ var deBruijnIdx64ctz = [64]byte{
 	61, 22, 43, 51, 60, 42, 59, 58,
 }
 
+const deBruijn32ctz = 0x04653adf
+var deBruijnIdx32ctz = [32]byte{
+	0, 1, 2, 6, 3, 11, 7, 16,
+	4, 14, 12, 21, 8, 23, 17, 26,
+	31, 5, 10, 15, 13, 20, 22, 25,
+	30, 9, 19, 24, 29, 18, 28, 27,
+}
+
 // Ctz64 counts trailing (low-order) zeroes,
 // and if all are zero, then 64.
+//可以在64位系统中将size转化为位运算
 func Ctz64(x uint64) int {
 	x &= -x                       // isolate low-order bit
 	y := x * deBruijn64ctz >> 58  // extract part of deBruijn sequence
 	i := int(deBruijnIdx64ctz[y]) // convert to bit index
 	z := int((x - 1) >> 57 & 64)  // adjustment if zero
+	return i + z
+}
+
+// Ctz32 counts trailing (low-order) zeroes,
+// and if all are zero, then 32.
+//可以在32位系统中将size转化为位运算
+func Ctz32(x uint32) int {
+	x &= -x                       // isolate low-order bit
+	y := x * deBruijn32ctz >> 27  // extract part of deBruijn sequence
+	i := int(deBruijnIdx32ctz[y]) // convert to bit index
+	z := int((x - 1) >> 26 & 32)  // adjustment if zero
 	return i + z
 }
