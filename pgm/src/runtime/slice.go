@@ -10,7 +10,7 @@ import (
 	"unsafe"
 )
 
-//切片就是高级版的数组
+//切片就是动态数组
 type slice struct {
 	array unsafe.Pointer
 	len int
@@ -60,7 +60,7 @@ func growslice(et *_type,old slice,cap int)slice{
 	newcap := old.cap
 	doublecap :=newcap + newcap
 	if cap > doublecap{
-		newcap := newcap + newcap
+		newcap = newcap + newcap
 	}else{
 		// Check 0 < newcap to detect overflow
 		// and prevent an infinite loop.
@@ -144,10 +144,20 @@ func growslice(et *_type,old slice,cap int)slice{
 	var p unsafe.Pointer
 	//如果元素不是指针
 	if et.ptrdata == 0{
-
+		//申请一块无类型的内存空间
+		p = mallocgc(capmem, nil, false)
+		// The append() that calls growslice is going to overwrite from old.len to cap (which will be the new length).
+		// Only clear the part that will not be overwritten.
+		//将超出切片当前长度的位置进行初始化
+		memclrNoHeapPointers(add(p, newlenmem), capmem-newlenmem)
 	}else{
-
+		// Note: can't use rawmem (which avoids zeroing of memory), because then GC can scan uninitialized memory.
+		p = mallocgc(capmem,et,true)
 	}
+	//将旧切片的值考入新的切片
+	memmove(p, old.array, lenmem)
+
+	return slice{p,old.len,newcap}
 }
 
 //是否为2的倍数
