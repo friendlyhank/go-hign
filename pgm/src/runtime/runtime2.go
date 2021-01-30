@@ -180,8 +180,12 @@ type mutex struct{
 	key uintptr
 }
 
-type iface struct{}
+//带方法的接口
+type iface struct{
+	data unsafe.Pointer
+}
 
+//不带方法的接口
 type eface struct{
 	_type *_type
 	data unsafe.Pointer
@@ -542,6 +546,36 @@ type schedt struct{
 	sysmonlock mutex //sysmon监控的锁
 }
 
+// Layout of in-memory per-function information prepared by linker
+// See https://golang.org/s/go12symtab.
+// Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
+// and with package debug/gosym and with symtab.go in package runtime.
+type _func struct {
+	entry   uintptr // start pc
+	nameoff int32   // function name
+
+	args        int32  // in/out args size
+	deferreturn uint32 // offset of start of a deferreturn call instruction from entry, if any.
+
+	pcsp      int32
+	pcfile    int32
+	pcln      int32
+	npcdata   int32
+	funcID    funcID  // set for certain special runtime functions
+	_         [2]int8 // unused
+	nfuncdata uint8   // must be last
+}
+
+// layout of Itab known to compilers
+// allocated in non-garbage-collected memory
+// Needs to be in sync with
+// ../cmd/compile/internal/gc/reflect.go:/^func.dumptabs.
+type itab struct {
+	inter *interfacetype //接口类型
+	_type *_type
+	hash uint32
+}
+
 type gobuf struct {
 	// The offsets of sp, pc, and g are known to (hard-coded in) libmach.
 	//
@@ -621,28 +655,6 @@ type wincallbackcontext struct {
 	gobody unsafe.Pointer // go function to call
 	argsize uintptr // callback arguments size (in bytes)
 }
-
-// Layout of in-memory per-function information prepared by linker
-// See https://golang.org/s/go12symtab.
-// Keep in sync with linker (../cmd/link/internal/ld/pcln.go:/pclntab)
-// and with package debug/gosym and with symtab.go in package runtime.
-type _func struct {
-	entry   uintptr // start pc
-	nameoff int32   // function name
-
-	args        int32  // in/out args size
-	deferreturn uint32 // offset of start of a deferreturn call instruction from entry, if any.
-
-	pcsp      int32
-	pcfile    int32
-	pcln      int32
-	npcdata   int32
-	funcID    funcID  // set for certain special runtime functions
-	_         [2]int8 // unused
-	nfuncdata uint8   // must be last
-}
-
-type itab struct {}
 
 // extendRandom extends the random numbers in r[:n] to the whole slice r.
 // Treats n<0 as n==0.

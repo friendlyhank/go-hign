@@ -6,6 +6,17 @@
 
 package runtime
 
+import "unsafe"
+
+// tflag is documented in reflect/type.go.
+//
+// tflag values must be kept in sync with copies in:
+//	cmd/compile/internal/gc/reflect.go
+//	cmd/link/internal/ld/decodesym.go
+//	reflect/type.go
+//      internal/reflectlite/type.go
+type tflag uint8
+
 // Needs to be in sync with ../cmd/link/internal/ld/decodesym.go:/^func.commonsize,
 // ../cmd/compile/internal/gc/reflect.go:/^func.dcommontype and
 // ../reflect/type.go:/^type.rtype.
@@ -15,6 +26,15 @@ type _type struct {
 	size       uintptr //占用的字节大小
 	ptrdata uintptr //指针数据 size of memory prefix holding all pointers
 	hash       uint32
+	tflag      tflag
+	align      uint8 //内存对齐系数
+	fieldAlign uint8 //字段内存对齐系数
+	kind uint8
+	// function for comparing objects of this type
+	// (ptr to object A, ptr to object B) -> ==?
+	equal func(unsafe.Pointer, unsafe.Pointer) bool//用于判断当前类型多个对象是否相等
+	str       nameOff //名字偏移量
+	ptrToThis typeOff //指针的偏移量
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.
