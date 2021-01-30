@@ -573,7 +573,7 @@ type _func struct {
 type itab struct {
 	inter *interfacetype //接口类型
 	_type *_type
-	hash uint32
+	hash uint32 //判断目标类型和具体类型是否一致 copy of _type.hash. Used for type switches.
 }
 
 type gobuf struct {
