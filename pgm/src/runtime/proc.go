@@ -257,6 +257,7 @@ func schedinit(){
 	mallocinit()
 	//初始化m
 	mcommoninit(_g_.m,-1)
+	itabsinit() // uses activeModules
 
 	//初始化参数和环境变量
 

@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"runtime/internal/atomic"
 	"runtime/internal/sys"
 	"unsafe"
 )
@@ -65,7 +66,7 @@ type moduledata struct {
 
 	textsectmap []textsect
 	typelinks   []int32 // offsets from types
-	itablinks   []*itab
+	itablinks   []*itab //存储实现接口的实例链接信息
 
 	ptab []ptabEntry
 
@@ -122,6 +123,24 @@ type textsect struct {}
 var firstmoduledata moduledata  // linker symbol
 var lastmoduledatap *moduledata // linker symbol
 var modulesSlice *[]*moduledata // see activeModules
+
+// activeModules returns a slice of active modules.
+//
+// A module is active once its gcdatamask and gcbssmask have been
+// assembled and it is usable by the GC.
+//
+// This is nosplit/nowritebarrier because it is called by the
+// cgo pointer checking code.
+//获取活跃的moduledata信息
+//go:nosplit
+//go:nowritebarrier
+func activeModules() []*moduledata {
+	p := (*[]*moduledata)(atomic.Loadp(unsafe.Pointer(&modulesSlice)))
+	if p == nil {
+		return nil
+	}
+	return *p
+}
 
 const minfunc = 16                 // minimum function size
 const pcbucketsize = 256 * minfunc // size of bucket in the pc->func lookup table
