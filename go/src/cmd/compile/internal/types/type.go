@@ -106,6 +106,12 @@ type Array struct{
 	Bound int64 //number of elements; <0 if unknown yet
 }
 
+// Slice contains Type fields specific to slice types.
+//切片结构体
+type Slice struct{
+	Elem *Type
+}
+
 func New(et EType)*Type{
 	t :=&Type{
 		Etype:et,
@@ -120,6 +126,7 @@ func New(et EType)*Type{
 }
 
 // NewArray returns a new fixed-length array Type.
+//数组初始化
 func NewArray(elem *Type,bound int64) *Type{
 	if bound < 0{
 
@@ -127,5 +134,13 @@ func NewArray(elem *Type,bound int64) *Type{
 	t := New(TARRAY)
 	t.Extra = &Array{Elem: elem,Bound: bound}
 	t.SetNotInHeap(elem.NotInHeap())
+	return t
+}
+
+// NewSlice returns the slice Type with element type elem.
+//切片初始化
+func NewSlice(elem *Type)*Type{
+	t :=New(TSLICE)
+	t.Extra =Slice{Elem: elem}
 	return t
 }
