@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"runtime/internal/atomic"
+	"runtime/internal/math"
 	"runtime/internal/sys"
 	"unsafe"
 )
@@ -519,6 +520,19 @@ type persistentAlloc struct {
 var globalAlloc struct{
 	mutex
 	persistentAlloc
+}
+
+// newarray allocates an array of n elements of type typ.
+//map也会通过这个分配内存
+func newarray(typ *_type,n int)unsafe.Pointer{
+	if n == 1{
+		return	mallocgc(typ.size,typ,true)
+	}
+	mem,overflow := math.MulUintptr(typ.size,uintptr(n))
+	if overflow || mem > maxAlloc || n < 0{
+
+	}
+	return mallocgc(mem,typ,true)
 }
 
 // persistentChunkSize is the number of bytes we allocate when we grow

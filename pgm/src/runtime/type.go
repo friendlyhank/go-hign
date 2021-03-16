@@ -58,7 +58,18 @@ type imethod struct {}
 
 type interfacetype struct {}
 
-type maptype struct {}
+type maptype struct {
+	typ _type
+	key *_type
+	elem *_type
+	bucket *_type // internal type representing a hash bucket
+	// function for hashing keys (ptr to key, seed) -> hash
+	hasher     func(unsafe.Pointer, uintptr) uintptr
+	keysize uint8 // size of key slot
+	elemsize uint8 // size of elem slot
+	bucketsize uint16 // size of bucket
+	flags uint32
+}
 
 type arraytype struct {}
 
