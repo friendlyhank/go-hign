@@ -19,13 +19,19 @@ const (
 	// Represent as loadFactorNum/loadFactorDen, to allow integer math.
 	loadFactorNum = 13
 	loadFactorDen = 2
+
+	// flags
+	iterator     = 1 //buckets正在被使用 there may be an iterator using buckets
+	oldIterator = 2 //oldbuckets正在被使用 there may be an iterator using oldbuckets
+	hashWriting = 4 //map正在被写入 a goroutine is writing to the map
+	sameSizeGrow = 8 //map正在扩容 the current map growth is to a new map of the same size
 )
 
 type hmap struct{
 	// Note: the format of the hmap is also encoded in cmd/compile/internal/gc/reflect.go.
 	// Make sure this stays in sync with the compiler's definition.
 	count int // # live cells == size of map.  Must be first (used by len() builtin)
-	flags uint8 //标记
+	flags uint8 //标记是否被使用 是否正在写入 是否正在扩容
 	B uint8 //桶的数量2^B log_2 of # of buckets (can hold up to loadFactor * 2^B items)
 	noverflow uint16 // approximate number of overflow buckets; see incrnoverflow for details
 	hash0 uint32 //哈希因子 hash seed
@@ -169,7 +175,28 @@ func makeBucketArray(t *maptype,b uint8,dirtyalloc unsafe.Pointer)(buckets unsaf
 	return buckets,nextOverflow
 }
 
+// mapaccess1 returns a pointer to h[key].  Never returns nil, instead
+// it will return a reference to the zero object for the elem type if
+// the key is not in the map.
+// NOTE: The returned pointer may keep the whole map live, so don't
+// hold onto it for very long.
+func mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
+	if h == nil || h.count == 0{
+
+	}
+
+	//当前map正在被写入
+	if h.flags&hashWriting != 0 {
+		throw("concurrent map read and map write")
+	}
+
+	hash := t.hasher(key,uintptr(h.hash0))
+}
+
 // overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor.
 func overLoadFactor(count int, B uint8) bool {
 	return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
 }
+
+const maxZero = 1024 // must match value in cmd/compile/internal/gc/walk.go:zeroValSize
+var zeroVal [maxZero]byte
