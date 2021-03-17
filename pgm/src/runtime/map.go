@@ -292,6 +292,7 @@ bucketloop:
 				//如果tophash不相等并且等于空,那么可以则可以插入
 				if isEmpty(b.tophash[i]) && inserti == nil{
 					inserti = &b.tophash[i]
+					//获取对应插入key和value的指针地址
 					insertk = add(unsafe.Pointer(b),dataOffset+i*uintptr(t.keysize))
 					elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i *uintptr(t.elemsize))
 				}
@@ -320,6 +321,19 @@ bucketloop:
 			goto done
 		}
 	}
+
+	// Did not find mapping for key. Allocate new cell & add entry.
+
+	//如果没有找到对应的插入位置,说明满了,尝试往溢出桶插入
+	if inserti == nil{
+
+	}
+
+	// store new key/elem at insert position
+	if t.indirectkey(){
+
+	}
+
 done:
 		if h.flags&hashWriting == 0{
 
