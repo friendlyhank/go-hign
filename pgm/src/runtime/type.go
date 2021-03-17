@@ -71,6 +71,23 @@ type maptype struct {
 	flags uint32
 }
 
+// Note: flag values must match those used in the TMAP case
+// in ../cmd/compile/internal/gc/reflect.go:dtypesym.
+//判断key值是否指针
+func (mt *maptype) indirectkey() bool { // store ptr to key instead of key itself
+	return mt.flags&1 != 0
+}
+
+//判断元素是否指针
+func (mt *maptype) indirectelem() bool { // store ptr to elem instead of elem itself
+	return mt.flags&2 != 0
+}
+
+//判断key值是否需要重写
+func (mt *maptype) needkeyupdate() bool { // true if we need to update key on an overwrite
+	return mt.flags&8 != 0
+}
+
 type arraytype struct {}
 
 type chantype struct {}

@@ -12,6 +12,7 @@ import (
 
 const (
 	// Maximum number of key/elem pairs a bucket can hold.
+	//定义桶能存储最大的值
 	bucketCntBits = 3
 	bucketCnt     = 1 << bucketCntBits
 
@@ -20,10 +21,21 @@ const (
 	loadFactorNum = 13
 	loadFactorDen = 2
 
+	// data offset should be the size of the bmap struct, but needs to be
+	// aligned correctly. For amd64p32 this means 64-bit alignment
+	// even though pointers are 32 bit.
+	//bmap结构体所占用的大小
+	dataOffset = unsafe.Offsetof(struct {
+		b bmap
+		v int64
+	}{}.v)
+
 	// Possible tophash values. We reserve a few possibilities for special marks.
 	// Each bucket (including its overflow buckets, if any) will have either all or none of its
 	// entries in the evacuated* states (except during the evacuate() method, which only happens
 	// during map writes and thus no one else can observe the map during that time).
+	//tophash的状态信息
+	//O和1的状态到底有啥区别
 	emptyRest      = 0 // this cell is empty, and there are no more non-empty cells at higher indexes or overflows.
 	emptyOne       = 1 // this cell is empty
 	evacuatedX     = 2 // key/elem is valid.  Entry has been evacuated to first half of larger table.
@@ -31,12 +43,18 @@ const (
 	evacuatedEmpty = 4 // cell is empty, bucket is evacuated.
 	minTopHash     = 5 // minimum tophash for a normal filled cell.
 
-	// flags
+	// hmap flags标记
 	iterator     = 1 //buckets正在被使用 there may be an iterator using buckets
 	oldIterator = 2 //oldbuckets正在被使用 there may be an iterator using oldbuckets
 	hashWriting = 4 //map正在被写入 a goroutine is writing to the map
 	sameSizeGrow = 8 //map在等量扩容 the current map growth is to a new map of the same size
 )
+
+// isEmpty reports whether the given tophash array entry represents an empty bucket entry.
+//判断tophash是否为空
+func isEmpty(x uint8)bool{
+	return x <= emptyOne
+}
 
 type hmap struct{
 	// Note: the format of the hmap is also encoded in cmd/compile/internal/gc/reflect.go.
@@ -85,6 +103,7 @@ type bmap struct {
 }
 
 // bucketShift returns 1<<b, optimized for code generation.
+//计算2^n的值
 func bucketShift(b uint8) uintptr {
 	// Masking the shift amount allows overflow checks to be elided.
 	return uintptr(1) << (b & (sys.PtrSize*8 - 1))
@@ -96,6 +115,7 @@ func bucketMask(b uint8) uintptr {
 }
 
 // tophash calculates the tophash value for hash.
+//生成tophash值
 func tophash(hash uintptr)uint8{
 	top := uint8(hash >> (sys.PtrSize*8 - 8))
 	if top < minTopHash {
@@ -259,6 +279,53 @@ again:
 
 	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+bucket*uintptr(t.bucketsize)))
 	top :=tophash(hash)
+
+	var inserti *uint8//记录插入的tophash
+	var insertk unsafe.Pointer//记录插入的key值
+	var elem unsafe.Pointer//记录插入的value值
+
+bucketloop:
+	for{
+		for i :=uintptr(0);i < bucketCnt;i++{
+			//判断tophash是否相等
+			if b.tophash[i] != top {
+				//如果tophash不相等并且等于空,那么可以则可以插入
+				if isEmpty(b.tophash[i]) && inserti == nil{
+					inserti = &b.tophash[i]
+					insertk = add(unsafe.Pointer(b),dataOffset+i*uintptr(t.keysize))
+					elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i *uintptr(t.elemsize))
+				}
+				//如果该位置是可用状态的
+				if b.tophash[i] == emptyRest{
+					break bucketloop
+				}
+				continue
+			}
+
+			//走到这里说明tophash相等,说明之前已经设置过了
+			k := add(unsafe.Pointer(b),dataOffset+i+uintptr(t.keysize))
+			//如果是指针,则要转化为指针
+			if t.indirectkey(){
+				k = *((*unsafe.Pointer)(k))
+			}
+			if !t.key.equal(key,k){
+				continue
+			}
+			// already have a mapping for key. Update it.
+			//key值需要修改
+			if t.needkeyupdate(){
+				typedmemmove(t.key, k, key)
+			}
+			elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
+			goto done
+		}
+	}
+done:
+		if h.flags&hashWriting == 0{
+
+		}
+		h.flags &^= hashWriting
+		return elem
 }
 
 //判断是否等量扩容,如果为true,则表示buckets和oldbuckets大小相等
@@ -266,7 +333,8 @@ func (h *hmap)sameSizeGrow()bool{
 	return h.flags&sameSizeGrow != 0
 }
 
-// overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor.
+// overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor
+//用于帮助计算桶的指数值
 func overLoadFactor(count int, B uint8) bool {
 	return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
 }
