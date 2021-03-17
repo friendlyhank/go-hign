@@ -324,21 +324,39 @@ bucketloop:
 
 	// Did not find mapping for key. Allocate new cell & add entry.
 
-	//如果没有找到对应的插入位置,说明满了,尝试往溢出桶插入
+	//没有插入过的情况会这里往下走，如果已经满了,会转化为溢出桶插入
 	if inserti == nil{
 
 	}
 
 	// store new key/elem at insert position
+	//如果key是指针
 	if t.indirectkey(){
-
+		kmem :=newobject(t.key)
+		*(*unsafe.Pointer)(insertk) = kmem
+		insertk = kmem
 	}
+	//如果插入元素是指针
+	if t.indirectelem(){
+		vmem :=newobject(t.elem)
+		*(*unsafe.Pointer)(elem) = vmem
+	}
+	typedmemmove(t.key, insertk, key)
+	//设置tophash值
+	*inserti = top
+	h.count++ //元素增加
 
 done:
 		if h.flags&hashWriting == 0{
 
 		}
 		h.flags &^= hashWriting
+		//如果插入元素是指针
+		if t.indirectelem(){
+			elem = *((*unsafe.Pointer)(elem))
+		}
+
+		//注意这里只是返回指针地址,真正插入元素是在编译完成
 		return elem
 }
 
