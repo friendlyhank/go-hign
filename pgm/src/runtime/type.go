@@ -65,9 +65,9 @@ type maptype struct {
 	bucket *_type // internal type representing a hash bucket
 	// function for hashing keys (ptr to key, seed) -> hash
 	hasher     func(unsafe.Pointer, uintptr) uintptr
-	keysize uint8 // size of key slot
-	elemsize uint8 // size of elem slot
-	bucketsize uint16 // size of bucket
+	keysize uint8 //key的大小 size of key slot
+	elemsize uint8 //元素的大小 size of elem slot
+	bucketsize uint16 //桶的大小 size of bucket
 	flags uint32
 }
 

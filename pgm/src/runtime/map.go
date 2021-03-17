@@ -139,6 +139,31 @@ func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
 	*(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize)) = ovf
 }
 
+//当溢出桶被使用时,创建新的溢出桶
+func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
+	var ovf *bmap
+	if h.extra != nil && h.extra.nextOverflow != nil{
+		// We have preallocated overflow buckets available.
+		// See makeBucketArray for more details.
+		ovf = h.extra.nextOverflow
+		//如果当前溢出桶是nil了,那么取下一个溢出桶
+		if ovf.overflow(t) == nil{
+			// We're not at the end of the preallocated overflow buckets. Bump the pointer.
+			h.extra.nextOverflow =(*bmap)(add(unsafe.Pointer(ovf), uintptr(t.bucketsize)))
+		}else{
+			// This is the last preallocated overflow bucket.
+			// Reset the overflow pointer on this bucket,
+			// which was set to a non-nil sentinel value.
+			//当前溢出桶被使用,直接重置为nil
+			ovf.setoverflow(t,nil)
+			h.extra.nextOverflow = nil
+		}
+	}else{
+		//没有溢出桶直接分配一个
+		ovf =(*bmap)(newobject(t.bucket))
+	}
+}
+
 // makemap implements Go map creation for make(map[k]v, hint).
 // If the compiler has determined that the map or the first bucket
 // can be created on the stack, h and/or bucket may be non-nil.
