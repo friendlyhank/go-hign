@@ -139,6 +139,32 @@ func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
 	*(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize)) = ovf
 }
 
+// incrnoverflow increments h.noverflow.
+// noverflow counts the number of overflow buckets.
+// This is used to trigger same-size map growth.
+// See also tooManyOverflowBuckets.
+// To keep hmap small, noverflow is a uint16.
+// When there are few buckets, noverflow is an exact count.
+// When there are many buckets, noverflow is an approximate count.
+func (h *hmap) incrnoverflow() {
+	// We trigger same-size map growth if there are
+	// as many overflow buckets as buckets.
+	// We need to be able to count to 1<<h.B.
+	if h.B < 16 {
+		h.noverflow++
+		return
+	}
+	// Increment with probability 1/(1<<(h.B-15)).
+	// When we reach 1<<15 - 1, we will have approximately
+	// as many overflow buckets as buckets.
+	mask := uint32(1)<<(h.B-15) - 1
+	// Example: if h.B == 18, then mask == 7,
+	// and fastrand & 7 == 0 with probability 1/8.
+	if fastrand()&mask == 0 {
+		h.noverflow++
+	}
+}
+
 //当溢出桶被使用时,创建新的溢出桶
 func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 	var ovf *bmap
@@ -147,6 +173,7 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 		// See makeBucketArray for more details.
 		ovf = h.extra.nextOverflow
 		//如果当前溢出桶是nil了,表示不是最后一个桶(不是特别清楚的去看初始化的溢出桶的最后一个桶是链接buckets的首地址)
+		//溢出桶被使用之后也会被放在链表最后所以也不会是nil
 		//这时候更新h.extra.nextOverflow链接到下一个桶方便下次使用
 		if ovf.overflow(t) == nil{
 			// We're not at the end of the preallocated overflow buckets. Bump the pointer.
@@ -163,6 +190,12 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 		//没有溢出桶直接内存分配一个
 		ovf =(*bmap)(newobject(t.bucket))
 	}
+	h.incrnoverflow()
+
+
+
+	b.setoverflow(t,ovf) //将要使用的溢出桶放在链表最后方
+	return ovf
 }
 
 // makemap implements Go map creation for make(map[k]v, hint).
