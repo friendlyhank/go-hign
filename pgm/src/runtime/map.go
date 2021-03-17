@@ -129,6 +129,12 @@ func evacuated(b *bmap) bool {
 
 }
 
+//获取溢出桶
+func (b *bmap) overflow(t *maptype) *bmap {
+	return *(**bmap)(add(unsafe.Pointer(b),uintptr(t.bucketsize)-sys.PtrSize))
+}
+
+//设置溢出桶
 func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
 	*(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize)) = ovf
 }
@@ -319,6 +325,13 @@ bucketloop:
 			}
 			elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
 			goto done
+
+			//空间已经满了,找到溢出桶
+			ovf := b.overflow(t)
+			if ovf == nil{
+				break
+			}
+			b = ovf
 		}
 	}
 
