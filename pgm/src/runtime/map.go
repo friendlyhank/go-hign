@@ -146,7 +146,8 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 		// We have preallocated overflow buckets available.
 		// See makeBucketArray for more details.
 		ovf = h.extra.nextOverflow
-		//如果当前溢出桶是nil了,那么取下一个溢出桶
+		//如果当前溢出桶是nil了,表示不是最后一个桶(不是特别清楚的去看初始化的溢出桶的最后一个桶是链接buckets的首地址)
+		//这时候更新h.extra.nextOverflow链接到下一个桶方便下次使用
 		if ovf.overflow(t) == nil{
 			// We're not at the end of the preallocated overflow buckets. Bump the pointer.
 			h.extra.nextOverflow =(*bmap)(add(unsafe.Pointer(ovf), uintptr(t.bucketsize)))
@@ -154,12 +155,12 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 			// This is the last preallocated overflow bucket.
 			// Reset the overflow pointer on this bucket,
 			// which was set to a non-nil sentinel value.
-			//当前溢出桶被使用,直接重置为nil
+			//表示当前是最后一个桶了,h.extra.nextOverflow设置为nil,下次要从内存中分配
 			ovf.setoverflow(t,nil)
 			h.extra.nextOverflow = nil
 		}
 	}else{
-		//没有溢出桶直接分配一个
+		//没有溢出桶直接内存分配一个
 		ovf =(*bmap)(newobject(t.bucket))
 	}
 }
