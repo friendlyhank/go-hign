@@ -20,11 +20,22 @@ const (
 	loadFactorNum = 13
 	loadFactorDen = 2
 
+	// Possible tophash values. We reserve a few possibilities for special marks.
+	// Each bucket (including its overflow buckets, if any) will have either all or none of its
+	// entries in the evacuated* states (except during the evacuate() method, which only happens
+	// during map writes and thus no one else can observe the map during that time).
+	emptyRest      = 0 // this cell is empty, and there are no more non-empty cells at higher indexes or overflows.
+	emptyOne       = 1 // this cell is empty
+	evacuatedX     = 2 // key/elem is valid.  Entry has been evacuated to first half of larger table.
+	evacuatedY     = 3 // same as above, but evacuated to second half of larger table.
+	evacuatedEmpty = 4 // cell is empty, bucket is evacuated.
+	minTopHash     = 5 // minimum tophash for a normal filled cell.
+
 	// flags
 	iterator     = 1 //buckets正在被使用 there may be an iterator using buckets
 	oldIterator = 2 //oldbuckets正在被使用 there may be an iterator using oldbuckets
 	hashWriting = 4 //map正在被写入 a goroutine is writing to the map
-	sameSizeGrow = 8 //map正在扩容 the current map growth is to a new map of the same size
+	sameSizeGrow = 8 //map在等量扩容 the current map growth is to a new map of the same size
 )
 
 type hmap struct{
@@ -77,6 +88,25 @@ type bmap struct {
 func bucketShift(b uint8) uintptr {
 	// Masking the shift amount allows overflow checks to be elided.
 	return uintptr(1) << (b & (sys.PtrSize*8 - 1))
+}
+
+// bucketMask returns 1<<b - 1, optimized for code generation.
+func bucketMask(b uint8) uintptr {
+	return bucketShift(b) - 1
+}
+
+// tophash calculates the tophash value for hash.
+func tophash(hash uintptr)uint8{
+	top := uint8(hash >> (sys.PtrSize*8 - 8))
+	if top < minTopHash {
+		top += minTopHash
+	}
+	return top
+}
+
+func evacuated(b *bmap) bool {
+	h :=b.tophash[0]
+
 }
 
 func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
@@ -191,6 +221,49 @@ func mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
 	}
 
 	hash := t.hasher(key,uintptr(h.hash0))
+	m := bucketMask(h.B)
+	//根据hash获取指定的桶
+	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets) + (hash&m)*uintptr(t.bucketsize)))
+	//如果旧桶不为空，说明发生了扩容，在旧桶里找
+	if c :=h.oldbuckets; c != nil{
+		if !h.sameSizeGrow(){
+			// There used to be half as many buckets; mask down one more power of two.
+			//如果不是等量扩容,旧桶是当前桶的一半大小
+			m >>= 1
+		}
+		oldb := (*bmap)(add(c,(hash&m)*uintptr(t.bucketsize)))
+	}
+}
+
+// Like mapaccess, but allocates a slot for the key if it is not present in the map.
+func mapassign(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
+	if h ==  nil{
+	}
+
+	if h.flags&hashWriting != 0{
+
+	}
+	hash :=t.hasher(key,uintptr(h.hash0))
+
+	// Set hashWriting after calling t.hasher, since t.hasher may panic,
+	// in which case we have not actually done a write.
+	//更新状态为正在写入
+	h.flags ^= hashWriting
+
+	if h.buckets == nil{
+		h.buckets = newobject(t.bucket)//相当于 newarray(t.bucket, 1)
+	}
+
+again:
+	bucket := hash & bucketMask(h.B)
+
+	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+bucket*uintptr(t.bucketsize)))
+	top :=tophash(hash)
+}
+
+//判断是否等量扩容,如果为true,则表示buckets和oldbuckets大小相等
+func (h *hmap)sameSizeGrow()bool{
+	return h.flags&sameSizeGrow != 0
 }
 
 // overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor.

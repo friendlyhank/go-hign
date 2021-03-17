@@ -2,6 +2,22 @@ package runtime
 
 import "unsafe"
 
+func memhash0(p unsafe.Pointer,h uintptr)uintptr{
+	return h
+}
+
+func memhash8(p unsafe.Pointer,h uintptr)uintptr{
+	return memhash(p,h,1)
+}
+
+func memhash16(p unsafe.Pointer,h uintptr)uintptr{
+	return memhash(p,h,2)
+}
+
+func memhash128(p unsafe.Pointer,h uintptr)uintptr{
+	return memhash(p,h,16)
+}
+
 // in asm_*.s
 func memhash(p unsafe.Pointer, h, s uintptr) uintptr
 func memhash32(p unsafe.Pointer, h uintptr) uintptr
