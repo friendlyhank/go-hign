@@ -129,12 +129,12 @@ func evacuated(b *bmap) bool {
 
 }
 
-//获取溢出桶
+//这里字面意思理解获取溢出桶,实际理解是找到下一个链接的桶
 func (b *bmap) overflow(t *maptype) *bmap {
 	return *(**bmap)(add(unsafe.Pointer(b),uintptr(t.bucketsize)-sys.PtrSize))
 }
 
-//设置溢出桶
+//这里字面意思理解设置溢出桶,实际可以理解为链表,设置链接下一个桶
 func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
 	*(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize)) = ovf
 }
@@ -192,10 +192,24 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 	}
 	h.incrnoverflow()
 
+	//TODO HANK 这里我也不是很理解
+	if t.bucket.ptrdata == 0{
+		//这里可以说明overflow可以是不连续的空间
+		h.createOverflow()
+		*h.extra.overflow = append(*h.extra.overflow, ovf)
+	}
 
-
-	b.setoverflow(t,ovf) //将要使用的溢出桶放在链表最后方
+	b.setoverflow(t,ovf) //将要用的溢出桶链接在当前桶的最尾部
 	return ovf
+}
+
+func (h *hmap)createOverflow(){
+	if h.extra == nil{
+		h.extra = new(mapextra)
+	}
+	if h.extra.overflow == nil{
+		h.extra.overflow = new([]*bmap)
+	}
 }
 
 // makemap implements Go map creation for make(map[k]v, hint).
@@ -385,7 +399,7 @@ bucketloop:
 			elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
 			goto done
 
-			//空间已经满了,找到溢出桶
+			//当前桶已经空间满了,找到溢出桶，如果也满了会不断往下找溢出桶
 			ovf := b.overflow(t)
 			if ovf == nil{
 				break
@@ -396,9 +410,12 @@ bucketloop:
 
 	// Did not find mapping for key. Allocate new cell & add entry.
 
-	//没有插入过的情况会这里往下走，如果已经满了,会转化为溢出桶插入
+	//没有插入过的情况会这里往下走
 	if inserti == nil{
-
+		//如果已经满了,会转化为溢出桶插入
+		// all current buckets are full, allocate a new one.
+		newb := h.newoverflow(t,b)
+		inserti =&newb.tophash[0]
 	}
 
 	// store new key/elem at insert position
