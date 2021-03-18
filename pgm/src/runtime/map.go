@@ -509,6 +509,12 @@ func hashGrow(t *maptype,h *hmap){
 	// by growWork() and evacuate().
 }
 
+// overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor
+//用于帮助计算桶的指数值 count > (1<< B *6.5)
+func overLoadFactor(count int, B uint8) bool {
+	return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
+}
+
 // tooManyOverflowBuckets reports whether noverflow buckets is too many for a map with 1<<B buckets.
 // Note that most of these overflow buckets must be in sparse use;
 // if use was dense, then we'd have already triggered regular map growth.
@@ -536,10 +542,14 @@ func (h *hmap)sameSizeGrow()bool{
 	return h.flags&sameSizeGrow != 0
 }
 
-// overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor
-//用于帮助计算桶的指数值 count > (1<< B *6.5)
-func overLoadFactor(count int, B uint8) bool {
-	return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
+//扩容之后数据是逐渐转移的
+func growWork(t *maptype,h *hmap,bucket uintptr){
+	// make sure we evacuate the oldbucket corresponding
+	// to the bucket we're about to use
+}
+
+func evacuate(t *maptype, h *hmap, oldbucket uintptr) {
+
 }
 
 const maxZero = 1024 // must match value in cmd/compile/internal/gc/walk.go:zeroValSize
