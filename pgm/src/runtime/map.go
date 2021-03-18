@@ -190,7 +190,7 @@ func (h *hmap) newoverflow(t *maptype, b *bmap) *bmap {
 		//没有溢出桶直接内存分配一个
 		ovf =(*bmap)(newobject(t.bucket))
 	}
-	h.incrnoverflow()
+	h.incrnoverflow()//溢出统计,扩容时也会参考这个
 
 	//TODO HANK 这里我也不是很理解
 	if t.bucket.ptrdata == 0{
@@ -355,6 +355,10 @@ func mapassign(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
 
 again:
 	bucket := hash & bucketMask(h.B)
+	//如果正在扩容
+	if h.growing(){
+
+	}
 
 	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+bucket*uintptr(t.bucketsize)))
 	top :=tophash(hash)
@@ -410,6 +414,15 @@ bucketloop:
 
 	// Did not find mapping for key. Allocate new cell & add entry.
 
+	// If we hit the max load factor or we have too many overflow buckets,
+	// and we're not already in the middle of growing, start growing.
+	//1.哈希不是正在扩容状态的
+	//元素的数量 > 1<<B * 6.5 6.5为装载因子,装载因子最大8(一个桶的数量)
+	//溢出桶过多 noverflow >= 1<<B,B最大为15
+	if !h.growing() && (overLoadFactor(h.count+1,h.B) || tooManyOverflowBuckets(h.noverflow,h.B)){
+		goto again
+	}
+
 	//没有插入过的情况会这里往下走
 	if inserti == nil{
 		//如果已经满了,会转化为溢出桶插入
@@ -449,6 +462,28 @@ done:
 
 		//注意这里只是返回指针地址,真正插入元素是在编译完成
 		return elem
+}
+
+// tooManyOverflowBuckets reports whether noverflow buckets is too many for a map with 1<<B buckets.
+// Note that most of these overflow buckets must be in sparse use;
+// if use was dense, then we'd have already triggered regular map growth.
+//判断溢出栈是否过大
+func tooManyOverflowBuckets(noverflow uint16, B uint8) bool {
+	// If the threshold is too low, we do extraneous work.
+	// If the threshold is too high, maps that grow and shrink can hold on to lots of unused memory.
+	// "too many" means (approximately) as many overflow buckets as regular buckets.
+	// See incrnoverflow for more details.
+	if B > 15{
+		B = 15
+	}
+	// The compiler doesn't see here that B < 16; mask B to generate shorter shift code.
+	//溢出桶的数量是否大于1<<B,B最大为15
+	return noverflow >= uint16(1)<<(B&15)
+}
+
+//判断哈希表是否在扩容
+func (h *hmap)growing()bool{
+	return h.oldbuckets != nil
 }
 
 //判断是否等量扩容,如果为true,则表示buckets和oldbuckets大小相等
