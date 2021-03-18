@@ -416,6 +416,8 @@ bucketloop:
 		// all current buckets are full, allocate a new one.
 		newb := h.newoverflow(t,b)
 		inserti =&newb.tophash[0]
+		insertk = add(unsafe.Pointer(newb),dataOffset)
+		elem = add(insertk,bucketCnt*uintptr(t.keysize))
 	}
 
 	// store new key/elem at insert position
