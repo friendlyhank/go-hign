@@ -81,8 +81,8 @@ type mapextra struct {
 	// overflow contains overflow buckets for hmap.buckets.
 	// oldoverflow contains overflow buckets for hmap.oldbuckets.
 	// The indirection allows to store a pointer to the slice in hiter.
-	overflow *[]*bmap
-	oldoverflow *[]*bmap
+	overflow *[]*bmap //当前被使用的溢出桶(注意溢出桶不一定是连续的,可以看插入的时候会从内存分配溢出桶)
+	oldoverflow *[]*bmap //扩容的话被使用的溢出桶会放在这里
 
 	// nextOverflow holds a pointer to a free overflow bucket.
 	nextOverflow *bmap
@@ -420,6 +420,7 @@ bucketloop:
 	//元素的数量 > 1<<B * 6.5 6.5为装载因子,装载因子最大8(一个桶的数量)
 	//溢出桶过多 noverflow >= 1<<B,B最大为15
 	if !h.growing() && (overLoadFactor(h.count+1,h.B) || tooManyOverflowBuckets(h.noverflow,h.B)){
+		hashGrow(t,h)//发生扩容
 		goto again
 	}
 
@@ -464,6 +465,50 @@ done:
 		return elem
 }
 
+//哈希扩容
+func hashGrow(t *maptype,h *hmap){
+	// If we've hit the load factor, get bigger.
+	// Otherwise, there are too many overflow buckets,
+	// so keep the same number of buckets and "grow" laterally.
+	bigger := uint8(1)
+	if !overLoadFactor(h.count+1,h.B){ //没有超出装载因子是等量扩容
+		bigger = 0
+		h.flags |= sameSizeGrow
+	}
+	oldbuckets := h.buckets
+	newbuckets, nextOverflow := makeBucketArray(t, h.B+bigger, nil)
+
+	//更新哈希的标志
+	flags := h.flags &^ (iterator | oldIterator)
+	if h.flags&iterator != 0{
+		flags |= oldIterator
+	}
+	// commit the grow (atomic wrt gc)
+	h.B += bigger
+	h.flags = flags
+	h.oldbuckets = oldbuckets
+	h.buckets = newbuckets
+	h.nevacuate = 0
+	h.noverflow = 0
+
+	if h.extra != nil && h.extra.overflow != nil{
+		// Promote current overflow buckets to the old generation.
+		if h.extra.oldoverflow != nil{
+
+		}
+		h.extra.oldoverflow = h.extra.overflow
+		h.extra.overflow =  nil
+	}
+	if nextOverflow != nil{
+		if h.extra == nil{
+			h.extra = new(mapextra)
+		}
+		h.extra.nextOverflow = nextOverflow
+	}
+	// the actual copying of the hash table data is done incrementally
+	// by growWork() and evacuate().
+}
+
 // tooManyOverflowBuckets reports whether noverflow buckets is too many for a map with 1<<B buckets.
 // Note that most of these overflow buckets must be in sparse use;
 // if use was dense, then we'd have already triggered regular map growth.
@@ -492,7 +537,7 @@ func (h *hmap)sameSizeGrow()bool{
 }
 
 // overLoadFactor reports whether count items placed in 1<<B buckets is over loadFactor
-//用于帮助计算桶的指数值
+//用于帮助计算桶的指数值 count > (1<< B *6.5)
 func overLoadFactor(count int, B uint8) bool {
 	return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
 }
