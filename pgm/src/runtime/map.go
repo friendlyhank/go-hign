@@ -36,11 +36,11 @@ const (
 	// during map writes and thus no one else can observe the map during that time).
 	//tophash的状态信息
 	//O和1的状态到底有啥区别
-	emptyRest      = 0 // this cell is empty, and there are no more non-empty cells at higher indexes or overflows.
-	emptyOne       = 1 // this cell is empty
-	evacuatedX     = 2 // key/elem is valid.  Entry has been evacuated to first half of larger table.
-	evacuatedY     = 3 // same as above, but evacuated to second half of larger table.
-	evacuatedEmpty = 4 // cell is empty, bucket is evacuated.
+	emptyRest      = 0 //元素被删除且重置 this cell is empty, and there are no more non-empty cells at higher indexes or overflows.
+	emptyOne       = 1 //元素是空的 this cell is empty
+	evacuatedX     = 2 //元素被迁移到前半部分 key/elem is valid.  Entry has been evacuated to first half of larger table.
+	evacuatedY     = 3 //元素被迁移到后半部分 same as above, but evacuated to second half of larger table.
+	evacuatedEmpty = 4 //元素已经被迁移 cell is empty, bucket is evacuated.
 	minTopHash     = 5 // minimum tophash for a normal filled cell.
 
 	// hmap flags标记
@@ -66,7 +66,7 @@ type hmap struct{
 	hash0 uint32 //哈希因子 hash seed
 	buckets    unsafe.Pointer //2^B的桶 array of 2^B Buckets. may be nil if count==0.
 	oldbuckets unsafe.Pointer //扩容时用于保存之前的buckets
-	nevacuate  uintptr
+	nevacuate  uintptr //扩容之后数据迁移的计数器,方便知道下次迁移的位置
 
 	extra *mapextra // 额外的map字段
 }
@@ -124,9 +124,10 @@ func tophash(hash uintptr)uint8{
 	return top
 }
 
+//判断桶是否为空,如果桶是空的tophash表示可以状态值
 func evacuated(b *bmap) bool {
 	h :=b.tophash[0]
-
+	return h > emptyOne && h <minTopHash
 }
 
 //这里字面意思理解获取溢出桶,实际理解是找到下一个链接的桶
@@ -355,9 +356,9 @@ func mapassign(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
 
 again:
 	bucket := hash & bucketMask(h.B)
-	//如果正在扩容
+	//如果正在扩容,进行数据迁移
 	if h.growing(){
-
+		growWork(t, h, bucket)
 	}
 
 	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+bucket*uintptr(t.bucketsize)))
@@ -542,14 +543,194 @@ func (h *hmap)sameSizeGrow()bool{
 	return h.flags&sameSizeGrow != 0
 }
 
+// noldbuckets calculates the number of buckets prior to the current map growth.
+//获取旧桶的数量
+func (h *hmap)noldbuckets()uintptr{
+	oldB :=h.B
+	if !h.sameSizeGrow(){
+		oldB-- //扩容是两倍扩容,所以B-1就是之前旧桶B的大小
+	}
+	return bucketShift(oldB)
+}
+
+// oldbucketmask provides a mask that can be applied to calculate n % noldbuckets().
+func (h *hmap) oldbucketmask() uintptr {
+	return h.noldbuckets()-1
+}
+
 //扩容之后数据是逐渐转移的
 func growWork(t *maptype,h *hmap,bucket uintptr){
 	// make sure we evacuate the oldbucket corresponding
 	// to the bucket we're about to use
+	//对当前要使用的桶进行迁移
+	evacuate(t,h,bucket&h.oldbucketmask())
+
+	// evacuate one more oldbucket to make progress on growing
+	if h.growing(){
+		//从迁移的标志位置继续迁移
+		evacuate(t,h,h.nevacuate)
+	}
+}
+
+func bucketEvacuated(t *maptype, h *hmap, bucket uintptr) bool {
+	b := (*bmap)(add(h.oldbuckets, bucket*uintptr(t.bucketsize)))
+	return evacuated(b)
+}
+
+// evacDst is an evacuation destination.
+type evacDst struct {
+	b *bmap          // current destination bucket
+	i int            // key/elem index into b
+	k unsafe.Pointer // pointer to current key storage
+	e unsafe.Pointer // pointer to current elem storage
 }
 
 func evacuate(t *maptype, h *hmap, oldbucket uintptr) {
+	//获取指定要转移的桶
+	b := (*bmap)(add(h.oldbuckets,oldbucket*uintptr(t.bucketsize)))
+	newbit := h.noldbuckets()
+	//如果这个桶不为空
+	if !evacuated(b){
+		// TODO: reuse overflow buckets instead of using new ones, if there
+		// is no iterator using the old buckets.  (If !oldIterator.)
 
+		// xy contains the x and y (low and high) evacuation destinations.
+		var xy [2]evacDst
+		x :=&xy[0]
+		x.b = (*bmap)(add(h.buckets,oldbucket*uintptr(t.bucketsize)))
+		x.k =add(unsafe.Pointer(x.b),dataOffset)
+		x.e = add(x.k,bucketCnt*uintptr(t.keysize))
+
+		//不是等量扩容才会设置两个evacDst
+		if !h.sameSizeGrow(){
+			// Only calculate y pointers if we're growing bigger.
+			// Otherwise GC can see bad pointers.
+			y :=&xy[1]
+			y.b = (*bmap)(add(h.buckets,(oldbucket+newbit)*uintptr(t.bucketsize)))
+			y.k = add(unsafe.Pointer(y.b),dataOffset)
+			y.e = add(y.k,bucketCnt*uintptr(t.keysize))
+		}
+
+		//遍历桶
+		for ; b != nil;b = b.overflow(t){
+			//获取k和e的首地址
+			k := add(unsafe.Pointer(b),dataOffset)
+			e := add(k,bucketCnt*uintptr(t.keysize))
+			//遍历桶内元素,不断去获取i,key,elem三个首地址
+			for i := 0; i < bucketCnt; i, k, e = i+1, add(k, uintptr(t.keysize)), add(e, uintptr(t.elemsize)) {
+				top :=b.tophash[i]
+				if isEmpty(top){
+					b.tophash[i] = evacuatedEmpty//标记为迁移状态
+					continue
+				}
+				if top < minTopHash{
+
+				}
+				k2 := k
+				if t.indirectkey(){
+					k2 = *((*unsafe.Pointer)(k2))
+				}
+				var useY uint8
+				if !h.sameSizeGrow(){
+					// Compute hash to make our evacuation decision (whether we need
+					// to send this key/elem to bucket x or bucket y).
+					hash :=t.hasher(k2,uintptr(h.hash0))
+					if h.flags&iterator != 0 && !t.reflexivekey() && !t.key.equal(k2,k2){
+						// If key != key (NaNs), then the hash could be (and probably
+						// will be) entirely different from the old hash. Moreover,
+						// it isn't reproducible. Reproducibility is required in the
+						// presence of iterators, as our evacuation decision must
+						// match whatever decision the iterator made.
+						// Fortunately, we have the freedom to send these keys either
+						// way. Also, tophash is meaningless for these kinds of keys.
+						// We let the low bit of tophash drive the evacuation decision.
+						// We recompute a new random tophash for the next level so
+						// these keys will get evenly distributed across all buckets
+						useY = top & 1
+						top  = tophash(hash)
+					}else{
+						if hash&newbit != 0{
+							useY = 1
+						}
+					}
+				}
+
+				if evacuatedX+1 != evacuatedY || evacuatedX^1 != evacuatedY {
+
+				}
+
+				b.tophash[i] = evacuatedX + useY //设置状态旧桶数据插入到前部分还是后部分 evacuatedX + 1 == evacuatedY
+				dst :=&xy[useY]
+				//当前桶已经满了,插入到溢出桶
+				if dst.i == bucketCnt{
+					dst.b = h.newoverflow(t, dst.b)
+					dst.i = 0
+					dst.k = add(unsafe.Pointer(dst.b),dataOffset)
+					dst.e = add(dst.k,bucketCnt*uintptr(t.keysize))
+				}
+				dst.b.tophash[dst.i&(bucketCnt-1)] = top // mask dst.i as an optimization, to avoid a bounds check
+				//key值复制
+				if t.indirectkey(){//指针的复制
+					*(*unsafe.Pointer)(dst.k) = k2 // copy pointer
+				}else{
+					typedmemmove(t.key, dst.k, k) //非指针的key复制 copy elem
+				}
+				//value值复制
+				if t.indirectelem(){//key指针复制
+					*(*unsafe.Pointer)(dst.e) = *(*unsafe.Pointer)(e)
+				}else{
+					typedmemmove(t.key, dst.k, k) //非指针的value复制 copy elem
+				}
+				dst.i++
+				// These updates might push these pointers past the end of the
+				// key or elem arrays.  That's ok, as we have the overflow pointer
+				// at the end of the bucket to protect against pointing past the
+				// end of the bucket.
+				//找到桶下一个元素cell的地址位置
+				dst.k = add(dst.k,uintptr(t.keysize))
+				dst.e = add(dst.e,uintptr(t.elemsize))
+			}
+		}
+		//如果旧桶没有在使用,就把旧桶清除掉帮助gc
+		for h.flags&oldIterator == 0&&t.bucket.ptrdata != 0{
+			b := add(h.oldbuckets, oldbucket*uintptr(t.bucketsize))
+			// Preserve b.tophash because the evacuation
+			// state is maintained there.
+			ptr := add(b, dataOffset)
+			n := uintptr(t.bucketsize) - dataOffset
+			memclrHasPointers(ptr, n)
+		}
+	}
+
+	//迁移完成之后,更新nevacuate迁移计数器
+	if oldbucket == h.nevacuate{
+		advanceEvacuationMark(h,t,newbit)
+	}
+}
+
+//迁移计数器的标记
+func advanceEvacuationMark(h *hmap, t *maptype, newbit uintptr) {
+	h.nevacuate++
+	// Experiments suggest that 1024 is overkill by at least an order of magnitude.
+	// Put it in there as a safeguard anyway, to ensure O(1) behavior.
+	stop := h.nevacuate + 1024
+	if stop > newbit {
+		stop = newbit
+	}
+	for h.nevacuate != stop && bucketEvacuated(t, h, h.nevacuate) {
+		h.nevacuate++
+	}
+	if h.nevacuate == newbit { // newbit == # of oldbuckets
+		// Growing is all done. Free old main bucket array.
+		h.oldbuckets = nil
+		// Can discard old overflow buckets as well.
+		// If they are still referenced by an iterator,
+		// then the iterator holds a pointers to the slice.
+		if h.extra != nil {
+			h.extra.oldoverflow = nil
+		}
+		h.flags &^= sameSizeGrow
+	}
 }
 
 const maxZero = 1024 // must match value in cmd/compile/internal/gc/walk.go:zeroValSize

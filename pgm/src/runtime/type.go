@@ -83,6 +83,10 @@ func (mt *maptype) indirectelem() bool { // store ptr to elem instead of elem it
 	return mt.flags&2 != 0
 }
 
+func (mt *maptype)reflexivekey()bool{// true if k==k for all keys
+	return mt.flags&8 != 0
+}
+
 //判断key值是否需要重写
 func (mt *maptype) needkeyupdate() bool { // true if we need to update key on an overwrite
 	return mt.flags&8 != 0

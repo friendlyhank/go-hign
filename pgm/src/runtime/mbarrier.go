@@ -165,3 +165,13 @@ func typedmemmove(typ *_type, dst, src unsafe.Pointer) {
 	memmove(dst, src, typ.size)
 
 }
+
+
+// memclrHasPointers clears n bytes of typed memory starting at ptr.
+// The caller must ensure that the type of the object at ptr has
+// pointers, usually by checking typ.ptrdata. However, ptr
+// does not have to point to the start of the allocation.
+//指针类型资源回收,不在堆上
+//go:nosplit
+func memclrHasPointers(ptr unsafe.Pointer, n uintptr) {
+}
