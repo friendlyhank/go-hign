@@ -452,15 +452,18 @@ func mapaccess2(t *maptype, h *hmap, key unsafe.Pointer) (unsafe.Pointer, bool) 
 	}
 	hash :=t.hasher(key,uintptr(h.hash0))
 	m := bucketMask(h.B)
+	//根据hash获取指定的桶
 	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+(hash&m)*uintptr(t.bucketsize)))
+	//如果旧桶不为空，说明发生了扩容，在旧桶里找
 	if c :=h.oldbuckets;c != nil{
 		if !h.sameSizeGrow(){
 			// There used to be half as many buckets; mask down one more power of two.
+			//如果不是等量扩容,旧桶是当前桶的一半大小
 			m >>=1
 		}
 		oldb :=(*bmap)(unsafe.Pointer(uintptr(c)+(hash&m)*uintptr(t.bucketsize)))
 		if !evacuated(oldb){
-			b = oldb
+			b = oldb //更改为去旧桶里查找
 		}
 	}
 	top := tophash(hash)
@@ -519,8 +522,8 @@ again:
 	top :=tophash(hash)
 
 	var inserti *uint8//记录插入的tophash
-	var insertk unsafe.Pointer//记录插入的key值
-	var elem unsafe.Pointer//记录插入的value值
+	var insertk unsafe.Pointer//记录插入的key值地址
+	var elem unsafe.Pointer//记录插入的value值地址
 
 bucketloop:
 	for{
