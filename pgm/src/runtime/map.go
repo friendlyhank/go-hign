@@ -4,6 +4,55 @@
 
 package runtime
 
+// This file contains the implementation of Go's map type.
+//
+// A map is just a hash table. The data is arranged
+// into an array of buckets. Each bucket contains up to
+// 8 key/elem pairs. The low-order bits of the hash are
+// used to select a bucket. Each bucket contains a few
+// high-order bits of each hash to distinguish the entries
+// within a single bucket.
+//
+// If more than 8 keys hash to a bucket, we chain on
+// extra buckets.
+//
+// When the hashtable grows, we allocate a new array
+// of buckets twice as big. Buckets are incrementally
+// copied from the old bucket array to the new bucket array.
+//
+// Map iterators walk through the array of buckets and
+// return the keys in walk order (bucket #, then overflow
+// chain order, then bucket index).  To maintain iteration
+// semantics, we never move keys within their bucket (if
+// we did, keys might be returned 0 or 2 times).  When
+// growing the table, iterators remain iterating through the
+// old table and must check the new table if the bucket
+// they are iterating through has been moved ("evacuated")
+// to the new table.
+
+// Picking loadFactor: too large and we have lots of overflow
+// buckets, too small and we waste a lot of space. I wrote
+// a simple program to check some stats for different loads:
+// (64-bit, 8 byte keys and elems)
+//  loadFactor    %overflow  bytes/entry     hitprobe    missprobe
+//        4.00         2.13        20.77         3.00         4.00
+//        4.50         4.05        17.30         3.25         4.50
+//        5.00         6.85        14.77         3.50         5.00
+//        5.50        10.55        12.94         3.75         5.50
+//        6.00        15.27        11.67         4.00         6.00
+//        6.50        20.90        10.79         4.25         6.50
+//        7.00        27.14        10.15         4.50         7.00
+//        7.50        34.03         9.73         4.75         7.50
+//        8.00        41.10         9.40         5.00         8.00
+//
+// %overflow   = percentage of buckets which have an overflow bucket
+// bytes/entry = overhead bytes used per key/elem pair
+// hitprobe    = # of entries to check when looking up a present key
+// missprobe   = # of entries to check when looking up an absent key
+//
+// Keep in mind this data is for maximally loaded tables, i.e. just
+// before the table grows. Typical tables will be somewhat less loaded.
+
 import (
 	"runtime/internal/math"
 	"runtime/internal/sys"
@@ -20,6 +69,13 @@ const (
 	// Represent as loadFactorNum/loadFactorDen, to allow integer math.
 	loadFactorNum = 13
 	loadFactorDen = 2
+
+	// Maximum key or elem size to keep inline (instead of mallocing per element).
+	// Must fit in a uint8.
+	// Fast versions cannot handle big elems - the cutoff size for
+	// fast versions in cmd/compile/internal/gc/walk.go must be at most this elem.
+	maxKeySize  = 128
+	maxElemSize = 128
 
 	// data offset should be the size of the bmap struct, but needs to be
 	// aligned correctly. For amd64p32 this means 64-bit alignment
@@ -115,7 +171,7 @@ func bucketMask(b uint8) uintptr {
 }
 
 // tophash calculates the tophash value for hash.
-//生成tophash值
+//生成tophash值,取hash得高八位来作为tophash
 func tophash(hash uintptr)uint8{
 	top := uint8(hash >> (sys.PtrSize*8 - 8))
 	if top < minTopHash {
@@ -138,6 +194,10 @@ func (b *bmap) overflow(t *maptype) *bmap {
 //这里字面意思理解设置溢出桶,实际可以理解为链表,设置链接下一个桶
 func (b *bmap) setoverflow(t *maptype, ovf *bmap) {
 	*(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize)) = ovf
+}
+
+func (b *bmap)keys()unsafe.Pointer{
+	return add(unsafe.Pointer(b),dataOffset)
 }
 
 // incrnoverflow increments h.noverflow.
@@ -213,11 +273,28 @@ func (h *hmap)createOverflow(){
 	}
 }
 
+func makemap64(t *maptype,hint int64,h *hmap)*hmap{
+	if int64(int(hint)) != hint{
+		hint = 0
+	}
+	return makemap(t,int(hint),h)
+}
+
+// makemap_small implements Go map creation for make(map[k]v) and
+// make(map[k]v, hint) when hint is known to be at most bucketCnt
+// at compile time and the map needs to be allocated on the heap.
+func makemap_small()*hmap{
+	h := new(hmap)
+	h.hash0 = fastrand()
+	return h
+}
+
 // makemap implements Go map creation for make(map[k]v, hint).
 // If the compiler has determined that the map or the first bucket
 // can be created on the stack, h and/or bucket may be non-nil.
 // If h != nil, the map can be created directly in h.
 // If h.buckets != nil, bucket pointed to can be used as the first bucket.
+//map初始化
 func makemap(t *maptype,hint int,h *hmap)*hmap{
 	//计算内存空间和判断是否内存溢出
 	mem,overflow := math.MulUintptr(uintptr(hint),t.bucket.size)
@@ -261,6 +338,7 @@ func makemap(t *maptype,hint int,h *hmap)*hmap{
 // allocated by makeBucketArray with the same t and b parameters.
 // If dirtyalloc is nil a new backing array will be alloced and
 // otherwise dirtyalloc will be cleared and reused as backing array.
+//分配map的桶的内存空间
 func makeBucketArray(t *maptype,b uint8,dirtyalloc unsafe.Pointer)(buckets unsafe.Pointer, nextOverflow *bmap){
 	base :=bucketShift(b)
 	nbuckets := base
@@ -310,6 +388,7 @@ func makeBucketArray(t *maptype,b uint8,dirtyalloc unsafe.Pointer)(buckets unsaf
 // the key is not in the map.
 // NOTE: The returned pointer may keep the whole map live, so don't
 // hold onto it for very long.
+//map查询方法一
 func mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
 	if h == nil || h.count == 0{
 
@@ -361,6 +440,53 @@ bucketloop:
 		}
 	}
 	return unsafe.Pointer(&zeroVal[0])
+}
+
+//map查询方法二
+func mapaccess2(t *maptype, h *hmap, key unsafe.Pointer) (unsafe.Pointer, bool) {
+	if h == nil || h.count  == 0{
+		return unsafe.Pointer(&zeroVal[0]),false
+	}
+	if h.flags&hashWriting != 0{
+
+	}
+	hash :=t.hasher(key,uintptr(h.hash0))
+	m := bucketMask(h.B)
+	b :=(*bmap)(unsafe.Pointer(uintptr(h.buckets)+(hash&m)*uintptr(t.bucketsize)))
+	if c :=h.oldbuckets;c != nil{
+		if !h.sameSizeGrow(){
+			// There used to be half as many buckets; mask down one more power of two.
+			m >>=1
+		}
+		oldb :=(*bmap)(unsafe.Pointer(uintptr(c)+(hash&m)*uintptr(t.bucketsize)))
+		if !evacuated(oldb){
+			b = oldb
+		}
+	}
+	top := tophash(hash)
+bucketloop:
+	for ; b != nil;b =b.overflow(t){
+		for i := uintptr(0);i < bucketCnt;i++{
+			if b.tophash[i] != top{
+				if b.tophash[i] == emptyRest{
+					break bucketloop
+				}
+				continue
+			}
+			k := add(unsafe.Pointer(b),dataOffset+i*uintptr(t.keysize))
+			if t.indirectkey(){
+				k = *((*unsafe.Pointer)(k))
+			}
+			if t.key.equal(key,k){
+				e := add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
+				if t.indirectelem(){
+					e = *((*unsafe.Pointer)(e))
+				}
+				return e,true
+			}
+		}
+	}
+	return unsafe.Pointer(&zeroVal[0]),false
 }
 
 // Like mapaccess, but allocates a slot for the key if it is not present in the map.
@@ -492,6 +618,65 @@ done:
 
 		//注意这里只是返回指针地址,真正插入元素是在编译完成
 		return elem
+}
+
+func mapdelete(t *maptype, h *hmap, key unsafe.Pointer){
+	if h ==  nil || h.count == 0{
+		return
+	}
+	if h.flags&hashWriting != 0{
+
+	}
+
+	hash := t.hasher(key,uintptr(h.hash0))
+
+	// Set hashWriting after calling t.hasher, since t.hasher may panic,
+	// in which case we have not actually done a write (delete).
+	h.flags ^= hashWriting
+
+	bucket := hash & bucketMask(h.B)
+
+	//如果正在扩容,进行数据迁移,否则要在旧桶里删除
+	if h.growing(){
+		growWork(t,h,bucket)
+	}
+	b :=(*bmap)(add(h.buckets,bucket*uintptr(t.bucketsize)))
+	bOrig :=b
+	top := tophash(hash)
+search:
+	for ;b != nil;b = b.overflow(t){
+		for i := uintptr(0);i < bucketCnt;i++{
+			if b.tophash[i] != top{
+				if b.tophash[i] == emptyRest{
+					break search
+				}
+				continue
+			}
+			k := add(unsafe.Pointer(b),dataOffset+i*uintptr(t.keysize))
+			k2 := k
+			if t.indirectkey(){
+				k2 =*((*unsafe.Pointer)(k2))
+			}
+			if !t.key.equal(key,k2){
+				continue
+			}
+			// Only clear key if there are pointers in it.
+			if t.indirectkey(){
+				*(*unsafe.Pointer)(k) = nil
+			}else if t.key.ptrdata != 0{
+				memclrHasPointers(k,t.key.size)
+			}
+			e := add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
+			if t.indirectelem(){
+				*(*unsafe.Pointer)(e)=nil
+			}else if t.elem.ptrdata != 0{
+				memclrHasPointers(e,t.elem.size)
+			}else{
+				memclrNoHeapPointers(e,t.elem.size)
+			}
+			b.tophash[i] = emptyOne
+		}
+	}
 }
 
 //哈希扩容
