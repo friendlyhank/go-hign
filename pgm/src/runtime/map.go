@@ -332,7 +332,35 @@ func mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
 			m >>= 1
 		}
 		oldb := (*bmap)(add(c,(hash&m)*uintptr(t.bucketsize)))
+		//旧桶数据还没迁移
+		if !evacuated(oldb){
+			b = oldb //更改为去旧桶里查找
+		}
 	}
+	top := tophash(hash)
+bucketloop:
+	for ; b != nil;b = b.overflow(t){
+		for i := uintptr(0);i<bucketCnt;i++{
+			if b.tophash[i] != top{
+				if b.tophash[i] == emptyRest{
+					break bucketloop
+				}
+				continue
+			}
+			k := add(unsafe.Pointer(b),dataOffset+i*uintptr(t.keysize))
+			if t.indirectkey(){
+				k = *((*unsafe.Pointer)(k))
+			}
+			if t.key.equal(key,k){
+				e := add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
+				if t.indirectelem(){
+					e = *((*unsafe.Pointer)(e))
+				}
+				return e
+			}
+		}
+	}
+	return unsafe.Pointer(&zeroVal[0])
 }
 
 // Like mapaccess, but allocates a slot for the key if it is not present in the map.
