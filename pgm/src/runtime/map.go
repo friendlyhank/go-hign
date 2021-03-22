@@ -561,7 +561,7 @@ bucketloop:
 			elem = add(unsafe.Pointer(b),dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.elemsize))
 			goto done
 
-			//当前桶已经空间满了,找到溢出桶，如果也满了会不断往下找溢出桶
+			//未找到可插入的位置,找一下有没溢出桶，如果有继续执行写入操作
 			ovf := b.overflow(t)
 			if ovf == nil{
 				break
@@ -584,7 +584,7 @@ bucketloop:
 
 	//没有插入过的情况会这里往下走
 	if inserti == nil{
-		//如果已经满了,会转化为溢出桶插入
+		//如果在正常桶和溢出桶中都未找到插入的位置，那么得到一个新的溢出桶执行插入
 		// all current buckets are full, allocate a new one.
 		newb := h.newoverflow(t,b)
 		inserti =&newb.tophash[0]
