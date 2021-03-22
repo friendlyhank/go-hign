@@ -575,7 +575,7 @@ bucketloop:
 	// If we hit the max load factor or we have too many overflow buckets,
 	// and we're not already in the middle of growing, start growing.
 	//1.哈希不是正在扩容状态的
-	//元素的数量 > 1<<B * 6.5 6.5为装载因子,装载因子最大8(一个桶的数量)
+	//2.元素的数量 > 2^B次方(桶的数量) * 6.5,6.5表示为装载因子,很容易理解装载因子最大为8(一个桶能装载的元素数量)
 	//溢出桶过多 noverflow >= 1<<B,B最大为15
 	if !h.growing() && (overLoadFactor(h.count+1,h.B) || tooManyOverflowBuckets(h.noverflow,h.B)){
 		hashGrow(t,h)//发生扩容
