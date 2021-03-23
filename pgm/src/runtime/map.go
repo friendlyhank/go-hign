@@ -865,6 +865,7 @@ func evacuate(t *maptype, h *hmap, oldbucket uintptr) {
 						useY = top & 1
 						top  = tophash(hash)
 					}else{
+						//正常旧桶对应的桶是2^(B-1)-1,这里是2^(B-1)多算了一位
 						if hash&newbit != 0{
 							useY = 1
 						}
