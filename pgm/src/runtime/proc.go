@@ -161,6 +161,12 @@ func main(){
 	exit(0)
 }
 
+func goready(gp *g,traceskip int){
+	systemstack(func() {
+		ready(gp,traceskip,true)
+	})
+}
+
 // funcPC returns the entry PC of the function f.
 // It assumes that f is a func value. Otherwise the behavior is undefined.
 // CAREFUL: In programs with plugins, funcPC can return different values
@@ -346,9 +352,30 @@ func fastrandinit(){
 	getRandomData(s)
 }
 
+// Mark gp ready to run.
+//标记g的ready状态然后去运行
+func ready(gp *g, traceskip int, next bool) {
+
+	status :=readgstatus(gp)
+
+	// Mark runnable.
+	_g_ := getg()
+	mp :=acquirem()
+	if status^_Gscan != _Gwaiting{//如果不是运行状态
+		throw("bad g->status in ready")
+	}
+}
+
 // freezeStopWait is a large value that freezetheworld sets
 // sched.stopwait to in order to request that all Gs permanently stop.
 const freezeStopWait = 0x7fffffff
+
+// All reads and writes of g's status go through readgstatus, casgstatus
+// castogscanstatus, casfrom_Gscanstatus.
+//go:nosplit
+func readgstatus(gp *g) uint32 {
+	return atomic.Load(&gp.atomicstatus)
+}
 
 // freezing is set to non-zero if the runtime is trying to freeze the
 // world.

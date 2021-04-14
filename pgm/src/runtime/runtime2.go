@@ -638,7 +638,18 @@ type lfnode struct {
 	pushcnt uintptr
 }
 
-type sudog struct {}
+//g列表
+type sudog struct {
+	// The following fields are protected by the hchan.lock of the
+	// channel this sudog is blocking on. shrinkstack depends on
+	// this for sudogs involved in channel ops.
+	g *g
+
+	next *sudog //下一个g
+	prev *sudog //上一个g
+
+	elem unsafe.Pointer //元素 data element (may point to stack)
+}
 
 //系统调用
 type libcall struct{

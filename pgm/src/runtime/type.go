@@ -94,7 +94,11 @@ func (mt *maptype) needkeyupdate() bool { // true if we need to update key on an
 
 type arraytype struct {}
 
-type chantype struct {}
+type chantype struct {
+	typ _type
+	elem *_type
+	dir uintptr
+}
 
 type slicetype struct {}
 
