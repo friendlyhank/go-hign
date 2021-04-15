@@ -201,13 +201,6 @@ func allgadd(gp *g){
 	unlock(&allglock)
 }
 
-// All reads and writes of g's status go through readgstatus, casgstatus
-// castogscanstatus, casfrom_Gscanstatus.
-//go:nosplit
-func readgstatus(gp *g)uint32{
-	return atomic.Load(&gp.atomicstatus)
-}
-
 //runtime/asm_amd64.s
 //go:nosplit
 //go:nowritebarrierrec
@@ -361,9 +354,17 @@ func ready(gp *g, traceskip int, next bool) {
 	// Mark runnable.
 	_g_ := getg()
 	mp :=acquirem()
-	if status^_Gscan != _Gwaiting{//如果不是运行状态
+	if status^_Gscan != _Gwaiting{//如果不是等待状态
 		throw("bad g->status in ready")
 	}
+
+	// status is Gwaiting or Gscanwaiting, make Grunnable and put on runq
+	casgstatus(gp,_Gwaiting,_Grunning)
+	//放入优先队列中
+	runqput(_g_.m.p.ptr(),gp,next)
+	//唤醒
+	wakep()
+	releasem(mp)
 }
 
 // freezeStopWait is a large value that freezetheworld sets
@@ -1818,6 +1819,20 @@ func handoffp(_p_ *p) {
 	}
 	pidleput(_p_)
 	unlock(&sched.lock)
+}
+
+// Tries to add one more P to execute G's.
+// Called when a G is made runnable (newproc, ready).
+func wakep() {
+	//如果没有空闲的p
+	if atomic.Load(&sched.npidle) == 0{
+		return
+	}
+	// be conservative about spinning threads
+	if atomic.Load(&sched.nmspinning) != 0 || !atomic.Cas(&sched.nmspinning,0,1){
+		return
+	}
+	startm(nil,true)
 }
 
 // wakeNetPoller wakes up the thread sleeping in the network poller,
