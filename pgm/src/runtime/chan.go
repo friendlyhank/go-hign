@@ -144,7 +144,7 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 	mysg.g = gp
 	mysg.c = c
 	gp.waiting =mysg
-	c.sendq.enqueue(mysg)
+	c.sendq.enqueue(mysg)//这里应该可以说明有多个不断入队列
 	//使当前goroutine休眠等待激活
 	gopark(chanparkcommit, unsafe.Pointer(&c.lock), waitReasonChanSend, traceEvGoBlockSend, 2)
 	//保持活跃状态，直到被接收者接收
@@ -195,6 +195,103 @@ func sendDirect(t *_type, sg *sudog, src unsafe.Pointer) {
 
 	// No need for cgo write barrier checks because dst is always
 	// Go memory.
+	//直接将数据写入i <- chan
+	memmove(dst,src,t.size)
+}
+
+// chanrecv receives on channel c and writes the received data to ep.
+// ep may be nil, in which case received data is ignored.
+// If block == false and no elements are available, returns (false, false).
+// Otherwise, if c is closed, zeros *ep and returns (true, false).
+// Otherwise, fills in *ep with an element and returns (true, true).
+// A non-nil ep must point to the heap or the caller's stack.
+//chan的接收
+func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool) {
+	// raceenabled: don't need to check ep, as it is always on the stack
+	// or is new memory allocated by reflect.
+
+	if c== nil{
+		if !block{
+			return
+		}
+		gopark(nil, nil, waitReasonChanReceiveNilChan, traceEvGoStop, 2)
+		throw("unreachable")
+	}
+
+	lock(&c.lock)
+
+	if sg :=c.sendq.dequeue();sg != nil{
+		// Found a waiting sender. If buffer is size 0, receive value
+		// directly from sender. Otherwise, receive from head of queue
+		// and add sender's value to the tail of the queue (both map to
+		// the same buffer slot because the queue is full).
+		recv(c,sg,ep, func() {unlock(&c.lock)},3)
+		return true,true
+	}
+
+	if !block{
+		unlock(&c.lock)
+		return false,false
+	}
+
+	// no sender available: block on this channel.
+	gp := getg()
+	mysg := acquireSudog()
+
+	// No stack splits between assigning elem and enqueuing mysg
+	// on gp.waiting where copystack can find it.
+	//例如i := <- ch,在发送端唤醒的时候就会把值拷贝到i中,然后唤醒i
+	mysg.elem = ep
+	gp.waiting =mysg
+	mysg.g = gp
+	mysg.c = c
+	c.recvq.enqueue(mysg)//写入接收队列
+
+	//进入休眠，等待被唤醒
+	gopark(chanparkcommit, unsafe.Pointer(&c.lock), waitReasonChanReceive, traceEvGoBlockRecv, 2)
+
+	// someone woke us up
+	//走到这里说明被唤醒了
+	if mysg != gp.waiting {
+		throw("G waiting list is corrupted")
+	}
+	gp.waiting = nil
+	mysg.c = nil
+	releaseSudog(mysg)
+	return true, false
+}
+
+// recv processes a receive operation on a full channel c.
+// There are 2 parts:
+// 1) The value sent by the sender sg is put into the channel
+//    and the sender is woken up to go on its merry way.
+// 2) The value received by the receiver (the current G) is
+//    written to ep.
+// For synchronous channels, both values are the same.
+// For asynchronous channels, the receiver gets its data from
+// the channel buffer and the sender's data is put in the
+// channel buffer.
+// Channel c must be full and locked. recv unlocks c with unlockf.
+// sg must already be dequeued from c.
+// A non-nil ep must point to the heap or the caller's stack.
+func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
+	//如果没有缓存槽,那么直接拷贝发送队列的值
+	if c.dataqsiz == 0{
+		if ep != nil{
+			// copy data from sender
+			recvDirect(c.elemtype,sg,ep)
+		}
+	}else{
+		//如果有缓存槽,说明缓存槽都饱满并且产生了等待的发送队列
+		//这时候先从缓冲槽中获取
+	}
+}
+
+func recvDirect(t *_type, sg *sudog, dst unsafe.Pointer) {
+	// dst is on our stack or the heap, src is on another stack.
+	// The channel is locked, so src will not move during this
+	// operation.
+	src := sg.elem
 	memmove(dst,src,t.size)
 }
 
