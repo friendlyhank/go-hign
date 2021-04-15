@@ -30,6 +30,7 @@ var (
 // Without the KeepAlive call, the finalizer could run at the start of
 // syscall.Read, closing the file descriptor before syscall.Read makes
 // the actual system call.
+//保持活跃状态
 func KeepAlive(x interface{}) {
 	// Introduce a use of x that the compiler can't eliminate.
 	// This makes sure x is alive on entry. We need x to be alive

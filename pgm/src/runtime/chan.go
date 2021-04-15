@@ -74,6 +74,11 @@ func makechan(t *chantype,size int)*hchan{
 	return c
 }
 
+// chanbuf(c, i) is pointer to the i'th slot in the buffer.
+func chanbuf(c *hchan, i uint) unsafe.Pointer{
+	return add(c.buf,uintptr(i)*uintptr(c.elemsize))
+}
+
 // entry point for c <- x from compiled code
 //go:nosplit
 func chansend1(c *hchan, elem unsafe.Pointer) {
@@ -103,7 +108,57 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 		// Found a waiting receiver. We pass the value we want to send
 		// directly to the receiver, bypassing the channel buffer (if any).
 		send(c, sg, ep, func() { unlock(&c.lock) }, 3)
+		return true
 	}
+
+	//如果是又缓冲槽的,将数据写入缓冲槽
+	if c.qcount < c.dataqsiz{
+		// Space is available in the channel buffer. Enqueue the element to send.
+		//根据发送索引计算出插入的位置
+		qp :=chanbuf(c,c.sendx)
+		typedmemmove(c.elemtype,qp,ep)
+		c.sendx++
+		//如果缓冲槽满了，重置发送索引
+		if c.sendx ==c.dataqsiz{
+			c.sendx = 0
+		}
+		c.qcount++
+		//解锁
+		unlock(&c.lock)
+		return true
+	}
+
+	//如果不需要设置阻塞，直接解锁,然后返回false表示发送失败
+	if !block{
+		unlock(&c.lock)
+		return false
+	}
+
+	// Block on the channel. Some receiver will complete our operation for us.
+	gp := getg()
+	mysg := acquireSudog()
+
+	// No stack splits between assigning elem and enqueuing mysg
+	// on gp.waiting where copystack can find it.
+	mysg.elem = ep
+	mysg.g = gp
+	mysg.c = c
+	gp.waiting =mysg
+	c.sendq.enqueue(mysg)
+	//使当前goroutine休眠等待激活
+	gopark(chanparkcommit, unsafe.Pointer(&c.lock), waitReasonChanSend, traceEvGoBlockSend, 2)
+	//保持活跃状态，直到被接收者接收
+	KeepAlive(ep)
+
+	//到这里说明被唤醒了,将资源进行释放
+	// someone woke us up.
+	if mysg != gp.waiting {
+		throw("G waiting list is corrupted")
+	}
+	gp.waiting = nil
+	mysg.c = nil
+	releaseSudog(mysg)
+	return true
 }
 
 // send processes a send operation on an empty channel c.
@@ -141,6 +196,30 @@ func sendDirect(t *_type, sg *sudog, src unsafe.Pointer) {
 	// No need for cgo write barrier checks because dst is always
 	// Go memory.
 	memmove(dst,src,t.size)
+}
+
+func chanparkcommit(gp *g, chanLock unsafe.Pointer) bool {
+	// Make sure we unlock after setting activeStackChans and
+	// unsetting parkingOnChan. The moment we unlock chanLock
+	// we risk gp getting readied by a channel operation and
+	// so gp could continue running before everything before
+	// the unlock is visible (even to gp itself).
+	unlock((*mutex)(chanLock))
+	return true
+}
+
+func (q *waitq) enqueue(sgp *sudog) {
+	sgp.next = nil
+	x := q.last
+	if x == nil{
+		sgp.prev = nil
+		q.first = sgp
+		q.last = sgp
+		return
+	}
+	sgp.prev = x
+	x.next = sgp
+	q.last = sgp
 }
 
 func (q *waitq)dequeue()*sudog{

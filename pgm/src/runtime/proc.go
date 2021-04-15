@@ -161,10 +161,119 @@ func main(){
 	exit(0)
 }
 
+// Puts the current goroutine into a waiting state and calls unlockf.
+// If unlockf returns false, the goroutine is resumed.
+// unlockf must not access this G's stack, as it may be moved between
+// the call to gopark and the call to unlockf.
+// Reason explains why the goroutine has been parked.
+// It is displayed in stack traces and heap dumps.
+// Reasons should be unique and descriptive.
+// Do not re-use reasons, add new ones.
+//将当前的goroutine置于等待状态
+func gopark(unlockf func(*g, unsafe.Pointer) bool, lock unsafe.Pointer, reason waitReason, traceEv byte, traceskip int) {
+	mp := acquirem()
+	gp := mp.curg
+	status := readgstatus(gp)
+	if status != _Grunning && status !=_Gscanrunning{
+		throw("gopark: bad g status")
+	}
+	mp.waitlock = lock
+	mp.waitunlockf = unlockf
+	gp.waitreason =  reason
+	releasem(mp)
+	// can't do anything that might move the G between Ms here.
+	mcall(park_m)
+}
+
 func goready(gp *g,traceskip int){
 	systemstack(func() {
 		ready(gp,traceskip,true)
 	})
+}
+
+//go:nosplit
+func acquireSudog() *sudog {
+	// Delicate dance: the semaphore implementation calls
+	// acquireSudog, acquireSudog calls new(sudog),
+	// new calls malloc, malloc can call the garbage collector,
+	// and the garbage collector calls the semaphore implementation
+	// in stopTheWorld.
+	// Break the cycle by doing acquirem/releasem around new(sudog).
+	// The acquirem/releasem increments m.locks during new(sudog),
+	// which keeps the garbage collector from being invoked.
+	mp := acquirem()
+	pp := mp.p.ptr()
+
+	//从全局中取一个sudog
+	if len(pp.sudogcache) == 0{
+		lock(&sched.sudoglock)
+		// First, try to grab a batch from central cache.
+		//sudogcache元素数量<sudocache容量的一半
+		for len(pp.sudogcache) < cap(pp.sudogcache)/2 && sched.sudogcache != nil {
+			//从全局中取一个
+			s :=sched.sudogcache
+			sched.sudogcache = s.next
+			s.next =  nil
+			pp.sudogcache = append(pp.sudogcache,s)
+		}
+		unlock(&sched.sudoglock)
+		// If the central cache is empty, allocate a new one.
+		if len(pp.sudogcache) == 0{
+			pp.sudogcache = append(pp.sudogcache,new(sudog))
+		}
+	}
+	n := len(pp.sudogcache)
+	s :=pp.sudogcache[n-1]
+	pp.sudogcache[n-1] = nil
+	pp.sudogcache =pp.sudogcache[:n-1]
+	if s.elem != nil{
+		throw("acquireSudog: found s.elem != nil in cache")
+	}
+	releasem(mp)
+	return s
+}
+
+//释放sudog
+//go:nosplit
+func releaseSudog(s *sudog) {
+	if s.elem != nil {
+		throw("runtime: sudog with non-nil elem")
+	}
+	if s.next != nil {
+		throw("runtime: sudog with non-nil next")
+	}
+	if s.prev != nil {
+		throw("runtime: sudog with non-nil prev")
+	}
+	if s.c != nil {
+		throw("runtime: sudog with non-nil c")
+	}
+	gp := getg()
+	mp := acquirem() // avoid rescheduling to another P
+	pp := mp.p.ptr()
+	//如果p中的sudog缓存已经满了，转移一些到中心缓存中
+	if len(pp.sudogcache) == cap(pp.sudogcache) {
+		// Transfer half of local cache to the central cache.
+		var first, last *sudog
+		for len(pp.sudogcache) > cap(pp.sudogcache)/2 {
+			n := len(pp.sudogcache)
+			p := pp.sudogcache[n-1]
+			pp.sudogcache[n-1] = nil
+			pp.sudogcache = pp.sudogcache[:n-1]
+			if first == nil {
+				first = p
+			} else {
+				last.next = p
+			}
+			last = p
+		}
+		lock(&sched.sudoglock)
+		last.next = sched.sudogcache
+		sched.sudogcache = first
+		unlock(&sched.sudoglock)
+	}
+	pp.sudogcache = append(pp.sudogcache, s)
+	releasem(mp)
 }
 
 // funcPC returns the entry PC of the function f.
@@ -415,7 +524,9 @@ func freezetheworld() {
 //go:nosplit
 func casgstatus(gp *g, oldval, newval uint32) {
 	for i := 0; !atomic.Cas(&gp.atomicstatus,oldval,newval);i++{
-
+		if oldval == _Gwaiting && gp.atomicstatus == _Grunnable {
+			throw("casgstatus: waiting for Gwaiting but is Grunnable")
+		}
 	}
 }
 
@@ -1905,6 +2016,31 @@ func dropg() {
 
 	setMNoWB(&_g_.m.curg.m, nil)
 	setGNoWB(&_g_.m.curg, nil)
+}
+
+//休眠g,休眠过程是加锁的
+// park continuation on g0.
+func park_m(gp *g) {
+	_g_ := getg()
+
+	//修改g的状态为等待状态
+	casgstatus(gp, _Grunning, _Gwaiting)
+	dropg()
+
+	if fn :=_g_.m.waitunlockf;fn != nil{
+		//解锁
+		ok := fn(gp, _g_.m.waitlock)
+		_g_.m.waitunlockf = nil
+		_g_.m.waitlock = nil
+
+		//如果解锁失败
+		if !ok {
+			//直接去执行
+			casgstatus(gp, _Gwaiting, _Grunnable)
+			execute(gp, true) // Schedule it back, never returns.
+		}
+	}
+	schedule()//进入调度循环
 }
 
 //go:nosplit

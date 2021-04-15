@@ -307,7 +307,7 @@ type g struct{
 	goid int64 // Goroutine的ID
 	schedlink    guintptr //下一个链接的g构造成链表
 	waitsince int64      // approx time when the g become blocked
-	waitreason waitReason // if status==Gwaiting
+	waitreason waitReason //锁等待的原因 if status==Gwaiting
 
 	preempt bool //和stackguard0 = stackpreempt一样表示被抢占 preemption signal, duplicates stackguard0 = stackpreempt
 
@@ -327,6 +327,7 @@ type g struct{
 	ancestors      *[]ancestorInfo // ancestor information goroutine(s) that created this goroutine (only used if debug.tracebackancestors)
 	startpc uintptr  //pc of goroutine function g的启用函数(比如main.main)
 	racectx uintptr //与race相关
+	waiting    *sudog //等待中的g列表 sudog structures this g is waiting on (that have a valid elem ptr); in lock order
 	cgoCtxt        []uintptr      // cgo traceback context
 }
 
@@ -363,6 +364,8 @@ type m struct{
 	schedlink     muintptr//和sched.midle形成链表，记录空闲的m
 	lockedg guintptr
 	nextwaitm     muintptr    //next m waiting for lock下一个等待锁的m
+	waitunlockf   func(*g, unsafe.Pointer) bool//解锁的方法
+	waitlock      unsafe.Pointer //等待锁
 	startingtrace bool
 	syscalltick   uint32
 
@@ -412,6 +415,9 @@ type p struct{
 		gList
 		n int32
 	}
+
+	//sudog缓存
+	sudogcache []*sudog
 
 	//mspan缓存,会从mheap.spanalloc分配内存空间 Cache of mspan objects from the heap.
 	mspancache struct {
@@ -520,6 +526,7 @@ type schedt struct{
 
 	// Central cache of sudog structs.
 	sudoglock mutex
+	sudogcache *sudog
 
 	// Central pool of available defer structs of different sizes.
 	deferlock mutex //defer的锁
@@ -638,7 +645,17 @@ type lfnode struct {
 	pushcnt uintptr
 }
 
-//g列表
+// sudog represents a g in a wait list, such as for sending/receiving
+// on a channel.
+//
+// sudog is necessary because the g ↔ synchronization object relation
+// is many-to-many. A g can be on many wait lists, so there may be
+// many sudogs for one g; and many gs may be waiting on the same
+// synchronization object, so there may be many sudogs for one object.
+//
+// sudogs are allocated from a special pool. Use acquireSudog and
+// releaseSudog to allocate and free them.
+//sudog表示g的等待列表，例如在channel中的发送和接收
 type sudog struct {
 	// The following fields are protected by the hchan.lock of the
 	// channel this sudog is blocking on. shrinkstack depends on
@@ -647,8 +664,9 @@ type sudog struct {
 
 	next *sudog //下一个g
 	prev *sudog //上一个g
-
 	elem unsafe.Pointer //元素 data element (may point to stack)
+
+	c        *hchan // channel
 }
 
 //系统调用
