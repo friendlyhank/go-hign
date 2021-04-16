@@ -229,6 +229,23 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 		return true,true
 	}
 
+	//没有在等待的发送队列,缓冲槽中有数据，从缓存槽中读取数据
+	if c.qcount > 0{
+		// Receive directly from queue
+		qp := chanbuf(c,c.recvx)
+		if ep != nil{
+			typedmemmove(c.elemtype, ep, qp)//将缓冲槽的数据拷贝到接收方目标地址
+		}
+		typedmemclr(c.elemtype, qp)//将已经被拷贝到发送方的缓冲槽释放
+		c.recvx++
+		if c.recvx == c.dataqsiz{
+			c.recvx = 0
+		}
+		c.qcount--
+		unlock(&c.lock)
+		return true,true
+	}
+
 	if !block{
 		unlock(&c.lock)
 		return false,false
@@ -315,6 +332,57 @@ func recvDirect(t *_type, sg *sudog, dst unsafe.Pointer) {
 	// operation.
 	src := sg.elem
 	memmove(dst,src,t.size)
+}
+
+func closechan(c *hchan) {
+	if c == nil{
+
+	}
+
+	lock(&c.lock)
+	if c.closed != 0{
+		unlock(&c.lock)
+	}
+
+	c.closed =1
+
+	var glist gList
+
+	//释放接收者
+	// release all readers
+	for{
+		sg :=c.recvq.dequeue()
+		if sg == nil{
+			break
+		}
+		if sg.elem != nil{
+			typedmemclr(c.elemtype,sg.elem)
+			sg.elem = nil
+		}
+		gp := sg.g
+		glist.push(gp)
+	}
+
+	//释放所有的发送者
+	// release all writers (they will panic)
+	for{
+		sg := c.sendq.dequeue()
+		if sg == nil{
+			break
+		}
+		sg.elem = nil
+		gp := sg.g
+		glist.push(gp)
+	}
+	unlock(&c.lock)
+
+	// Ready all Gs now that we've dropped the channel lock.
+	//将等待状态的g变为运行状态
+	for !glist.empty(){
+		gp :=glist.pop()
+		gp.schedlink = 0
+		goready(gp,3)
+	}
 }
 
 func chanparkcommit(gp *g, chanLock unsafe.Pointer) bool {
