@@ -787,7 +787,7 @@ const (
 	waitReasonGCAssistMarking                         // "GC assist marking"
 	waitReasonIOWait                                  // "IO wait"
 	waitReasonChanReceiveNilChan                      // "chan receive (nil chan)"
-	waitReasonChanSendNilChan                         // "chan send (nil chan)"
+	waitReasonChanSendNilChan                         //chan是nil "chan send (nil chan)"
 	waitReasonDumpingHeap                             // "dumping heap"
 	waitReasonGarbageCollection                       // "garbage collection"
 	waitReasonGarbageCollectionScan                   // "garbage collection scan"

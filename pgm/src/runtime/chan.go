@@ -79,6 +79,19 @@ func chanbuf(c *hchan, i uint) unsafe.Pointer{
 	return add(c.buf,uintptr(i)*uintptr(c.elemsize))
 }
 
+// full reports whether a send on c would block (that is, the channel is full).
+// It uses a single word-sized read of mutable state, so although
+// the answer is instantaneously true, the correct answer may have changed
+// by the time the calling function receives the return value.
+func full(c *hchan)bool{
+	// c.dataqsiz is immutable (never written after the channel is created)
+	// so it is safe to read at any time during channel operation.
+
+	// Assumes that a uint read is relaxed-atomic.
+	//说明已经满了
+	return c.qcount ==c.dataqsiz
+}
+
 // entry point for c <- x from compiled code
 //go:nosplit
 func chansend1(c *hchan, elem unsafe.Pointer) {
@@ -99,6 +112,33 @@ func chansend1(c *hchan, elem unsafe.Pointer) {
  */
 //ep就是elem,block表示发送时阻塞的
 func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
+	if c == nil{
+		if !block{
+			return false
+		}
+		gopark(nil, nil, waitReasonChanSendNilChan, traceEvGoStop, 2)
+		throw("unreachable")
+	}
+
+	// Fast path: check for failed non-blocking operation without acquiring the lock.
+	//
+	// After observing that the channel is not closed, we observe that the channel is
+	// not ready for sending. Each of these observations is a single word-sized read
+	// (first c.closed and second full()).
+	// Because a closed channel cannot transition from 'ready for sending' to
+	// 'not ready for sending', even if the channel is closed between the two observations,
+	// they imply a moment between the two when the channel was both not yet closed
+	// and not ready for sending. We behave as if we observed the channel at that moment,
+	// and report that the send cannot proceed.
+	//
+	// It is okay if the reads are reordered here: if we observe that the channel is not
+	// ready for sending and then observe that it is not closed, that implies that the
+	// channel wasn't closed during the first observation. However, nothing here
+	// guarantees forward progress. We rely on the side effects of lock release in
+	// chanrecv() and closechan() to update this thread's view of c.closed and full().
+	if !block && c.closed == 0 && full(c){
+		return false
+	}
 
 	//chanel发送会锁定
 	lock(&c.lock)
