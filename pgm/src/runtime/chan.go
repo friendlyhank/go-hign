@@ -282,9 +282,31 @@ func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
 			recvDirect(c.elemtype,sg,ep)
 		}
 	}else{
+		// Queue is full. Take the item at the
+		// head of the queue. Make the sender enqueue
+		// its item at the tail of the queue. Since the
+		// queue is full, those are both the same slot.
 		//如果有缓存槽,说明缓存槽都饱满并且产生了等待的发送队列
 		//这时候先从缓冲槽中获取
+		qp :=chanbuf(c,c.recvx)
+		// copy data from queue to receiver
+		if ep != nil{
+			typedmemmove(c.elemtype,ep,qp)//将缓冲槽的数据拷贝到接收方目标地址
+		}
+		// copy data from sender to queue
+		typedmemmove(c.elemtype,qp,sg.elem)//将发送方的头队列复制到当前缓存槽位置
+		c.recvx++//更新发送索引
+		if c.recvx == c.dataqsiz{
+			c.recvx = 0
+		}
+		c.sendx = c.recvx //在缓存槽满的情况两个值是相等的 c.sendx = (c.sendx+1) % c.dataqsiz
 	}
+
+	//将在阻塞中的发送方唤醒
+	sg.elem = nil
+	gp :=sg.g
+	unlockf()
+	goready(gp, skip+1)
 }
 
 func recvDirect(t *_type, sg *sudog, dst unsafe.Pointer) {
