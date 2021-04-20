@@ -116,6 +116,7 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 		if !block{
 			return false
 		}
+		//在发送端如果chan没有初始化也会进入休眠
 		gopark(nil, nil, waitReasonChanSendNilChan, traceEvGoStop, 2)
 		throw("unreachable")
 	}
@@ -254,12 +255,14 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 		if !block{
 			return
 		}
+		//在接收端如果chan没有初始化也会进入休眠
 		gopark(nil, nil, waitReasonChanReceiveNilChan, traceEvGoStop, 2)
 		throw("unreachable")
 	}
 
 	lock(&c.lock)
 
+	//如果有等待的发送队列,那么直接接收
 	if sg :=c.sendq.dequeue();sg != nil{
 		// Found a waiting sender. If buffer is size 0, receive value
 		// directly from sender. Otherwise, receive from head of queue
@@ -343,23 +346,23 @@ func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
 		// head of the queue. Make the sender enqueue
 		// its item at the tail of the queue. Since the
 		// queue is full, those are both the same slot.
-		//如果有缓存槽,说明缓存槽都饱满并且产生了等待的发送队列
-		//这时候先从缓冲槽中获取
+		//如果有缓冲槽，说明缓存槽满了并且产生了等待发送的队列
+		//从缓冲槽中获取数据,并且将发送队列的头节点保存的数据写入缓冲槽中
 		qp :=chanbuf(c,c.recvx)
 		// copy data from queue to receiver
 		if ep != nil{
 			typedmemmove(c.elemtype,ep,qp)//将缓冲槽的数据拷贝到接收方目标地址
 		}
 		// copy data from sender to queue
-		typedmemmove(c.elemtype,qp,sg.elem)//将发送方的头队列复制到当前缓存槽位置
-		c.recvx++//更新发送索引
+		typedmemmove(c.elemtype,qp,sg.elem)//将发送队列的头节点拷贝到当前缓存槽位置
+		c.recvx++//接收索引增加
 		if c.recvx == c.dataqsiz{
 			c.recvx = 0
 		}
-		c.sendx = c.recvx //在缓存槽满的情况两个值是相等的 c.sendx = (c.sendx+1) % c.dataqsiz
+		c.sendx = c.recvx //缓冲槽满了的情况是缓冲槽发送索引等于接收的索引值 c.sendx = (c.sendx+1) % c.dataqsiz
 	}
 
-	//将在阻塞中的发送方唤醒
+	//将阻塞的发送方头节点goroutine唤醒
 	sg.elem = nil
 	gp :=sg.g
 	unlockf()
